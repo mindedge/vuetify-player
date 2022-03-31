@@ -31,11 +31,18 @@ export default {
           ads: [],
           sources: [
             {
-              src: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+              src: "https://cdn3-d.mindedgeonline.com/videos/how-we-help-video.mp4",
               type: "video/mp4",
             },
           ],
-          tracks: [],
+          tracks: [
+              {
+                  src: "https://cdn3-d.mindedgeonline.com/videos/how-we-help-video-captions.vtt",
+                  kind: "captions",
+                  srclang: "en_US",
+                  default: true,
+              }
+          ],
         },
       ],
     },

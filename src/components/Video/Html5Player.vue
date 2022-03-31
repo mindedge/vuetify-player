@@ -575,19 +575,21 @@ export default {
          */
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
-                this.player.textTracks.forEach((tt, index) => {
+                for(let i=0; i<this.player.textTracks.length; i++) {
+                    const tt = this.player.textTracks[i]
+
                     if (tt.language === lang) {
                         this.options.ccLang = lang
-                        this.player.textTracks[index].mode = 'showing'
+                        this.player.textTracks[i].mode = 'showing'
 
                         this.setCues(tt)
 
                         // Emit the current track
                         this.$emit('trackchange', tt)
                     } else {
-                        this.player.textTracks[index].mode = 'disabled'
+                        this.player.textTracks[i].mode = 'disabled'
                     }
-                })
+                }
             }
         },
         onPlaybackSpeed(index) {
