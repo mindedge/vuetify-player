@@ -31,14 +31,18 @@ An accessible, localized, full featured media player with Vuetifyjs
 npm install @mindedge/vuetify-player
 ```
 
-### 2. Insert tag
+### 2. Import
+```javascript
+import  MediaPlayer  from  '@mindedge/vuetify-player'
+```
+
+### 3. Insert tag
 
 ```html
 <MediaPlayer :src="src" />
 ```
 
-### 3. Define `src` with the bare minimum
-
+### 4. Define your `src`
 ```javascript
 src: {
 	sources: [
@@ -185,7 +189,7 @@ ads: [
 ]
 ```
 
-See [Full media `src` structure for where this ads array is placed](#full-media-src-structure)
+See [Full media `src` structure for where the ads array is placed](#full-media-src-structure)
 
 ## Supported `<MediaPlayer>` Attributes
 | Attribute Name            | Datatype  | Allowed Values                                     | Default                       | Description                                                                                                                                                                                 |
