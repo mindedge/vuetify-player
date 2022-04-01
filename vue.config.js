@@ -2,6 +2,11 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
     transpileDependencies: ['vuetify'],
+    configureWebpack: {
+        output: {
+            libraryExport: 'default',
+        },
+    },
     chainWebpack: (config) => {
         config.module
             .rule('i18n')

@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
+        "build": "vue-cli-service build --target lib --name VuetifyPlayer src/index.js",
         "test:unit": "vue-cli-service test:unit",
         "lint": "vue-cli-service lint",
         "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore ."
@@ -17,7 +17,13 @@
     "author": "Jacob Rogaishio",
     "license": "MIT",
     "homepage": "https://github.com/mindedge/vuetify-player#readme",
-    "main": "./src/index.js",
+    "main": "./dist/vuetify-player.common.js",
+    "keywords": [
+        "vue",
+        "vue components",
+        "vue UI",
+        "vuetify"
+    ],
     "dependencies": {
         "@intlify/vue-i18n-loader": "^1.1.0",
         "core-js": "^3.8.3",
