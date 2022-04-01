@@ -1,5 +1,5 @@
 {
-  "name": "vuetify-player",
+  "name": "@mindedge/vuetify-player",
   "version": "0.1.0",
   "description": "Accessible, localized, full featured media player with Vuetifyjs",
   "private": true,
