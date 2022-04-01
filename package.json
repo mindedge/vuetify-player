@@ -1,6 +1,7 @@
 {
   "name": "vuetify-player",
   "version": "0.1.0",
+  "description": "Accessible, localized, full featured media player with Vuetifyjs",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -8,6 +9,13 @@
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mindedge/vuetify-player.git"
+  },
+  "author": "Jacob Rogaishio",
+  "license": "MIT",
+  "homepage": "https://github.com/mindedge/vuetify-player#readme",
   "main": "./src/index.js",
   "dependencies": {
     "@intlify/vue-i18n-loader": "^1.1.0",

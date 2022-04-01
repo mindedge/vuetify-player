@@ -47,6 +47,13 @@
             @mouseover="onVideoHover"
             @mouseout="onVideoLeave"
             @ended="onEnded"
+            @error="$emit('error', $event)"
+            @canplay="$emit('canplay', $event)"
+            @waiting="$emit('waiting', $event)"
+            @canplaythrough="$emit('canplaythrough', $event)"
+            @emptied="$emit('emptied', $event)"
+            @stalled="$emit('stalled', $event)"
+            @abort="$emit('abort', $event)"
         >
             <source
                 v-for="(source, index) of current.sources"
@@ -222,7 +229,7 @@
                                         :max="1"
                                         :step="0.1"
                                         vertical
-                                        @change="player.volume = options.volume"
+                                        @change="onVolumeChange"
                                     ></v-slider>
                                 </v-sheet>
                             </v-menu>
@@ -525,17 +532,19 @@ export default {
         onRemoteplayback() {
             this.$emit('click:remoteplayback', this.$refs.player)
         },
-        onVideoHover() {
+        onVideoHover(e) {
             this.options.controls = true
             clearTimeout(this.options.controlsDebounce)
+            this.$emit('mouseover', e)
         },
-        onVideoLeave() {
+        onVideoLeave(e) {
             const self = this
             // Clear any existing timeouts before we create one
             clearTimeout(this.options.controlsDebounce)
             this.options.controlsDebounce = setTimeout(() => {
                 self.options.controls = false
             }, 50)
+            this.$emit('mouseout', e)
         },
         onEnded(e) {
             if (this.activeAd) {
@@ -595,17 +604,22 @@ export default {
         onPlaybackSpeed(index) {
             this.player.playbackRate = this.attributes.playbackrates[index]
             this.options.playbackRateIndex = index
+            this.$emit('ratechange', this.player.playbackRate)
         },
-        onTimeupdate() {
+        onTimeupdate(e) {
             this.currentPercent = Math.floor(
                 (this.player.currentTime / this.player.duration) * 100
             )
+
+            this.$emit('timeupdate', { event: e, current_percent: this.currentPercent})
         },
-        onSeeking() {
+        onSeeking(e) {
+            this.$emit('seeking', e)
             //console.log("onSeeking");
             //console.log(e);
         },
-        onMediaProgress() {
+        onMediaProgress(e) {
+            this.$emit('progress', e)
             //console.log("onMediaProgress");
             //console.log(e);
         },
@@ -618,7 +632,7 @@ export default {
                 this.onSelectTrack()
             }
         },
-        onPlayToggle() {
+        onPlayToggle(e) {
             const self = this
             this.options.controls = true
 
@@ -629,27 +643,31 @@ export default {
             }, 5000)
 
             if (this.player.paused) {
-                this.onPlay()
+                this.onPlay(e)
             } else {
-                this.onPause()
+                this.onPause(e)
             }
         },
         onMuteToggle() {
             if (this.player.muted) {
                 this.options.muted = false
                 this.player.muted = false
+                this.$emit('volumechange', this.options.volume)
             } else {
                 this.options.muted = true
                 this.player.muted = true
+                this.$emit('volumechange', 0)
             }
         },
-        onPlay() {
+        onPlay(e) {
             this.options.paused = false
             this.player.play()
+            this.$emit('play', e)
         },
-        onPause() {
+        onPause(e) {
             this.options.paused = true
             this.player.pause()
+            this.$emit('pause', e)
         },
         onScrubTime(value) {
             // Value is a number from 0 to scrub max (eg 100). Translate that into a time
@@ -682,14 +700,20 @@ export default {
 
             this.$emit('loadeddata', e)
         },
-        onLoadedmetadata() {
+        onLoadedmetadata(e) {
             // Set the player object since metadata (and therefore duration) is now loaded
             // this.$refs.player is a type of HTMLMediaElement
             // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
             //this.player.media = this.$refs.player;
-
+            this.$emit('loadedmetadata', e)
             this.player = this.$refs.player
             this.player.volume = this.options.volume
+            this.$emit('volumechange', this.options.volume)
+        },
+        onVolumeChange(value) {
+            this.options.volume = value
+            this.player.volume = value
+            this.$emit('volumechange', value)
         },
         onDurationChange() {
             // console.log('onDurationChange');
