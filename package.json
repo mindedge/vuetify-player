@@ -1,76 +1,81 @@
 {
-  "name": "@mindedge/vuetify-player",
-  "version": "0.1.0",
-  "description": "Accessible, localized, full featured media player with Vuetifyjs",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:mindedge/vuetify-player.git"
-  },
-  "author": "Jacob Rogaishio",
-  "license": "MIT",
-  "homepage": "https://github.com/mindedge/vuetify-player#readme",
-  "main": "./src/index.js",
-  "dependencies": {
-    "@intlify/vue-i18n-loader": "^1.1.0",
-    "core-js": "^3.8.3",
-    "vue": "^2.6.14",
-    "vue-i18n": "^8.27.1",
-    "vuetify": "^2.6.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-plugin-unit-jest": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "@vue/test-utils": "^1.1.3",
-    "@vue/vue2-jest": "^27.0.0-alpha.2",
-    "babel-jest": "^27.0.6",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
-    "jest": "^27.0.5",
-    "sass": "~1.32.0",
-    "sass-loader": "^10.0.0",
-    "vue-cli-plugin-vuetify": "~2.4.8",
-    "vue-template-compiler": "^2.6.14",
-    "vuetify-loader": "^1.7.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "@mindedge/vuetify-player",
+    "version": "0.1.0",
+    "description": "Accessible, localized, full featured media player with Vuetifyjs",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "test:unit": "vue-cli-service test:unit",
+        "lint": "vue-cli-service lint",
+        "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore ."
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:mindedge/vuetify-player.git"
     },
-    "rules": {},
-    "overrides": [
-      {
-        "files": [
-          "**/__tests__/*.{j,t}s?(x)",
-          "**/tests/unit/**/*.spec.{j,t}s?(x)"
-        ],
+    "author": "Jacob Rogaishio",
+    "license": "MIT",
+    "homepage": "https://github.com/mindedge/vuetify-player#readme",
+    "main": "./src/index.js",
+    "dependencies": {
+        "@intlify/vue-i18n-loader": "^1.1.0",
+        "core-js": "^3.8.3",
+        "vue": "^2.6.14",
+        "vue-i18n": "^8.27.1",
+        "vuetify": "^2.6.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.12.16",
+        "@babel/eslint-parser": "^7.12.16",
+        "@vue/cli-plugin-babel": "~5.0.0",
+        "@vue/cli-plugin-eslint": "~5.0.0",
+        "@vue/cli-plugin-unit-jest": "~5.0.0",
+        "@vue/cli-service": "~5.0.0",
+        "@vue/test-utils": "^1.1.3",
+        "@vue/vue2-jest": "^27.0.0-alpha.2",
+        "babel-jest": "^27.0.6",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-prettier": "^4.0.0",
+        "eslint-plugin-vue": "^8.0.3",
+        "jest": "^27.0.5",
+        "prettier": "^2.6.1",
+        "sass": "~1.32.0",
+        "sass-loader": "^10.0.0",
+        "vue-cli-plugin-vuetify": "~2.4.8",
+        "vue-template-compiler": "^2.6.14",
+        "vuetify-loader": "^1.7.0"
+    },
+    "eslintConfig": {
+        "root": true,
         "env": {
-          "jest": true
-        }
-      }
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended",
+            "plugin:prettier/recommended"
+        ],
+        "parserOptions": {
+            "parser": "@babel/eslint-parser"
+        },
+        "rules": {},
+        "overrides": [
+            {
+                "files": [
+                    "**/__tests__/*.{j,t}s?(x)",
+                    "**/tests/unit/**/*.spec.{j,t}s?(x)"
+                ],
+                "env": {
+                    "jest": true
+                }
+            }
+        ]
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead"
     ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
 }

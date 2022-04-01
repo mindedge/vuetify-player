@@ -136,9 +136,19 @@
                                 <span>{{ $t('player.rewind_10') }}</span>
                             </v-tooltip>
                         </template>
+
                         <template #append>
                             <!-- Closed Captions -->
-                            <v-menu open-on-hover top offset-y>
+                            <v-menu
+                                v-if="
+                                    options.cc &&
+                                    current.tracks &&
+                                    current.tracks.length > 0
+                                "
+                                open-on-hover
+                                top
+                                offset-y
+                            >
                                 <template v-slot:activator="{ on, attrs }">
                                     <v-btn
                                         small
@@ -554,10 +564,13 @@ export default {
                 this.activeAd = null
 
                 // Reload the player to refresh all the sources / tracks
-                this.player.load()
+                this.load(e)
                 // Start playing the main video
-                this.player.play()
-            } else if (this.activeAd !== null && this.activeAd.play_at_percent === 100) {
+                this.play(e)
+            } else if (
+                this.activeAd !== null &&
+                this.activeAd.play_at_percent === 100
+            ) {
                 // Ended but this ad was a postroll
                 this.$emit('ended', e)
             } else {
@@ -584,7 +597,7 @@ export default {
          */
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
-                for(let i=0; i<this.player.textTracks.length; i++) {
+                for (let i = 0; i < this.player.textTracks.length; i++) {
                     const tt = this.player.textTracks[i]
 
                     if (tt.language === lang) {
@@ -611,7 +624,10 @@ export default {
                 (this.player.currentTime / this.player.duration) * 100
             )
 
-            this.$emit('timeupdate', { event: e, current_percent: this.currentPercent})
+            this.$emit('timeupdate', {
+                event: e,
+                current_percent: this.currentPercent,
+            })
         },
         onSeeking(e) {
             this.$emit('seeking', e)
@@ -643,9 +659,9 @@ export default {
             }, 5000)
 
             if (this.player.paused) {
-                this.onPlay(e)
+                this.play(e)
             } else {
-                this.onPause(e)
+                this.pause(e)
             }
         },
         onMuteToggle() {
@@ -660,14 +676,10 @@ export default {
             }
         },
         onPlay(e) {
-            this.options.paused = false
-            this.player.play()
-            this.$emit('play', e)
+            this.play(e)
         },
         onPause(e) {
-            this.options.paused = true
-            this.player.pause()
-            this.$emit('pause', e)
+            this.pause(e)
         },
         onScrubTime(value) {
             // Value is a number from 0 to scrub max (eg 100). Translate that into a time
@@ -730,6 +742,22 @@ export default {
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
+        },
+        load(e = null) {
+            // Reload the player to refresh all the sources / tracks
+            this.player.load()
+            this.$emit('load', e)
+        },
+        pause(e = null) {
+            this.player.pause()
+            this.options.paused = true
+            this.$emit('pause', e)
+        },
+        play(e = null) {
+            // Start playing the main video
+            this.player.play()
+            this.options.paused = false
+            this.$emit('play', e)
         },
     },
     beforeMount() {

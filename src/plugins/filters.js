@@ -7,22 +7,25 @@ import Vue from 'vue'
  *
  * @param String The duration in "hh:mm:ss" format
  */
- Vue.filter('humanShortDuration', function (secondsParam) {
-    let ret = ''
-    let seconds = parseInt(secondsParam, 10)
+Vue.filter('humanShortDuration', function (secondsParam) {
+    let ret = '--:--:--'
 
-    const hour = Math.floor(seconds / 60 / 60)
-    seconds = seconds - hour * 60 * 60 // Subtract it from seconds
+    if (!isNaN(secondsParam) && secondsParam !== null) {
+        ret = ''
+        let seconds = parseInt(secondsParam, 10)
 
-    const minute = Math.floor(seconds / 60)
-    seconds = Math.floor(seconds - minute * 60) // Subtract it from seconds
+        const hour = Math.floor(seconds / 60 / 60)
+        seconds = seconds - hour * 60 * 60 // Subtract it from seconds
 
-    if (hour > 0) {
-        ret += String(hour).padStart(2, '0') + ':'
+        const minute = Math.floor(seconds / 60)
+        seconds = Math.floor(seconds - minute * 60) // Subtract it from seconds
+
+        if (hour > 0) {
+            ret += String(hour).padStart(2, '0') + ':'
+        }
+
+        ret += String(minute).padStart(2, '0') + ':'
+        ret += String(seconds).padStart(2, '0')
     }
-
-    ret += String(minute).padStart(2, '0') + ':'
-    ret += String(seconds).padStart(2, '0')
-
     return ret
 })

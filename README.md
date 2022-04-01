@@ -12,7 +12,8 @@ An accessible, localized, full featured media player with Vuetifyjs
 * [Define a media source](#the-src-attribute)
 * [Define a playlist](#the-playlist-attribute)
 * [Define ads / preroll / postroll](#the-ads-array)
-* [Supported Events](#supported-events)
+* [Supported Attributes](#supported-vuetifyplayer-attributes)
+* [Supported Events](#supported-vuetifyplayer-events)
 * [License](#license)
 ---
 **Supported File Types:**
@@ -33,13 +34,13 @@ npm install @mindedge/vuetify-player
 
 ### 2. Import
 ```javascript
-import  MediaPlayer  from  '@mindedge/vuetify-player'
+import  VuetifyPlayer  from  '@mindedge/vuetify-player'
 ```
 
 ### 3. Insert tag
 
 ```html
-<MediaPlayer :src="src" />
+<VuetifyPlayer :src="src" />
 ```
 
 ### 4. Define your `src`
@@ -130,7 +131,7 @@ src: {
 }
 ```
 ```html
-<MediaPlayer :src="src" />
+<VuetifyPlayer :src="src" />
 ```
 See [Full media `src` structure](#full-media-src-structure)
 
@@ -146,16 +147,16 @@ playlist: [
 ]
 ```
 ```html
-<MediaPlayer :playlist="playlist" />
+<VuetifyPlayer :playlist="playlist" />
 ```
 
-When passing this attribute a playlist menu will appear and media will auto-advance from one source to the next on completion. Both of these can be adjusted with `playlistmenu` and `playlistautoadvance`. See [Supported `<MediaPlayer>` Attributes ](#supported-mediaplay-attributes) for more information
+When passing this attribute a playlist menu will appear and media will auto-advance from one source to the next on completion. Both of these can be adjusted with `playlistmenu` and `playlistautoadvance`. See [Supported `<VuetifyPlayer>` Attributes ](#supported-mediaplay-attributes) for more information
 
 For more informationm about media sources see [Full media `src` structure](#full-media-src-structure)
 
 ## The `ads` array
 
-The `<MediaPlayer>` supports video injection via the ads array. This can be used to inject any other media source at any time during playback.
+The `<VuetifyPlayer>` supports video injection via the ads array. This can be used to inject any other media source at any time during playback.
 
 For example:
 - For preroll set `play_at_percent` to `0`
@@ -191,7 +192,7 @@ ads: [
 
 See [Full media `src` structure for where the ads array is placed](#full-media-src-structure)
 
-## Supported `<MediaPlayer>` Attributes
+## Supported `<VuetifyPlayer>` Attributes
 | Attribute Name            | Datatype  | Allowed Values                                     | Default                       | Description                                                                                                                                                                                 |
 | ------------------------- | --------- | -------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src`                     | `Object`  | See [src attribute](#the-src-attribute)                | "video"                       | In audio mode the player has a max-height of 40px                                                                                                                                           |
@@ -216,7 +217,7 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `playlistmenu`            | `Boolean` | true \| false                                      | true                          | Show the playlist menu if there's multiple videos                                                                                                                                           |
 | `playlistautoadvance`     | `Boolean` | true \| false                                      | true                          | Play the next source group                                                                                                                                                                  |
 | `playbackrates`           | `Array`   | [`array of numbers`]                               | [0.5, 1, 1.5, 2]              | Default playback speeds. Anything below 0.25 and above 4 will make cause audio distortion                                                                                                   |
-## Supported Events
+## Supported `<VuetifyPlayer>` Events
 | Event name                | Returns           | When it's triggered                                                                         |
 | ------------------------- | ----------------- | ------------------------------------------------------------------------------------------- |
 | `abort`                   | `Event`           | Download interrupted                                                                        |
@@ -225,8 +226,8 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `emptied`                 | `Event`           | The network connection is down                                                              |
 | `ended`                   | `Event`           | When playback has stopped because the end of the media was reached                          |
 | `error`                   | `Event`           | A network error occurred during the download                                                |
-| `loadeddata`              | `Event`           | When playback has stopped because the end of the media was reached                          |
-| `loadedmetadata`          | `Event`           | When playback has stopped because the end of the media was reached                          |
+| `loadeddata`              | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame                          |
+| `loadedmetadata`          | `Event`           | When the metadata has been loaded                          |
 | `play`                    | `Event`           | The media has received a request to start playing                                           |
 | `pause`                   | `Event`           | Playback has been suspended                                                                 |
 | `progress`                | `Event`           | The progress event is fired periodically as the browser loads a resource.                   |

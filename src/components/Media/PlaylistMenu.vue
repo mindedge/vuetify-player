@@ -26,11 +26,7 @@
                                 v-if="getPoster(source.poster, poster)"
                                 tile
                             >
-                                <img
-                                    :src="
-                                        getPoster(source.poster, poster)
-                                    "
-                                />
+                                <img :src="getPoster(source.poster, poster)" />
                             </v-avatar>
                             <v-skeleton-loader
                                 v-if="!getPoster(source.poster, poster)"
@@ -47,11 +43,17 @@
                                         v-on="on"
                                         class="text-lg-subtitle-1 text-truncate"
                                     >
-                                        {{ source.name || $t('playlist.default_name') }}
+                                        {{
+                                            source.name ||
+                                            $t('playlist.default_name')
+                                        }}
                                     </div>
                                 </template>
                                 <span>
-                                    {{ source.name || $t('playlist.default_name') }}
+                                    {{
+                                        source.name ||
+                                        $t('playlist.default_name')
+                                    }}
                                 </span>
                             </v-tooltip>
                         </v-list-item-content>
@@ -63,7 +65,7 @@
             <v-col cols="6">
                 <v-btn
                     block
-                    :disabled="value.length < 1 || sourceIndex === 0"
+                    :disabled="playlist.length < 1 || sourceIndex === 0"
                     @click="onPlaylistSelect(sourceIndex - 1)"
                 >
                     <v-icon>mdi-skip-previous</v-icon>
@@ -74,8 +76,8 @@
                 <v-btn
                     block
                     :disabled="
-                        value.length < 1 ||
-                        sourceIndex === value.length - 1
+                        playlist.length < 1 ||
+                        sourceIndex === playlist.length - 1
                     "
                     @click="onPlaylistSelect(sourceIndex + 1)"
                 >
@@ -88,41 +90,39 @@
 </template>
 
 <script>
-  export default {
+export default {
     props: {
-      value: { type: Number, required: true },
-      playlist: { type: Array, required: true },
-      poster: { type: String, required: false, default: '' },
+        value: { type: Number, required: true },
+        playlist: { type: Array, required: true },
+        poster: { type: String, required: false, default: '' },
     },
     data() {
-      return {
-        sourceIndex: 0,
-      };
+        return {
+            sourceIndex: this.value,
+        }
     },
     watch: {
-      value(newIndex) {
-        this.sourceIndex = newIndex
-      }
+        value(newIndex) {
+            this.sourceIndex = newIndex
+        },
     },
     methods: {
-      onPlaylistSelect(index) {
-        this.sourceIndex = index;
-        this.$emit('input', parseInt(this.sourceIndex))
-        this.$emit('click:select', index)
-      },
-      getPoster(...posters) {
-        for (const poster of posters) {
-          if (poster) {
-            return poster;
-          }
-        }
-        return null;
-      },
+        onPlaylistSelect(index) {
+            this.sourceIndex = index
+            this.$emit('input', parseInt(this.sourceIndex))
+            this.$emit('click:select', index)
+        },
+        getPoster(...posters) {
+            for (const poster of posters) {
+                if (poster) {
+                    return poster
+                }
+            }
+            return null
+        },
     },
-    mounted() {
-      this.sourceIndex = this.value
-    },
-  };
+    mounted() {},
+}
 </script>
 
 <style scoped>
