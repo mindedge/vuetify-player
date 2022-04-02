@@ -2,14 +2,17 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
     transpileDependencies: ['vuetify'],
+
     configureWebpack: {
         output: {
             libraryExport: 'default',
         },
     },
+
     css: {
         extract: false,
     },
+
     chainWebpack: (config) => {
         config.module
             .rule('i18n')
@@ -17,5 +20,15 @@ module.exports = defineConfig({
             .type('javascript/auto')
             .use('i18n')
             .loader('@intlify/vue-i18n-loader')
+    },
+
+    pluginOptions: {
+        i18n: {
+            locale: 'en-US',
+            fallbackLocale: 'en-US',
+            enableInSFC: true,
+            includeLocales: true,
+            enableBridge: true,
+        },
     },
 })
