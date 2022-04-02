@@ -1,5 +1,9 @@
 // Entrypoint for npm
+import Vue from 'vue'
+import { i18n, vuetify } from './plugins/vuetify'
 import '@/plugins/filters.js'
-import player from '@/components/VuetifyPlayer.vue'
+import VuetifyPlayer from '@/components/VuetifyPlayer.vue'
 
-export default player
+Vue.component(VuetifyPlayer.name, VuetifyPlayer)
+
+export default VuetifyPlayer

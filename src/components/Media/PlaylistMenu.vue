@@ -1,6 +1,6 @@
 <i18n>
 {
-    "en_US": {
+    "en-US": {
         "playlist": {
             "up_next": "Up Next",
             "default_name": "Media",

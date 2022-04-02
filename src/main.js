@@ -1,3 +1,4 @@
+// Entrypoint for npm run serve
 import Vue from 'vue'
 import App from './App.vue'
 import { i18n, vuetify } from './plugins/vuetify'

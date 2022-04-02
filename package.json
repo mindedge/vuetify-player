@@ -2,7 +2,7 @@
     "name": "@mindedge/vuetify-player",
     "version": "0.1.0",
     "description": "Accessible, localized, full featured media player with Vuetifyjs",
-    "private": true,
+    "private": false,
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build --target lib --name VuetifyPlayer src/index.js",
@@ -17,7 +17,7 @@
     "author": "Jacob Rogaishio",
     "license": "MIT",
     "homepage": "https://github.com/mindedge/vuetify-player#readme",
-    "main": "./dist/vuetify-player.common.js",
+    "main": "./dist/VuetifyPlayer.umd.js",
     "keywords": [
         "vue",
         "vue components",

@@ -67,6 +67,7 @@ export default {
         PlaylistMenu,
     },
     props: {
+        language: { type: String, required: false, default: 'en-US' },
         src: {
             type: Object,
             required: false,

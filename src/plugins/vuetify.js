@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib/framework'
 import VueI18n from 'vue-i18n'
-import en_US from '../i18n/vuetify/en_US.ts'
+import enUS from '../i18n/vuetify/en-US.ts'
 
 Vue.use(Vuetify)
 Vue.use(VueI18n)
@@ -9,11 +9,11 @@ Vue.use(VueI18n)
 // Create VueI18n instance with options
 export const i18n = new VueI18n({
     vueI18nLoader: true,
-    locales: ['en_US'],
-    locale: 'en_US',
-    fallbackLocale: 'en_US',
+    locales: ['en-US'],
+    locale: 'en-US',
+    fallbackLocale: 'en-US',
     messages: {
-        en_US,
+        enUS,
     },
 })
 

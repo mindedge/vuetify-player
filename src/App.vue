@@ -54,7 +54,7 @@ export default {
                 {
                     src: 'https://cdn3-d.mindedgeonline.com/videos/how-we-help-video-captions.vtt',
                     kind: 'captions',
-                    srclang: 'en_US',
+                    srclang: 'en-US',
                     default: true,
                 },
             ],
@@ -73,7 +73,7 @@ export default {
                     {
                         src: 'https://cdn3-d.mindedgeonline.com/videos/how-we-help-video-captions.vtt',
                         kind: 'captions',
-                        srclang: 'en_US',
+                        srclang: 'en-US',
                         default: true,
                     },
                 ],

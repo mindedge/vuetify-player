@@ -1,6 +1,6 @@
 <i18n>
 {
-    "en_US": {
+    "en-US": {
         "player": {
             "playback_speed": "Playback Speed",
             "playback_decrease": "Decrease playback speed",
@@ -593,7 +593,7 @@ export default {
         /**
          * Select a specific track by lang
          *
-         * @param String|null lang The lang to load. Eg en_US, sv_SE, etc. Pass nothing / null to turn off captions
+         * @param String|null lang The lang to load. Eg en-US, sv-SE, etc. Pass nothing / null to turn off captions
          */
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {

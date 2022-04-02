@@ -7,6 +7,9 @@ module.exports = defineConfig({
             libraryExport: 'default',
         },
     },
+    css: {
+        extract: false,
+    },
     chainWebpack: (config) => {
         config.module
             .rule('i18n')
