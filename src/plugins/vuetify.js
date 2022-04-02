@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib/framework'
-import VueI18n from 'vue-i18n'
 
 Vue.use(Vuetify)
-Vue.use(VueI18n)
+if (typeof window !== 'undefined' && window.Vue) {
+    window.Vue.use(Vuetify)
+}
 
-export const vuetify = new Vuetify({})
+const vuetify = new Vuetify({})
+
+export default vuetify

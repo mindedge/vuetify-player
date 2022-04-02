@@ -1,18 +1,6 @@
-<i18n>
-{
-    "en-US": {
-        "playlist": {
-            "up_next": "Up Next",
-            "default_name": "Media",
-            "previous": "Play previous item in playlist",
-            "next": "Play next item in playlist"
-        }
-    }
-}
-</i18n>
 <template>
     <v-card>
-        <v-card-title>{{ $t('playlist.up_next') }}</v-card-title>
+        <v-card-title>{{ i18n.t('playlist.up_next') }}</v-card-title>
         <v-card-text>
             <v-list>
                 <v-list-item-group v-model="sourceIndex">
@@ -45,14 +33,14 @@
                                     >
                                         {{
                                             source.name ||
-                                            $t('playlist.default_name')
+                                            i18n.t('playlist.default_name')
                                         }}
                                     </div>
                                 </template>
                                 <span>
                                     {{
                                         source.name ||
-                                        $t('playlist.default_name')
+                                        i18n.t('playlist.default_name')
                                     }}
                                 </span>
                             </v-tooltip>
@@ -69,7 +57,9 @@
                     @click="onPlaylistSelect(sourceIndex - 1)"
                 >
                     <v-icon>mdi-skip-previous</v-icon>
-                    <span class="d-sr-only">{{ $t('playlist.previous') }}</span>
+                    <span class="d-sr-only">{{
+                        i18n.t('playlist.previous')
+                    }}</span>
                 </v-btn>
             </v-col>
             <v-col cols="6">
@@ -82,7 +72,7 @@
                     @click="onPlaylistSelect(sourceIndex + 1)"
                 >
                     <v-icon>mdi-skip-next</v-icon>
-                    <span class="d-sr-only">{{ $t('playlist.next') }}</span>
+                    <span class="d-sr-only">{{ i18n.t('playlist.next') }}</span>
                 </v-btn>
             </v-col>
         </v-card-actions>
@@ -106,8 +96,8 @@ export default {
             this.sourceIndex = newIndex
         },
         language(newVal) {
-            if (typeof this.$i18n !== 'undefined') {
-                this.$i18n.locale = newVal
+            if (typeof this.i18n !== 'undefined') {
+                this.i18n.locale = newVal
             }
         },
     },

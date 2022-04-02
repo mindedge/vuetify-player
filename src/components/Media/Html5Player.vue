@@ -1,25 +1,3 @@
-<i18n>
-{
-    "en-US": {
-        "player": {
-            "playback_speed": "Playback Speed",
-            "playback_decrease": "Decrease playback speed",
-            "playback_increase": "Increase playback speed",
-            "toggle_settings": "Toggle Settings",
-            "download": "Download",
-            "toggle_remote_playback": "Toggle Remote Playback",
-            "toggle_picture_in_picture": "Toggle Picture in Picture",
-            "toggle_fullscreen": "Toggle Fullscreen",
-            "toggle_cc": "Toggle closed captions",
-            "volume_slider": "Volume Slider",
-            "rewind_10": "Rewind 10 seconds",
-            "play": "Click to play",
-            "pause": "Click to pause",
-            "no_support": "Sorry, your browser doesn't support embedded videos."
-        }
-    }
-}
-</i18n>
 <template>
     <v-container>
         <video
@@ -70,7 +48,7 @@
                 :srclang="track.srclang"
                 @cuechange="onCuechange"
             />
-            {{ $t('player.no_support') }}
+            {{ i18n.t('player.no_support') }}
         </video>
         <div
             class="controls-container"
@@ -115,8 +93,8 @@
                                 </template>
                                 <span>{{
                                     options.paused
-                                        ? $t('player.play')
-                                        : $t('player.pause')
+                                        ? i18n.t('player.play')
+                                        : i18n.t('player.pause')
                                 }}</span>
                             </v-tooltip>
 
@@ -133,7 +111,7 @@
                                         <v-icon>mdi-rewind-10</v-icon>
                                     </v-btn>
                                 </template>
-                                <span>{{ $t('player.rewind_10') }}</span>
+                                <span>{{ i18n.t('player.rewind_10') }}</span>
                             </v-tooltip>
                         </template>
 
@@ -163,7 +141,7 @@
                                                 : 'mdi-closed-caption-outline'
                                         }}</v-icon>
                                         <span class="d-sr-only">{{
-                                            $t('player.toggle_cc')
+                                            i18n.t('player.toggle_cc')
                                         }}</span>
                                     </v-btn>
                                 </template>
@@ -230,7 +208,7 @@
 
                                 <v-sheet class="pa-5">
                                     <span class="d-sr-only">{{
-                                        $t('player.volume_slider')
+                                        i18n.t('player.volume_slider')
                                     }}</span>
                                     <v-slider
                                         v-model="options.volume"
@@ -262,7 +240,7 @@
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    $t('player.toggle_fullscreen')
+                                    i18n.t('player.toggle_fullscreen')
                                 }}</span>
                             </v-tooltip>
 
@@ -285,7 +263,7 @@
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    $t('player.toggle_picture_in_picture')
+                                    i18n.t('player.toggle_picture_in_picture')
                                 }}</span>
                             </v-tooltip>
 
@@ -303,7 +281,7 @@
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    $t('player.toggle_remote_playback')
+                                    i18n.t('player.toggle_remote_playback')
                                 }}</span>
                             </v-tooltip>
 
@@ -320,7 +298,7 @@
                                         <v-icon>mdi-download</v-icon>
                                     </v-btn></template
                                 >
-                                <span>{{ $t('player.download') }}</span>
+                                <span>{{ i18n.t('player.download') }}</span>
                             </v-tooltip>
 
                             <!-- Settings -->
@@ -334,7 +312,7 @@
                                     <v-btn small text v-bind="attrs" v-on="on">
                                         <v-icon>mdi-cog</v-icon>
                                         <span class="d-sr-only">{{
-                                            $t('player.toggle_settings')
+                                            i18n.t('player.toggle_settings')
                                         }}</span>
                                     </v-btn>
                                 </template>
@@ -343,7 +321,9 @@
                                     <v-list-item>
                                         <v-list-item-title>
                                             <v-icon>mdi-play-speed</v-icon>
-                                            {{ $t('player.playback_speed') }}
+                                            {{
+                                                i18n.t('player.playback_speed')
+                                            }}
                                         </v-list-item-title>
                                     </v-list-item>
                                     <v-list-item>
@@ -365,7 +345,7 @@
                                                     mdi-clock-minus-outline
                                                 </v-icon>
                                                 <span class="d-sr-only">{{
-                                                    $t(
+                                                    i18n.t(
                                                         'player.playback_decrease'
                                                     )
                                                 }}</span>
@@ -397,7 +377,7 @@
                                                     mdi-clock-plus-outline
                                                 </v-icon>
                                                 <span class="d-sr-only">{{
-                                                    $t(
+                                                    i18n.t(
                                                         'player.playback_increase'
                                                     )
                                                 }}</span>
@@ -457,8 +437,8 @@ export default {
     },
     watch: {
         language(newVal) {
-            if (typeof this.$i18n !== 'undefined') {
-                this.$i18n.locale = newVal
+            if (typeof this.i18n !== 'undefined') {
+                this.i18n.locale = newVal
             }
         },
     },
@@ -498,7 +478,7 @@ export default {
             fullscreenEnabled: false,
             options: {
                 cc: true,
-                ccLang: this.$i18n.locale,
+                ccLang: this.i18n.locale,
                 controls: true,
                 controlsDebounce: null,
                 volume: 0.5, // default 50%

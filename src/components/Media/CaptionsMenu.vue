@@ -52,8 +52,8 @@ export default {
             },
         },
         language(newVal) {
-            if (typeof this.$i18n !== 'undefined') {
-                this.$i18n.locale = newVal
+            if (typeof this.i18n !== 'undefined') {
+                this.i18n.locale = newVal
             }
         },
     },
