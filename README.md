@@ -239,7 +239,7 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 ## Supported `<VuetifyPlayer>` Events
 
 | Event name               | Returns           | When it's triggered                                                                                      |
-| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------- | --- |
+| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------- |
 | `abort`                  | `Event`           | Download interrupted                                                                                     |
 | `canplay`                | `Event`           | Playback can start                                                                                       |
 | `canplaythrough`         | `Event`           | Playback can continue and should not be interrupted. Readstate is 3                                      |
@@ -258,7 +258,7 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `volumechange`           | `Number`          | The volume or muted button changed. Value from 0.0 to 1                                                  |
 | `waiting`                | `Event`           | Pause playback to download more data                                                                     |
 | `click:fullscreen`       | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                   |
-| `click:pictureinpicture` | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                        |     |
+| `click:pictureinpicture` | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                        |
 | `mouseover`              | `MouseEvent`      | Mouse over the media                                                                                     |
 | `mouseout`               | `MouseEvent`      | Mouse left the media                                                                                     |
 
