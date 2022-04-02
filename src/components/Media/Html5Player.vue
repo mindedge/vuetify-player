@@ -424,6 +424,7 @@
         >
             <CaptionsMenu
                 v-model="captions"
+                :language="language"
                 @click:cue="onCueClick"
             ></CaptionsMenu>
         </v-col>
@@ -439,6 +440,7 @@ export default {
         CaptionsMenu,
     },
     props: {
+        language: { type: String, required: false, default: 'en-US' },
         type: {
             type: String,
             required: false,
@@ -451,6 +453,13 @@ export default {
         src: {
             type: Object,
             required: true,
+        },
+    },
+    watch: {
+        language(newVal) {
+            if (typeof this.$i18n !== 'undefined') {
+                this.$i18n.locale = newVal
+            }
         },
     },
     computed: {

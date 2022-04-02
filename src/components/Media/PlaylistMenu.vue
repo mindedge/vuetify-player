@@ -105,6 +105,11 @@ export default {
         value(newIndex) {
             this.sourceIndex = newIndex
         },
+        language(newVal) {
+            if (typeof this.$i18n !== 'undefined') {
+                this.$i18n.locale = newVal
+            }
+        },
     },
     methods: {
         onPlaylistSelect(index) {

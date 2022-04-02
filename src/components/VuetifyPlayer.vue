@@ -5,6 +5,7 @@
                 <YoutubePlayer
                     ref="youtubePlayer"
                     v-if="parseSourceType(current.src.sources) === 'youtube'"
+                    :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
@@ -13,6 +14,7 @@
                 <Html5Player
                     ref="html5Player"
                     v-if="parseSourceType(current.src.sources) === 'html5'"
+                    :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
@@ -45,6 +47,7 @@
             <v-col v-if="playlistmenu && playlist.length > 1" cols="4">
                 <PlaylistMenu
                     v-model="sourceIndex"
+                    :language="language"
                     :playlist="playlist"
                     :poster="poster"
                     @click:select="onPlaylistSelect"
@@ -124,6 +127,13 @@ export default {
                 return [0.5, 1, 1.5, 2]
             },
         }, // Default playback speeds
+    },
+    watch: {
+        language(newVal) {
+            if (typeof this.$i18n !== 'undefined') {
+                this.$i18n.locale = newVal
+            }
+        },
     },
     computed: {
         player() {

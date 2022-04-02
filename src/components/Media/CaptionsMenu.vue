@@ -51,6 +51,11 @@ export default {
                 this.captionIndex = this.currentCue(this.captions)
             },
         },
+        language(newVal) {
+            if (typeof this.$i18n !== 'undefined') {
+                this.$i18n.locale = newVal
+            }
+        },
     },
     methods: {
         cueKey(cue) {
