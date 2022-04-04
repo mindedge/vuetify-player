@@ -787,13 +787,6 @@ export default {
         ) {
             this.options.controlslist = this.attributes.controlslist.split(' ')
         }
-        // Make sure the playback rates are set just in case
-        /*if (
-            !this.attributes.playbackrates ||
-            !this.attributes.playbackrates.length
-        ) {
-            this.attributes.playbackrates = [1]
-        }*/
 
         // Adjust the playback speed to 1 by default
         if (this.attributes.playbackrates.indexOf(1) !== -1) {
