@@ -2,6 +2,7 @@
     <v-container>
         <video
             ref="player"
+            tabindex="0"
             :class="'player-' + type"
             :height="attributes.height"
             :width="attributes.width"
@@ -22,6 +23,7 @@
             @progress="onMediaProgress"
             @loadedmetadata="onLoadedmetadata"
             @loadeddata="onLoadeddata"
+            @focus="onVideoHover"
             @mouseover="onVideoHover"
             @mouseout="onVideoLeave"
             @ended="onEnded"
@@ -89,6 +91,13 @@
                                                 ? 'mdi-play'
                                                 : 'mdi-pause'
                                         }}</v-icon>
+                                        <span class="d-sr-only">
+                                            {{
+                                                options.paused
+                                                    ? i18n.t('player.play')
+                                                    : i18n.t('player.pause')
+                                            }}
+                                        </span>
                                     </v-btn>
                                 </template>
                                 <span>{{
@@ -109,6 +118,9 @@
                                         @click="onRewind"
                                     >
                                         <v-icon>mdi-rewind-10</v-icon>
+                                        <span class="sr-only">{{
+                                            i18n.t('player.rewind_10')
+                                        }}</span>
                                     </v-btn>
                                 </template>
                                 <span>{{ i18n.t('player.rewind_10') }}</span>
@@ -119,9 +131,7 @@
                             <!-- Closed Captions -->
                             <v-menu
                                 v-if="
-                                    options.cc &&
-                                    current.tracks &&
-                                    current.tracks.length > 0
+                                    current.tracks && current.tracks.length > 0
                                 "
                                 open-on-hover
                                 top
@@ -203,6 +213,9 @@
                                             "
                                             >mdi-volume-off</v-icon
                                         >
+                                        <span class="d-sr-only">{{
+                                            i18n.t('player.volume_slider')
+                                        }}</span>
                                     </v-btn>
                                 </template>
 
@@ -237,6 +250,9 @@
                                                 ? 'mdi-fullscreen'
                                                 : 'mdi-fullscreen-exit'
                                         }}</v-icon>
+                                        <span class="d-sr-only">{{
+                                            i18n.t('player.toggle_fullscreen')
+                                        }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
@@ -260,6 +276,11 @@
                                         <v-icon
                                             >mdi-picture-in-picture-bottom-right</v-icon
                                         >
+                                        <span class="d-sr-only">{{
+                                            i18n.t(
+                                                'player.toggle_picture_in_picture'
+                                            )
+                                        }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
@@ -267,7 +288,7 @@
                                 }}</span>
                             </v-tooltip>
 
-                            <!-- Picture in picture -->
+                            <!-- Remote playback -->
                             <v-tooltip v-if="options.remoteplayback" top>
                                 <template v-slot:activator="{ on, attrs }">
                                     <v-btn
@@ -278,6 +299,11 @@
                                         @click="onRemoteplayback"
                                     >
                                         <v-icon>mdi-cast</v-icon>
+                                        <span class="d-sr-only">{{
+                                            i18n.t(
+                                                'player.toggle_remote_playback'
+                                            )
+                                        }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
@@ -296,6 +322,9 @@
                                         @click="onDownload"
                                     >
                                         <v-icon>mdi-download</v-icon>
+                                        <span class="d-sr-only">{{
+                                            i18n.t('player.download')
+                                        }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{ i18n.t('player.download') }}</span>

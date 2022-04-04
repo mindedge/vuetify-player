@@ -22,8 +22,10 @@
                             v-html="cue.text"
                         ></v-list-item-content>
                         <v-list-item-action>
-                            {{ cue.startTime | humanShortDuration }}
-                            - {{ cue.endTime | humanShortDuration }}
+                            <span aria-hidden="true">
+                                {{ cue.startTime | humanShortDuration }}
+                                - {{ cue.endTime | humanShortDuration }}
+                            </span>
                         </v-list-item-action>
                     </v-list-item>
                 </v-list-item-group>

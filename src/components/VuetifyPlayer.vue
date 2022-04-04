@@ -131,7 +131,8 @@ export default {
     watch: {
         language(newVal) {
             if (typeof this.i18n !== 'undefined') {
-                this.i18n.locale = newVal
+                // Set the locale and replace en_US to the correct en-US format
+                this.i18n.locale = newVal.replace('_', '-')
             }
         },
     },
@@ -272,7 +273,12 @@ export default {
     },
     beforeCreate() {},
     beforeMount() {},
-    mounted() {},
+    mounted() {
+        if (typeof this.i18n !== 'undefined') {
+            // Set the locale and replace en_US to the correct en-US format
+            this.i18n.locale = this.language.replace('_', '-')
+        }
+    },
     beforeDestroy() {},
 }
 </script>
