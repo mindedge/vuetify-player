@@ -1,6 +1,5 @@
 <template>
     <div>
-        ~From VuetifyPlayer: {{ language }}~um
         <v-row>
             <v-col :cols="!playlistmenu || playlist.length <= 1 ? 12 : 8">
                 <YoutubePlayer
