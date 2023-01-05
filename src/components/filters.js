@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 /**
  * Converts a number of seconds to a short duration format. Eg hh:mm:ss
  *
@@ -7,7 +5,7 @@ import Vue from 'vue'
  *
  * @param String The duration in "hh:mm:ss" format
  */
-Vue.filter('humanShortDuration', function (secondsParam) {
+const playerShortDuration = function (secondsParam) {
     let ret = '--:--:--'
 
     if (!isNaN(secondsParam) && secondsParam !== null) {
@@ -28,4 +26,6 @@ Vue.filter('humanShortDuration', function (secondsParam) {
         ret += String(seconds).padStart(2, '0')
     }
     return ret
-})
+}
+
+export default { playerShortDuration }

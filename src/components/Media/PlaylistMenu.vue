@@ -1,6 +1,6 @@
 <template>
     <v-card>
-        <v-card-title>{{ i18n.t('playlist.up_next') }}</v-card-title>
+        <v-card-title>{{ t(language, 'playlist.up_next') }}</v-card-title>
         <v-card-text>
             <v-list>
                 <v-list-item-group v-model="sourceIndex">
@@ -33,14 +33,14 @@
                                     >
                                         {{
                                             source.name ||
-                                            i18n.t('playlist.default_name')
+                                            t(language, 'playlist.default_name')
                                         }}
                                     </div>
                                 </template>
                                 <span>
                                     {{
                                         source.name ||
-                                        i18n.t('playlist.default_name')
+                                        t(language, 'playlist.default_name')
                                     }}
                                 </span>
                             </v-tooltip>
@@ -58,7 +58,7 @@
                 >
                     <v-icon>mdi-skip-previous</v-icon>
                     <span class="d-sr-only">{{
-                        i18n.t('playlist.previous')
+                        t(language, 'playlist.previous')
                     }}</span>
                 </v-btn>
             </v-col>
@@ -72,7 +72,9 @@
                     @click="onPlaylistSelect(sourceIndex + 1)"
                 >
                     <v-icon>mdi-skip-next</v-icon>
-                    <span class="d-sr-only">{{ i18n.t('playlist.next') }}</span>
+                    <span class="d-sr-only">{{
+                        t(language, 'playlist.next')
+                    }}</span>
                 </v-btn>
             </v-col>
         </v-card-actions>
@@ -80,25 +82,24 @@
 </template>
 
 <script>
+import { t } from '../../i18n/i18n'
+
 export default {
     props: {
         value: { type: Number, required: true },
         playlist: { type: Array, required: true },
         poster: { type: String, required: false, default: '' },
+        language: { type: String, required: false, default: 'en-US' },
     },
     data() {
         return {
+            t,
             sourceIndex: this.value,
         }
     },
     watch: {
         value(newIndex) {
             this.sourceIndex = newIndex
-        },
-        language(newVal) {
-            if (typeof this.i18n !== 'undefined') {
-                this.i18n.locale = newVal
-            }
         },
     },
     methods: {

@@ -5,14 +5,12 @@
     "description": "Accessible, localized, full featured media player with Vuetifyjs",
     "author": "Jacob Rogaishio",
     "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build --target lib --name VuetifyPlayer src/index.js",
         "test:unit": "vue-cli-service test:unit",
         "lint": "vue-cli-service lint",
         "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
         "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore ."
     },
-    "main": "./dist/VuetifyPlayer.umd.min.js",
+    "main": "./src/components/VuetifyPlayer.vue",
     "dependencies": {
         "@intlify/vue-i18n-loader": "^1.1.0",
         "core-js": "^3.8.3",

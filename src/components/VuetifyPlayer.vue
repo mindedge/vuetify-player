@@ -1,5 +1,6 @@
 <template>
     <div>
+        ~From VuetifyPlayer: {{ language }}~um
         <v-row>
             <v-col :cols="!playlistmenu || playlist.length <= 1 ? 12 : 8">
                 <YoutubePlayer
@@ -128,14 +129,7 @@ export default {
             },
         }, // Default playback speeds
     },
-    watch: {
-        language(newVal) {
-            if (typeof this.i18n !== 'undefined') {
-                // Set the locale and replace en_US to the correct en-US format
-                this.i18n.locale = newVal.replace('_', '-')
-            }
-        },
-    },
+    watch: {},
     computed: {
         player() {
             if (this.parseSourceType(this.current.src.sources) === 'youtube') {
@@ -209,13 +203,11 @@ export default {
             el.remote
                 .prompt()
                 .then(() => {
-                    this.$toast.info(
-                        'Remote playback not implemented on this player'
-                    )
+                    alert('Remote playback not implemented on this player')
                 })
                 .catch((e) => {
                     //if(e.name == 'NotSupportedError') {}
-                    this.$toast.error(e.message)
+                    alert(e.message)
                 })
         },
         onPictureInPicture(el) {
@@ -273,12 +265,7 @@ export default {
     },
     beforeCreate() {},
     beforeMount() {},
-    mounted() {
-        if (typeof this.i18n !== 'undefined') {
-            // Set the locale and replace en_US to the correct en-US format
-            this.i18n.locale = this.language.replace('_', '-')
-        }
-    },
+    mounted() {},
     beforeDestroy() {},
 }
 </script>

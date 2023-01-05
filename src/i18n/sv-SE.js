@@ -1,7 +1,4 @@
-import { en } from 'vuetify/lib/locale'
-
 export default {
-    ...en,
     locales: {
         'en-US': 'Engelska',
         'sv-SE': 'Svenska',

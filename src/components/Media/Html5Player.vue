@@ -50,7 +50,7 @@
                 :srclang="track.srclang"
                 @cuechange="onCuechange"
             />
-            {{ i18n.t('player.no_support') }}
+            {{ t(language, 'player.no_support') }}
         </video>
         <div
             class="controls-container"
@@ -65,11 +65,11 @@
                         :min="0"
                         :max="scrub.max"
                         :label="
-                            $options.filters.humanShortDuration(
+                            filters.playerShortDuration(
                                 percentToTimeSeconds(currentPercent)
                             ) +
                             ' / ' +
-                            $options.filters.humanShortDuration(player.duration)
+                            filters.playerShortDuration(player.duration)
                         "
                         inverse-label
                         @mousedown="onPause"
@@ -94,16 +94,19 @@
                                         <span class="d-sr-only">
                                             {{
                                                 options.paused
-                                                    ? i18n.t('player.play')
-                                                    : i18n.t('player.pause')
+                                                    ? t(language, 'player.play')
+                                                    : t(
+                                                          language,
+                                                          'player.pause'
+                                                      )
                                             }}
                                         </span>
                                     </v-btn>
                                 </template>
                                 <span>{{
                                     options.paused
-                                        ? i18n.t('player.play')
-                                        : i18n.t('player.pause')
+                                        ? t(language, 'player.play')
+                                        : t(language, 'player.pause')
                                 }}</span>
                             </v-tooltip>
 
@@ -119,11 +122,13 @@
                                     >
                                         <v-icon>mdi-rewind-10</v-icon>
                                         <span class="sr-only">{{
-                                            i18n.t('player.rewind_10')
+                                            t(language, 'player.rewind_10')
                                         }}</span>
                                     </v-btn>
                                 </template>
-                                <span>{{ i18n.t('player.rewind_10') }}</span>
+                                <span>{{
+                                    t(language, 'player.rewind_10')
+                                }}</span>
                             </v-tooltip>
                         </template>
 
@@ -151,7 +156,7 @@
                                                 : 'mdi-closed-caption-outline'
                                         }}</v-icon>
                                         <span class="d-sr-only">{{
-                                            i18n.t('player.toggle_cc')
+                                            t(language, 'player.toggle_cc')
                                         }}</span>
                                     </v-btn>
                                 </template>
@@ -214,14 +219,14 @@
                                             >mdi-volume-off</v-icon
                                         >
                                         <span class="d-sr-only">{{
-                                            i18n.t('player.volume_slider')
+                                            t(language, 'player.volume_slider')
                                         }}</span>
                                     </v-btn>
                                 </template>
 
                                 <v-sheet class="pa-5">
                                     <span class="d-sr-only">{{
-                                        i18n.t('player.volume_slider')
+                                        t(language, 'player.volume_slider')
                                     }}</span>
                                     <v-slider
                                         v-model="options.volume"
@@ -251,12 +256,15 @@
                                                 : 'mdi-fullscreen-exit'
                                         }}</v-icon>
                                         <span class="d-sr-only">{{
-                                            i18n.t('player.toggle_fullscreen')
+                                            t(
+                                                language,
+                                                'player.toggle_fullscreen'
+                                            )
                                         }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    i18n.t('player.toggle_fullscreen')
+                                    t(language, 'player.toggle_fullscreen')
                                 }}</span>
                             </v-tooltip>
 
@@ -277,14 +285,18 @@
                                             >mdi-picture-in-picture-bottom-right</v-icon
                                         >
                                         <span class="d-sr-only">{{
-                                            i18n.t(
+                                            t(
+                                                language,
                                                 'player.toggle_picture_in_picture'
                                             )
                                         }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    i18n.t('player.toggle_picture_in_picture')
+                                    t(
+                                        language,
+                                        'player.toggle_picture_in_picture'
+                                    )
                                 }}</span>
                             </v-tooltip>
 
@@ -300,14 +312,15 @@
                                     >
                                         <v-icon>mdi-cast</v-icon>
                                         <span class="d-sr-only">{{
-                                            i18n.t(
+                                            t(
+                                                language,
                                                 'player.toggle_remote_playback'
                                             )
                                         }}</span>
                                     </v-btn></template
                                 >
                                 <span>{{
-                                    i18n.t('player.toggle_remote_playback')
+                                    t(language, 'player.toggle_remote_playback')
                                 }}</span>
                             </v-tooltip>
 
@@ -323,11 +336,13 @@
                                     >
                                         <v-icon>mdi-download</v-icon>
                                         <span class="d-sr-only">{{
-                                            i18n.t('player.download')
+                                            t(language, 'player.download')
                                         }}</span>
                                     </v-btn></template
                                 >
-                                <span>{{ i18n.t('player.download') }}</span>
+                                <span>{{
+                                    t(language, 'player.download')
+                                }}</span>
                             </v-tooltip>
 
                             <!-- Settings -->
@@ -341,7 +356,10 @@
                                     <v-btn small text v-bind="attrs" v-on="on">
                                         <v-icon>mdi-cog</v-icon>
                                         <span class="d-sr-only">{{
-                                            i18n.t('player.toggle_settings')
+                                            t(
+                                                language,
+                                                'player.toggle_settings'
+                                            )
                                         }}</span>
                                     </v-btn>
                                 </template>
@@ -351,7 +369,10 @@
                                         <v-list-item-title>
                                             <v-icon>mdi-play-speed</v-icon>
                                             {{
-                                                i18n.t('player.playback_speed')
+                                                t(
+                                                    language,
+                                                    'player.playback_speed'
+                                                )
                                             }}
                                         </v-list-item-title>
                                     </v-list-item>
@@ -374,7 +395,8 @@
                                                     mdi-clock-minus-outline
                                                 </v-icon>
                                                 <span class="d-sr-only">{{
-                                                    i18n.t(
+                                                    t(
+                                                        language,
                                                         'player.playback_decrease'
                                                     )
                                                 }}</span>
@@ -406,7 +428,8 @@
                                                     mdi-clock-plus-outline
                                                 </v-icon>
                                                 <span class="d-sr-only">{{
-                                                    i18n.t(
+                                                    t(
+                                                        language,
                                                         'player.playback_increase'
                                                     )
                                                 }}</span>
@@ -441,7 +464,9 @@
 </template>
 
 <script>
+import filters from '../filters'
 import CaptionsMenu from './CaptionsMenu.vue'
+import { t } from '../../i18n/i18n'
 
 export default {
     name: 'Html5Player',
@@ -464,13 +489,7 @@ export default {
             required: true,
         },
     },
-    watch: {
-        language(newVal) {
-            if (typeof this.i18n !== 'undefined') {
-                this.i18n.locale = newVal
-            }
-        },
-    },
+    watch: {},
     computed: {
         current() {
             // We're playing an ad currently
@@ -499,6 +518,8 @@ export default {
     },
     data() {
         return {
+            t,
+            filters,
             ads: {},
             activeAd: null,
             currentPercent: 0,
@@ -507,7 +528,7 @@ export default {
             fullscreenEnabled: false,
             options: {
                 cc: true,
-                ccLang: this.i18n.locale,
+                ccLang: this.language,
                 controls: true,
                 controlsDebounce: null,
                 volume: 0.5, // default 50%
@@ -649,13 +670,11 @@ export default {
         },
         onSeeking(e) {
             this.$emit('seeking', e)
-            //console.log("onSeeking");
-            //console.log(e);
+            // console.log('onSeeking', e)
         },
         onMediaProgress(e) {
             this.$emit('progress', e)
-            //console.log("onMediaProgress");
-            //console.log(e);
+            //console.log('onMediaProgress', e)
         },
         onCCToggle() {
             this.options.cc = !this.options.cc
