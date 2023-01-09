@@ -23,8 +23,8 @@
                         ></v-list-item-content>
                         <v-list-item-action>
                             <span aria-hidden="true">
-                                {{ cue.startTime | humanShortDuration }}
-                                - {{ cue.endTime | humanShortDuration }}
+                                {{ filters.playerShortDuration(cue.startTime) }}
+                                - {{ filters.playerShortDuration(cue.endTime) }}
                             </span>
                         </v-list-item-action>
                     </v-list-item>
@@ -35,12 +35,16 @@
 </template>
 
 <script>
+import filters from '../filters'
+
 export default {
     props: {
         value: { type: Object, required: true },
+        language: { type: String, required: false, default: 'en-US' },
     },
     data() {
         return {
+            filters,
             captions: {},
             captionIndex: 0,
         }
@@ -52,11 +56,6 @@ export default {
                 this.captions = captions
                 this.captionIndex = this.currentCue(this.captions)
             },
-        },
-        language(newVal) {
-            if (typeof this.i18n !== 'undefined') {
-                this.i18n.locale = newVal
-            }
         },
     },
     methods: {
