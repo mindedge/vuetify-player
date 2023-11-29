@@ -25,4 +25,10 @@ export default {
         pause: 'Klicka för att pausa',
         no_support: 'Tyvärr, din webbläsare stöder inte inbäddade videor.',
     },
+    captions: {
+        expand: 'Bygga ut',
+        collapse: 'Kollaps',
+        view_as_paragraph: 'Visa som stycke',
+        view_as_captions: 'Visa som bildtexter',
+    },
 }

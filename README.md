@@ -5,7 +5,6 @@ An accessible, localized, full featured media player with Vuetifyjs
 ## Table of Contents
 
 -   [Quick Start](#quick-start)
--   [View demos locally](#local-project-setup-to-view-demos)
 -   [Complete media source structure](#full-media-src-structure)
 -   [Define a media source](#the-src-attribute)
 -   [Define a playlist](#the-playlist-attribute)
@@ -59,26 +58,6 @@ src: {
 ```
 
 ### 4. Enjoy~
-
-## Local project setup to view demos
-
-Clone the repo
-
-```bash
-git clone https://github.com/mindedge/vuetify-player.git
-```
-
-Install necessary packages
-
-```bash
-npm install
-```
-
-Compile and serve. This also hot-reloads for development & testing
-
-```bash
-npm run serve
-```
 
 ## Full media `src` structure
 

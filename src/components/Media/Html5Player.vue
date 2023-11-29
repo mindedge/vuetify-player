@@ -1,470 +1,551 @@
 <template>
     <v-container>
-        <div v-if="buffering" class="player-overlay">
-            <v-progress-circular :size="50" indeterminate></v-progress-circular>
-        </div>
-        <video
-            ref="player"
-            tabindex="0"
-            :class="'player-' + type"
-            :height="attributes.height"
-            :width="attributes.width"
-            :autoplay="attributes.autoplay"
-            :autopictureinpicture="attributes.autopictureinpicture"
-            :controlslist="attributes.controlslist"
-            :crossorigin="attributes.crossorigin"
-            :disablepictureinpicture="attributes.disablepictureinpicture"
-            :disableremoteplayback="attributes.disableremoteplayback"
-            :loop="attributes.loop"
-            :muted="attributes.muted"
-            :playsinline="attributes.playsinline"
-            :poster="src.poster || attributes.poster"
-            :preload="attributes.preload"
-            @click="onPlayToggle"
-            @seeking="onSeeking"
-            @timeupdate="onTimeupdate"
-            @progress="onMediaProgress"
-            @loadedmetadata="onLoadedmetadata"
-            @loadeddata="onLoadeddata"
-            @focus="onVideoHover"
-            @mouseover="onVideoHover"
-            @mouseout="onVideoLeave"
-            @ended="onEnded"
-            @error="$emit('error', $event)"
-            @canplay="onCanplay"
-            @waiting="onWaiting"
-            @canplaythrough="$emit('canplaythrough', $event)"
-            @emptied="$emit('emptied', $event)"
-            @stalled="$emit('stalled', $event)"
-            @abort="$emit('abort', $event)"
-        >
-            <source
-                v-for="(source, index) of current.sources"
-                :key="index + '_mediasources'"
-                :src="source.src"
-                :type="source.type"
-                :label="source.label"
-            />
-            <track
-                v-for="(track, index) of current.tracks"
-                :key="index + '_mediatracks'"
-                :default="track.default"
-                :src="track.src"
-                :kind="track.kind"
-                :srclang="track.srclang"
-                @cuechange="onCuechange"
-            />
-            {{ t(language, 'player.no_support') }}
-        </video>
+        <v-row>
+            <v-col
+                :cols="!options.expandedCaptions ? 12 : 6"
+                class="align-self-start"
+            >
+                <div v-if="buffering" class="player-overlay">
+                    <v-progress-circular
+                        :size="50"
+                        indeterminate
+                    ></v-progress-circular>
+                </div>
+                <video
+                    ref="player"
+                    tabindex="0"
+                    :class="'player-' + type"
+                    :height="attributes.height"
+                    :width="attributes.width"
+                    :autoplay="attributes.autoplay"
+                    :autopictureinpicture="attributes.autopictureinpicture"
+                    :controlslist="attributes.controlslist"
+                    :crossorigin="attributes.crossorigin"
+                    :disablepictureinpicture="
+                        attributes.disablepictureinpicture
+                    "
+                    :disableremoteplayback="attributes.disableremoteplayback"
+                    :loop="attributes.loop"
+                    :muted="attributes.muted"
+                    :playsinline="attributes.playsinline"
+                    :poster="src.poster || attributes.poster"
+                    :preload="attributes.preload"
+                    @click="onPlayToggle"
+                    @seeking="onSeeking"
+                    @timeupdate="onTimeupdate"
+                    @progress="onMediaProgress"
+                    @loadedmetadata="onLoadedmetadata"
+                    @loadeddata="onLoadeddata"
+                    @focus="onVideoHover"
+                    @mouseover="onVideoHover"
+                    @mouseout="onVideoLeave"
+                    @ended="onEnded"
+                    @error="$emit('error', $event)"
+                    @canplay="onCanplay"
+                    @waiting="onWaiting"
+                    @canplaythrough="$emit('canplaythrough', $event)"
+                    @emptied="$emit('emptied', $event)"
+                    @stalled="$emit('stalled', $event)"
+                    @abort="$emit('abort', $event)"
+                >
+                    <source
+                        v-for="(source, index) of current.sources"
+                        :key="index + '_mediasources'"
+                        :src="source.src"
+                        :type="source.type"
+                        :label="source.label"
+                    />
+                    <track
+                        v-for="(track, index) of current.tracks"
+                        :key="index + '_mediatracks'"
+                        :default="track.default"
+                        :src="track.src"
+                        :kind="track.kind"
+                        :srclang="track.srclang"
+                        @cuechange="onCuechange"
+                    />
+                    {{ t(language, 'player.no_support') }}
+                </video>
 
-        <div
-            class="controls-container"
-            v-if="attributes.controls"
-            @mouseover="onControlsHover"
-        >
-            <v-slide-y-reverse-transition>
-                <div v-if="player && options.controls" class="controls">
-                    <v-slider
-                        dark
-                        v-model="currentPercent"
-                        :min="0"
-                        :max="scrub.max"
-                        :label="
-                            filters.playerShortDuration(
-                                percentToTimeSeconds(currentPercent)
-                            ) +
-                            ' / ' +
-                            filters.playerShortDuration(player.duration)
-                        "
-                        inverse-label
-                        @mousedown="onPause"
-                        @change="onScrubTime"
-                    >
-                        <template #prepend>
-                            <!-- Play button -->
-                            <v-tooltip top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onPlayToggle"
-                                    >
-                                        <v-icon>{{
+                <div
+                    class="controls-container"
+                    v-if="attributes.controls"
+                    @mouseover="onControlsHover"
+                >
+                    <v-slide-y-reverse-transition>
+                        <div v-if="player && options.controls" class="controls">
+                            <v-slider
+                                dark
+                                v-model="currentPercent"
+                                :min="0"
+                                :max="scrub.max"
+                                :label="
+                                    filters.playerShortDuration(
+                                        percentToTimeSeconds(currentPercent)
+                                    ) +
+                                    ' / ' +
+                                    filters.playerShortDuration(player.duration)
+                                "
+                                inverse-label
+                                @mousedown="onPause"
+                                @change="onScrubTime"
+                            >
+                                <template #prepend>
+                                    <!-- Play button -->
+                                    <v-tooltip top>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onPlayToggle"
+                                            >
+                                                <v-icon>{{
+                                                    options.paused
+                                                        ? 'mdi-play'
+                                                        : 'mdi-pause'
+                                                }}</v-icon>
+                                                <span class="d-sr-only">
+                                                    {{
+                                                        options.paused
+                                                            ? t(
+                                                                  language,
+                                                                  'player.play'
+                                                              )
+                                                            : t(
+                                                                  language,
+                                                                  'player.pause'
+                                                              )
+                                                    }}
+                                                </span>
+                                            </v-btn>
+                                        </template>
+                                        <span>{{
                                             options.paused
-                                                ? 'mdi-play'
-                                                : 'mdi-pause'
-                                        }}</v-icon>
-                                        <span class="d-sr-only">
-                                            {{
-                                                options.paused
-                                                    ? t(language, 'player.play')
-                                                    : t(
-                                                          language,
-                                                          'player.pause'
-                                                      )
-                                            }}
-                                        </span>
-                                    </v-btn>
-                                </template>
-                                <span>{{
-                                    options.paused
-                                        ? t(language, 'player.play')
-                                        : t(language, 'player.pause')
-                                }}</span>
-                            </v-tooltip>
+                                                ? t(language, 'player.play')
+                                                : t(language, 'player.pause')
+                                        }}</span>
+                                    </v-tooltip>
 
-                            <!-- Rewind Button-->
-                            <v-tooltip v-if="attributes.rewind" top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onRewind"
-                                    >
-                                        <v-icon>mdi-rewind-10</v-icon>
-                                        <span class="sr-only">{{
+                                    <!-- Rewind Button-->
+                                    <v-tooltip v-if="attributes.rewind" top>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onRewind"
+                                            >
+                                                <v-icon>mdi-rewind-10</v-icon>
+                                                <span class="sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.rewind_10'
+                                                    )
+                                                }}</span>
+                                            </v-btn>
+                                        </template>
+                                        <span>{{
                                             t(language, 'player.rewind_10')
                                         }}</span>
-                                    </v-btn>
-                                </template>
-                                <span>{{
-                                    t(language, 'player.rewind_10')
-                                }}</span>
-                            </v-tooltip>
-                        </template>
-
-                        <template #append>
-                            <!-- Closed Captions -->
-                            <v-menu
-                                v-if="
-                                    current.tracks && current.tracks.length > 0
-                                "
-                                open-on-hover
-                                top
-                                offset-y
-                            >
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onCCToggle"
-                                    >
-                                        <v-icon>{{
-                                            options.cc
-                                                ? 'mdi-closed-caption'
-                                                : 'mdi-closed-caption-outline'
-                                        }}</v-icon>
-                                        <span class="d-sr-only">{{
-                                            t(language, 'player.toggle_cc')
-                                        }}</span>
-                                    </v-btn>
+                                    </v-tooltip>
                                 </template>
 
-                                <v-list>
-                                    <v-list-item-group>
-                                        <v-list-item
-                                            v-for="track in current.tracks"
-                                            :key="track.srclang"
-                                            @click="
-                                                onSelectTrack(track.srclang)
-                                            "
-                                        >
-                                            <v-list-item-title>{{
-                                                track.srclang
-                                            }}</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list-item-group>
-                                </v-list>
-                            </v-menu>
-
-                            <!-- Volume -->
-                            <v-menu open-on-hover top offset-y>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onMuteToggle"
+                                <template #append>
+                                    <!-- Closed Captions -->
+                                    <v-menu
+                                        v-if="
+                                            current.tracks &&
+                                            current.tracks.length > 0
+                                        "
+                                        open-on-hover
+                                        top
+                                        offset-y
                                     >
-                                        <v-icon
-                                            v-if="
-                                                !options.muted &&
-                                                options.volume > 0.75
-                                            "
-                                            >mdi-volume-high</v-icon
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
                                         >
-                                        <v-icon
-                                            v-if="
-                                                !options.muted &&
-                                                options.volume >= 0.25 &&
-                                                options.volume <= 0.75
-                                            "
-                                            >mdi-volume-medium</v-icon
-                                        >
-                                        <v-icon
-                                            v-if="
-                                                !options.muted &&
-                                                options.volume > 0 &&
-                                                options.volume < 0.25
-                                            "
-                                            >mdi-volume-low</v-icon
-                                        >
-                                        <v-icon
-                                            v-if="
-                                                options.muted ||
-                                                options.volume === 0
-                                            "
-                                            >mdi-volume-off</v-icon
-                                        >
-                                        <span class="d-sr-only">{{
-                                            t(language, 'player.volume_slider')
-                                        }}</span>
-                                    </v-btn>
-                                </template>
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onCCToggle"
+                                            >
+                                                <v-icon>{{
+                                                    options.cc
+                                                        ? 'mdi-closed-caption'
+                                                        : 'mdi-closed-caption-outline'
+                                                }}</v-icon>
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.toggle_cc'
+                                                    )
+                                                }}</span>
+                                            </v-btn>
+                                        </template>
 
-                                <v-sheet class="pa-5">
-                                    <span class="d-sr-only">{{
-                                        t(language, 'player.volume_slider')
-                                    }}</span>
-                                    <v-slider
-                                        v-model="options.volume"
-                                        inverse-label
-                                        :min="0"
-                                        :max="1"
-                                        :step="0.1"
-                                        vertical
-                                        @change="onVolumeChange"
-                                    ></v-slider>
-                                </v-sheet>
-                            </v-menu>
+                                        <v-list>
+                                            <v-list-item-group>
+                                                <v-list-item
+                                                    v-for="track in current.tracks"
+                                                    :key="track.srclang"
+                                                    @click="
+                                                        onSelectTrack(
+                                                            track.srclang
+                                                        )
+                                                    "
+                                                >
+                                                    <v-list-item-title>{{
+                                                        track.srclang
+                                                    }}</v-list-item-title>
+                                                </v-list-item>
+                                            </v-list-item-group>
+                                        </v-list>
+                                    </v-menu>
 
-                            <!-- Fullscreen -->
-                            <v-tooltip v-if="fullscreenEnabled" top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onFullscreen"
-                                    >
-                                        <v-icon>{{
-                                            !options.fullscreen
-                                                ? 'mdi-fullscreen'
-                                                : 'mdi-fullscreen-exit'
-                                        }}</v-icon>
-                                        <span class="d-sr-only">{{
+                                    <!-- Volume -->
+                                    <v-menu open-on-hover top offset-y>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onMuteToggle"
+                                            >
+                                                <v-icon
+                                                    v-if="
+                                                        !options.muted &&
+                                                        options.volume > 0.75
+                                                    "
+                                                    >mdi-volume-high</v-icon
+                                                >
+                                                <v-icon
+                                                    v-if="
+                                                        !options.muted &&
+                                                        options.volume >=
+                                                            0.25 &&
+                                                        options.volume <= 0.75
+                                                    "
+                                                    >mdi-volume-medium</v-icon
+                                                >
+                                                <v-icon
+                                                    v-if="
+                                                        !options.muted &&
+                                                        options.volume > 0 &&
+                                                        options.volume < 0.25
+                                                    "
+                                                    >mdi-volume-low</v-icon
+                                                >
+                                                <v-icon
+                                                    v-if="
+                                                        options.muted ||
+                                                        options.volume === 0
+                                                    "
+                                                    >mdi-volume-off</v-icon
+                                                >
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.volume_slider'
+                                                    )
+                                                }}</span>
+                                            </v-btn>
+                                        </template>
+
+                                        <v-sheet class="pa-5">
+                                            <span class="d-sr-only">{{
+                                                t(
+                                                    language,
+                                                    'player.volume_slider'
+                                                )
+                                            }}</span>
+                                            <v-slider
+                                                v-model="options.volume"
+                                                inverse-label
+                                                :min="0"
+                                                :max="1"
+                                                :step="0.1"
+                                                vertical
+                                                @change="onVolumeChange"
+                                            ></v-slider>
+                                        </v-sheet>
+                                    </v-menu>
+
+                                    <!-- Fullscreen -->
+                                    <v-tooltip v-if="fullscreenEnabled" top>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onFullscreen"
+                                            >
+                                                <v-icon>{{
+                                                    !options.fullscreen
+                                                        ? 'mdi-fullscreen'
+                                                        : 'mdi-fullscreen-exit'
+                                                }}</v-icon>
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.toggle_fullscreen'
+                                                    )
+                                                }}</span>
+                                            </v-btn></template
+                                        >
+                                        <span>{{
                                             t(
                                                 language,
                                                 'player.toggle_fullscreen'
                                             )
                                         }}</span>
-                                    </v-btn></template
-                                >
-                                <span>{{
-                                    t(language, 'player.toggle_fullscreen')
-                                }}</span>
-                            </v-tooltip>
+                                    </v-tooltip>
 
-                            <!-- Picture in picture -->
-                            <v-tooltip
-                                v-if="!attributes.disablepictureinpicture"
-                                top
-                            >
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onPictureInPicture"
+                                    <!-- Picture in picture -->
+                                    <v-tooltip
+                                        v-if="
+                                            !attributes.disablepictureinpicture
+                                        "
+                                        top
                                     >
-                                        <v-icon
-                                            >mdi-picture-in-picture-bottom-right</v-icon
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
                                         >
-                                        <span class="d-sr-only">{{
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onPictureInPicture"
+                                            >
+                                                <v-icon
+                                                    >mdi-picture-in-picture-bottom-right</v-icon
+                                                >
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.toggle_picture_in_picture'
+                                                    )
+                                                }}</span>
+                                            </v-btn></template
+                                        >
+                                        <span>{{
                                             t(
                                                 language,
                                                 'player.toggle_picture_in_picture'
                                             )
                                         }}</span>
-                                    </v-btn></template
-                                >
-                                <span>{{
-                                    t(
-                                        language,
-                                        'player.toggle_picture_in_picture'
-                                    )
-                                }}</span>
-                            </v-tooltip>
+                                    </v-tooltip>
 
-                            <!-- Remote playback -->
-                            <v-tooltip v-if="options.remoteplayback" top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onRemoteplayback"
+                                    <!-- Remote playback -->
+                                    <v-tooltip
+                                        v-if="options.remoteplayback"
+                                        top
                                     >
-                                        <v-icon>mdi-cast</v-icon>
-                                        <span class="d-sr-only">{{
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onRemoteplayback"
+                                            >
+                                                <v-icon>mdi-cast</v-icon>
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.toggle_remote_playback'
+                                                    )
+                                                }}</span>
+                                            </v-btn></template
+                                        >
+                                        <span>{{
                                             t(
                                                 language,
                                                 'player.toggle_remote_playback'
                                             )
                                         }}</span>
-                                    </v-btn></template
-                                >
-                                <span>{{
-                                    t(language, 'player.toggle_remote_playback')
-                                }}</span>
-                            </v-tooltip>
+                                    </v-tooltip>
 
-                            <!-- Download -->
-                            <v-tooltip v-if="options.download" top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        small
-                                        text
-                                        v-bind="attrs"
-                                        v-on="on"
-                                        @click="onDownload"
-                                    >
-                                        <v-icon>mdi-download</v-icon>
-                                        <span class="d-sr-only">{{
+                                    <!-- Download -->
+                                    <v-tooltip v-if="options.download" top>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onDownload"
+                                            >
+                                                <v-icon>mdi-download</v-icon>
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.download'
+                                                    )
+                                                }}</span>
+                                            </v-btn></template
+                                        >
+                                        <span>{{
                                             t(language, 'player.download')
                                         }}</span>
-                                    </v-btn></template
-                                >
-                                <span>{{
-                                    t(language, 'player.download')
-                                }}</span>
-                            </v-tooltip>
+                                    </v-tooltip>
 
-                            <!-- Settings -->
-                            <v-menu
-                                top
-                                offset-y
-                                :close-on-content-click="false"
-                                nudge-left="100"
-                            >
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn small text v-bind="attrs" v-on="on">
-                                        <v-icon>mdi-cog</v-icon>
-                                        <span class="d-sr-only">{{
-                                            t(
-                                                language,
-                                                'player.toggle_settings'
-                                            )
-                                        }}</span>
-                                    </v-btn>
+                                    <!-- Settings -->
+                                    <v-menu
+                                        top
+                                        offset-y
+                                        :close-on-content-click="false"
+                                        nudge-left="100"
+                                    >
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            >
+                                                <v-icon>mdi-cog</v-icon>
+                                                <span class="d-sr-only">{{
+                                                    t(
+                                                        language,
+                                                        'player.toggle_settings'
+                                                    )
+                                                }}</span>
+                                            </v-btn>
+                                        </template>
+
+                                        <v-list>
+                                            <v-list-item>
+                                                <v-list-item-title>
+                                                    <v-icon
+                                                        >mdi-play-speed</v-icon
+                                                    >
+                                                    {{
+                                                        t(
+                                                            language,
+                                                            'player.playback_speed'
+                                                        )
+                                                    }}
+                                                </v-list-item-title>
+                                            </v-list-item>
+                                            <v-list-item>
+                                                <v-list-item-title
+                                                    class="text-center"
+                                                >
+                                                    <v-btn
+                                                        small
+                                                        :disabled="
+                                                            options.playbackRateIndex ===
+                                                            0
+                                                        "
+                                                        @click="
+                                                            onPlaybackSpeed(
+                                                                options.playbackRateIndex -
+                                                                    1
+                                                            )
+                                                        "
+                                                    >
+                                                        <v-icon>
+                                                            mdi-clock-minus-outline
+                                                        </v-icon>
+                                                        <span
+                                                            class="d-sr-only"
+                                                            >{{
+                                                                t(
+                                                                    language,
+                                                                    'player.playback_decrease'
+                                                                )
+                                                            }}</span
+                                                        >
+                                                    </v-btn>
+                                                    <span class="pl-2 pr-2"
+                                                        >{{
+                                                            attributes
+                                                                .playbackrates[
+                                                                options
+                                                                    .playbackRateIndex
+                                                            ]
+                                                        }}x</span
+                                                    >
+                                                    <v-btn
+                                                        small
+                                                        :disabled="
+                                                            options.playbackRateIndex >=
+                                                            attributes
+                                                                .playbackrates
+                                                                .length -
+                                                                1
+                                                        "
+                                                        @click="
+                                                            onPlaybackSpeed(
+                                                                options.playbackRateIndex +
+                                                                    1
+                                                            )
+                                                        "
+                                                    >
+                                                        <v-icon>
+                                                            mdi-clock-plus-outline
+                                                        </v-icon>
+                                                        <span
+                                                            class="d-sr-only"
+                                                            >{{
+                                                                t(
+                                                                    language,
+                                                                    'player.playback_increase'
+                                                                )
+                                                            }}</span
+                                                        >
+                                                    </v-btn>
+                                                </v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-menu>
                                 </template>
-
-                                <v-list>
-                                    <v-list-item>
-                                        <v-list-item-title>
-                                            <v-icon>mdi-play-speed</v-icon>
-                                            {{
-                                                t(
-                                                    language,
-                                                    'player.playback_speed'
-                                                )
-                                            }}
-                                        </v-list-item-title>
-                                    </v-list-item>
-                                    <v-list-item>
-                                        <v-list-item-title class="text-center">
-                                            <v-btn
-                                                small
-                                                :disabled="
-                                                    options.playbackRateIndex ===
-                                                    0
-                                                "
-                                                @click="
-                                                    onPlaybackSpeed(
-                                                        options.playbackRateIndex -
-                                                            1
-                                                    )
-                                                "
-                                            >
-                                                <v-icon>
-                                                    mdi-clock-minus-outline
-                                                </v-icon>
-                                                <span class="d-sr-only">{{
-                                                    t(
-                                                        language,
-                                                        'player.playback_decrease'
-                                                    )
-                                                }}</span>
-                                            </v-btn>
-                                            <span class="pl-2 pr-2"
-                                                >{{
-                                                    attributes.playbackrates[
-                                                        options
-                                                            .playbackRateIndex
-                                                    ]
-                                                }}x</span
-                                            >
-                                            <v-btn
-                                                small
-                                                :disabled="
-                                                    options.playbackRateIndex >=
-                                                    attributes.playbackrates
-                                                        .length -
-                                                        1
-                                                "
-                                                @click="
-                                                    onPlaybackSpeed(
-                                                        options.playbackRateIndex +
-                                                            1
-                                                    )
-                                                "
-                                            >
-                                                <v-icon>
-                                                    mdi-clock-plus-outline
-                                                </v-icon>
-                                                <span class="d-sr-only">{{
-                                                    t(
-                                                        language,
-                                                        'player.playback_increase'
-                                                    )
-                                                }}</span>
-                                            </v-btn>
-                                        </v-list-item-title>
-                                    </v-list-item>
-                                </v-list>
-                            </v-menu>
-                        </template>
-                    </v-slider>
+                            </v-slider>
+                        </div>
+                    </v-slide-y-reverse-transition>
                 </div>
-            </v-slide-y-reverse-transition>
-        </div>
+            </v-col>
 
-        <v-col
-            v-if="
-                attributes.captionsmenu &&
-                current.tracks &&
-                captions &&
-                captions.cues &&
-                Object.keys(captions.cues).length
-            "
-            cols="12"
-        >
-            <CaptionsMenu
-                v-model="captions"
-                :language="language"
-                @click:cue="onCueClick"
-            ></CaptionsMenu>
-        </v-col>
+            <v-col
+                v-if="
+                    attributes.captionsmenu &&
+                    current.tracks &&
+                    captions &&
+                    captions.cues &&
+                    Object.keys(captions.cues).length
+                "
+                :cols="!options.expandedCaptions ? 12 : 6"
+            >
+                <CaptionsMenu
+                    v-model="captions"
+                    :language="language"
+                    @click:cue="onCueClick"
+                    @click:expand="onClickExpandCaptions"
+                ></CaptionsMenu>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
@@ -541,6 +622,7 @@ export default {
                 paused: true,
                 playbackRateIndex: 0,
                 fullscreen: false,
+                expandedCaptions: false,
                 download: false,
                 remoteplayback: false,
                 controlslist: [],
@@ -568,6 +650,10 @@ export default {
         },
         onCueClick(time) {
             this.setTime(time)
+        },
+        onClickExpandCaptions(expanded) {
+            this.options.expandedCaptions = expanded
+            this.$emit('click:captions-expand', expanded)
         },
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
