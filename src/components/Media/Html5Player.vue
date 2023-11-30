@@ -998,6 +998,7 @@ export default {
 }
 /* Hide transcript classes from player */
 .player-video::cue(c.transcript) {
+    visibility: hidden;
     font-size: 0;
 }
 .player-overlay {
