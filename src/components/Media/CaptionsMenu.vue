@@ -25,13 +25,13 @@
                 <v-list-item-group v-model="captionIndex">
                     <v-list-item
                         ref="captionItems"
-                        v-for="(cue, index) in captions.cues"
+                        v-for="(cue, index) in cues"
                         :key="index"
                         :two-line="expanded"
                         @click="onCueClick(cue.startTime)"
                     >
                         <template v-if="!expanded">
-                            <v-list-item-icon>
+                            <v-list-item-icon v-if="!paragraphView">
                                 <v-icon
                                     >{{
                                         index === captionIndex
@@ -46,7 +46,7 @@
                                     class="caption-text"
                                 ></v-list-item-title>
                             </v-list-item-content>
-                            <v-list-item-action>
+                            <v-list-item-action v-if="!paragraphView">
                                 <span aria-hidden="true">
                                     {{
                                         filters.playerShortDuration(
@@ -66,7 +66,7 @@
                                     v-html="cue.text"
                                     class="caption-text"
                                 ></v-list-item-title>
-                                <v-list-item-subtitle>
+                                <v-list-item-subtitle v-if="!paragraphView">
                                     <v-icon
                                         >{{
                                             index === captionIndex
@@ -112,6 +112,75 @@ export default {
                 ? 'captions-list captions-list--state-collapsed'
                 : 'captions-list captions-list--state-expanded'
         },
+        cues() {
+            // Normal cues view
+            if (
+                typeof this.captions.cues !== 'undefined' &&
+                !this.paragraphView
+            ) {
+                return this.captions.cues
+            } else if (
+                typeof this.captions.cues !== 'undefined' &&
+                this.paragraphView
+            ) {
+                // Paragraph view
+                let cues = this.captions.cues
+                const paragraphs = []
+                let puncuationCount = 0
+
+                for (let i = 0; i < cues.length; i++) {
+                    // Add the first item. Use `new VTTCue` to break the reference
+                    if (paragraphs.length === 0) {
+                        paragraphs.push(
+                            new VTTCue(
+                                cues[i].startTime,
+                                cues[i].endTime,
+                                cues[i].text
+                            )
+                        )
+                        // Skip first element
+                        continue
+                    }
+
+                    // Increment the count on puncuation checks
+                    if (new RegExp(/[.?!]/).test(cues[i].text)) {
+                        puncuationCount++
+                    }
+
+                    // Create a new paragraph every 3 sentences
+                    if (puncuationCount > 3) {
+                        // Find the first puncuation and include it in the slice
+                        const breakIndex = cues[i].text.search(/[.?!]/) + 1
+
+                        // Append the first part to the previous paragraph so it ends on a period
+                        paragraphs[paragraphs.length - 1].text +=
+                            ' ' + cues[i].text.slice(0, breakIndex)
+
+                        // Use `new VTTCue` to break the reference. Otherwise the below appends will duplicate text
+                        // Also grab from the breakIndex afterwards to get the potential next sentence
+                        paragraphs.push(
+                            new VTTCue(
+                                cues[i].startTime,
+                                cues[i].endTime,
+                                cues[i].text.slice(breakIndex).trim()
+                            )
+                        )
+                        puncuationCount = 0
+                    } else {
+                        // Append the cue text and update the end time
+                        paragraphs[paragraphs.length - 1].endTime =
+                            cues[i].endTime
+                        paragraphs[paragraphs.length - 1].text +=
+                            ' ' + cues[i].text
+                    }
+                }
+
+                return paragraphs
+            } else {
+                // No cues found!
+                return []
+            }
+        },
     },
     data() {
         return {
@@ -147,7 +216,11 @@ export default {
         currentCue(captions) {
             let currentIndex = 0
 
-            if (captions.activeCues && captions.activeCues.length) {
+            if (
+                typeof captions.cues !== 'undefined' &&
+                typeof captions.activeCues !== 'undefined' &&
+                captions.activeCues.length
+            ) {
                 for (let i = 0; i < captions.cues.length; i++) {
                     const cue = captions.cues[i]
                     if (captions.activeCues[0].startTime === cue.startTime) {
