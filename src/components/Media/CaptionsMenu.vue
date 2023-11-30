@@ -76,7 +76,7 @@
                             </v-list-item-icon>
                             <v-list-item-content>
                                 <v-list-item-title
-                                    v-html="cue.text"
+                                    v-html="cue.rawText || cue.text"
                                     class="caption-text"
                                 ></v-list-item-title>
                             </v-list-item-content>
@@ -97,7 +97,7 @@
                         <template v-if="expanded">
                             <v-list-item-content>
                                 <v-list-item-title
-                                    v-html="cue.text"
+                                    v-html="cue.rawText || cue.text"
                                     class="caption-text"
                                 ></v-list-item-title>
                                 <v-list-item-subtitle v-if="!paragraphView">
@@ -236,17 +236,6 @@ export default {
         },
     },
     methods: {
-        cueKey(cue) {
-            const str =
-                cue.language +
-                cue.startTime.toString() +
-                cue.endTime.toString() +
-                cue.text
-            return str.split('').reduce(function (a, b) {
-                a = (a << 5) - a + b.charCodeAt(0)
-                return a & a
-            }, 0)
-        },
         currentCue(captions) {
             let currentIndex = 0
 

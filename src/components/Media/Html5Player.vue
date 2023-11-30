@@ -770,11 +770,9 @@ export default {
         },
         onSeeking(e) {
             this.$emit('seeking', e)
-            // console.log('onSeeking', e)
         },
         onMediaProgress(e) {
             this.$emit('progress', e)
-            //console.log('onMediaProgress', e)
         },
         onCCToggle() {
             this.options.cc = !this.options.cc
@@ -829,6 +827,28 @@ export default {
         onCuechange(e) {
             if (e && e.srcElement && e.srcElement.track) {
                 const track = e.srcElement.track
+
+                // Remove transcript classes from cues manually
+                // This is because Firefox doesn't support ::cue(<selector>) so we can't remove them via css
+                if (
+                    typeof track.activeCues !== 'undefined' &&
+                    track.activeCues.length > 0
+                ) {
+                    // Store the raw version so we can retain it for the CaptionsMenu
+                    if (typeof track.activeCues[0].rawText === 'undefined') {
+                        track.activeCues[0].rawText = track.activeCues[0].text
+                    }
+
+                    // Now remove `<c.transcript>` tags
+                    const transcriptTagRegex = /<c.transcript>.*?<\/c>/gi
+
+                    track.activeCues[0].text =
+                        track.activeCues[0].text.replaceAll(
+                            transcriptTagRegex,
+                            ''
+                        )
+                }
+
                 this.setCues(track)
             }
 
