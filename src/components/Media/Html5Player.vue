@@ -996,6 +996,10 @@ export default {
     max-height: 100%;
     background: #000;
 }
+/* Hide transcript classes from player */
+.player-video::cue(c.transcript) {
+    font-size: 0;
+}
 .player-overlay {
     position: relative;
     color: #fff;
