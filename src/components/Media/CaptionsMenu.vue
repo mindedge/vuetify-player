@@ -1,24 +1,58 @@
 <template>
     <v-card>
         <v-card-actions class="justify-end">
-            <v-btn color="primary" text @click="onClickToggleExpand">
-                <v-icon>{{
-                    expanded ? 'mdi-arrow-collapse' : 'mdi-arrow-expand'
-                }}</v-icon>
-                <span class="sr-only">{{
-                    t(language, 'captions.expand')
-                }}</span>
-            </v-btn>
-            <v-btn color="primary" text @click="onClickToggleParagraphView">
-                <v-icon>{{
+            <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        color="primary"
+                        text
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="onClickToggleParagraphView"
+                    >
+                        <v-icon>{{
+                            paragraphView
+                                ? 'mdi-closed-caption-outline'
+                                : 'mdi-text-box-outline'
+                        }}</v-icon>
+                        <span class="sr-only">{{
+                            paragraphView
+                                ? t(language, 'captions.view_as_captions')
+                                : t(language, 'captions.view_as_paragraph')
+                        }}</span>
+                    </v-btn></template
+                >
+                <span>{{
                     paragraphView
-                        ? 'mdi-closed-caption-outline'
-                        : 'mdi-text-box-outline'
-                }}</v-icon>
-                <span class="sr-only">{{
-                    t(language, 'captions.view_as_paragraph')
+                        ? t(language, 'captions.view_as_captions')
+                        : t(language, 'captions.view_as_paragraph')
                 }}</span>
-            </v-btn>
+            </v-tooltip>
+            <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        color="primary"
+                        text
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="onClickToggleExpand"
+                    >
+                        <v-icon>{{
+                            expanded ? 'mdi-arrow-collapse' : 'mdi-arrow-expand'
+                        }}</v-icon>
+                        <span class="sr-only">{{
+                            expanded
+                                ? t(language, 'captions.collapse')
+                                : t(language, 'captions.expand')
+                        }}</span>
+                    </v-btn></template
+                >
+                <span>{{
+                    expanded
+                        ? t(language, 'captions.collapse')
+                        : t(language, 'captions.expand')
+                }}</span>
+            </v-tooltip>
         </v-card-actions>
         <v-card-text>
             <v-list ref="captionList" :class="captionsList">
