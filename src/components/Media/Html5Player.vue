@@ -927,6 +927,15 @@ export default {
             this.options.controlslist = this.attributes.controlslist.split(' ')
         }
 
+        if (
+            typeof this.attributes.playbackrates === 'undefined' ||
+            this.attributes.playbackrates.length === 0
+        ) {
+            throw new Error(
+                'attributes.playbackrates must be defined and an array of numbers!'
+            )
+        }
+
         // Adjust the playback speed to 1 by default
         if (this.attributes.playbackrates.indexOf(1) !== -1) {
             this.options.playbackRateIndex =

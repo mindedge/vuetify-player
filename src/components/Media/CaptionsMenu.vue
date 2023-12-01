@@ -137,7 +137,7 @@ import { t } from '../../i18n/i18n'
 
 export default {
     props: {
-        value: { type: Object, required: true },
+        value: { type: [Object, Array], required: true },
         language: { type: String, required: false, default: 'en-US' },
     },
     computed: {
