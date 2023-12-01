@@ -11,6 +11,7 @@ An accessible, localized, full featured media player with Vuetifyjs
 -   [Define ads / preroll / postroll](#the-ads-array)
 -   [Supported Attributes](#supported-vuetifyplayer-attributes)
 -   [Supported Events](#supported-vuetifyplayer-events)
+-   [Captions](#captions)
 -   [License](#license)
 
 ---
@@ -242,6 +243,26 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `click:captions-paragraph` | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
 | `mouseover`                | `MouseEvent`      | Mouse over the media                                                                                                 |
 | `mouseout`                 | `MouseEvent`      | Mouse left the media                                                                                                 |
+
+## Captions
+
+The player supports `.vtt` captions as defined in the `tracks` array explained above.
+
+Additionally we support the tag `<c.transcript> ... </c>` inline with your captions text. This tag will omit the enclosed text from the video player captions overlay but show the text in the separate interactive captions panel.
+This allows you to include additional information that you want to appear in the transcript that might not be appropriate to display in the video player itself.
+
+Below is a `sample.vtt` on how to use the `<c.transcript>` tag.
+
+```
+WEBVTT
+
+00:00:00.000 --> 00:00:03.999
+This text will show. <c.transcript>This text is hidden from the player.</c> This is some more text to show.
+This text will show up on a new line in the player.
+
+00:00:03.000 --> 00:00:5.999
+sentence here to break it up
+```
 
 ## License
 
