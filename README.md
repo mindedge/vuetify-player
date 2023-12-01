@@ -5,13 +5,13 @@ An accessible, localized, full featured media player with Vuetifyjs
 ## Table of Contents
 
 -   [Quick Start](#quick-start)
--   [View demos locally](#local-project-setup-to-view-demos)
 -   [Complete media source structure](#full-media-src-structure)
 -   [Define a media source](#the-src-attribute)
 -   [Define a playlist](#the-playlist-attribute)
 -   [Define ads / preroll / postroll](#the-ads-array)
 -   [Supported Attributes](#supported-vuetifyplayer-attributes)
 -   [Supported Events](#supported-vuetifyplayer-events)
+-   [Captions](#captions)
 -   [License](#license)
 
 ---
@@ -59,26 +59,6 @@ src: {
 ```
 
 ### 4. Enjoy~
-
-## Local project setup to view demos
-
-Clone the repo
-
-```bash
-git clone https://github.com/mindedge/vuetify-player.git
-```
-
-Install necessary packages
-
-```bash
-npm install
-```
-
-Compile and serve. This also hot-reloads for development & testing
-
-```bash
-npm run serve
-```
 
 ## Full media `src` structure
 
@@ -238,29 +218,51 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 
 ## Supported `<VuetifyPlayer>` Events
 
-| Event name               | Returns           | When it's triggered                                                                                      |
-| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| `abort`                  | `Event`           | Download interrupted                                                                                     |
-| `canplay`                | `Event`           | Playback can start                                                                                       |
-| `canplaythrough`         | `Event`           | Playback can continue and should not be interrupted. Readstate is 3                                      |
-| `emptied`                | `Event`           | The network connection is down                                                                           |
-| `ended`                  | `Event`           | When playback has stopped because the end of the media was reached                                       |
-| `error`                  | `Event`           | A network error occurred during the download                                                             |
-| `loadeddata`             | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame |
-| `loadedmetadata`         | `Event`           | When the metadata has been loaded                                                                        |
-| `play`                   | `Event`           | The media has received a request to start playing                                                        |
-| `pause`                  | `Event`           | Playback has been suspended                                                                              |
-| `progress`               | `Event`           | The progress event is fired periodically as the browser loads a resource.                                |
-| `seeking`                | `Event`           | Playback has moved to a new location                                                                     |
-| `timeupdate`             | `Object`          | The current time was changed. Object contains { event: Event, current_percent: Number }                  |
-| `ratechange`             | `Number`          | The playback speed multiplier                                                                            |
-| `stalled`                | `Event`           | The browser tried to download but has not received data yet                                              |
-| `volumechange`           | `Number`          | The volume or muted button changed. Value from 0.0 to 1                                                  |
-| `waiting`                | `Event`           | Pause playback to download more data                                                                     |
-| `click:fullscreen`       | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                   |
-| `click:pictureinpicture` | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                        |
-| `mouseover`              | `MouseEvent`      | Mouse over the media                                                                                     |
-| `mouseout`               | `MouseEvent`      | Mouse left the media                                                                                     |
+| Event name                 | Returns           | When it's triggered                                                                                                  |
+| -------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `abort`                    | `Event`           | Download interrupted                                                                                                 |
+| `canplay`                  | `Event`           | Playback can start                                                                                                   |
+| `canplaythrough`           | `Event`           | Playback can continue and should not be interrupted. Readstate is 3                                                  |
+| `emptied`                  | `Event`           | The network connection is down                                                                                       |
+| `ended`                    | `Event`           | When playback has stopped because the end of the media was reached                                                   |
+| `error`                    | `Event`           | A network error occurred during the download                                                                         |
+| `loadeddata`               | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame             |
+| `loadedmetadata`           | `Event`           | When the metadata has been loaded                                                                                    |
+| `play`                     | `Event`           | The media has received a request to start playing                                                                    |
+| `pause`                    | `Event`           | Playback has been suspended                                                                                          |
+| `progress`                 | `Event`           | The progress event is fired periodically as the browser loads a resource.                                            |
+| `seeking`                  | `Event`           | Playback has moved to a new location                                                                                 |
+| `timeupdate`               | `Object`          | The current time was changed. Object contains { event: Event, current_percent: Number }                              |
+| `ratechange`               | `Number`          | The playback speed multiplier                                                                                        |
+| `stalled`                  | `Event`           | The browser tried to download but has not received data yet                                                          |
+| `volumechange`             | `Number`          | The volume or muted button changed. Value from 0.0 to 1                                                              |
+| `waiting`                  | `Event`           | Pause playback to download more data                                                                                 |
+| `click:fullscreen`         | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                               |
+| `click:pictureinpicture`   | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                                    |
+| `click:captions-expand`    | `true` \| `false` | When the expand captions button is clicked. true on expanded, false on collapsed                                     |
+| `click:captions-paragraph` | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
+| `mouseover`                | `MouseEvent`      | Mouse over the media                                                                                                 |
+| `mouseout`                 | `MouseEvent`      | Mouse left the media                                                                                                 |
+
+## Captions
+
+The player supports `.vtt` captions as defined in the `tracks` array explained above.
+
+Additionally we support the tag `<c.transcript> ... </c>` inline with your captions text. This tag will omit the enclosed text from the video player captions overlay but show the text in the separate interactive captions panel.
+This allows you to include additional information that you want to appear in the transcript that might not be appropriate to display in the video player itself.
+
+Below is a `sample.vtt` on how to use the `<c.transcript>` tag.
+
+```
+WEBVTT
+
+00:00:00.000 --> 00:00:03.999
+This text will show. <c.transcript>This text is hidden from the player.</c> This is some more text to show.
+This text will show up on a new line in the player.
+
+00:00:03.000 --> 00:00:5.999
+sentence here to break it up
+```
 
 ## License
 
