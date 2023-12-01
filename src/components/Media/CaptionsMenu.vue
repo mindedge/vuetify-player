@@ -306,7 +306,7 @@ export default {
         );
 }
 .captions-list--state-expanded {
-    max-height: 30em;
+    aspect-ratio: 16 / 9;
     /* Fade the top/bottom 20% effect. The "red" mask is so the scrollbar doesn't get this effect*/
     mask: linear-gradient(90deg, rgba(255, 0, 0, 0) 98%, rgba(255, 0, 0, 1) 98%),
         linear-gradient(

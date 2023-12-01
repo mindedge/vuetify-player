@@ -1,10 +1,7 @@
 <template>
     <v-container>
         <v-row>
-            <v-col
-                :cols="!options.expandedCaptions ? 12 : 6"
-                class="align-self-start"
-            >
+            <v-col :cols="!options.expandedCaptions ? 12 : 6">
                 <div v-if="buffering" class="player-overlay">
                     <v-progress-circular
                         :size="50"
@@ -543,6 +540,7 @@
                     :language="language"
                     @click:cue="onCueClick"
                     @click:expand="onClickExpandCaptions"
+                    @click:paragraph="onClickParagraph"
                 ></CaptionsMenu>
             </v-col>
         </v-row>
@@ -654,6 +652,9 @@ export default {
         onClickExpandCaptions(expanded) {
             this.options.expandedCaptions = expanded
             this.$emit('click:captions-expand', expanded)
+        },
+        onClickParagraph(isParagraph) {
+            this.$emit('click:captions-paragraph', isParagraph)
         },
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
