@@ -25,4 +25,10 @@ export default {
         pause: 'Click to pause',
         no_support: "Sorry, your browser doesn't support embedded videos.",
     },
+    captions: {
+        expand: 'Expand',
+        collapse: 'Collapse',
+        view_as_paragraph: 'View as paragraph',
+        view_as_captions: 'View as captions',
+    },
 }

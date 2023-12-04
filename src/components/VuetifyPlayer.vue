@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-row>
-            <v-col :cols="!playlistmenu || playlist.length <= 1 ? 12 : 8">
+            <v-col :cols="playerCols">
                 <YoutubePlayer
                     ref="youtubePlayer"
                     v-if="parseSourceType(current.src.sources) === 'youtube'"
@@ -40,11 +40,16 @@
                     @click:fullscreen="onFullscreen"
                     @click:pictureinpicture="onPictureInPicture"
                     @click:remoteplayback="onRemoteplayback"
+                    @click:captions-expand="onClickCaptionsExpand"
+                    @click:captions-paragraph="onClickCaptionsParagraph"
                 ></Html5Player>
             </v-col>
 
             <!-- Playlist stuff -->
-            <v-col v-if="playlistmenu && playlist.length > 1" cols="4">
+            <v-col
+                v-if="playlistmenu && playlist.length > 1"
+                :cols="playlistCols"
+            >
                 <PlaylistMenu
                     v-model="sourceIndex"
                     :language="language"
@@ -173,10 +178,41 @@ export default {
 
             return attrs
         },
+        playlistCols() {
+            // Captions collapsed, playlist will appear on the right
+            if (
+                !this.captionsExpanded &&
+                this.playlistmenu &&
+                this.playlist.length > 1
+            ) {
+                return 4
+            } else if (
+                this.captionsExpanded &&
+                this.playlistmenu &&
+                this.playlist.length > 1
+            ) {
+                // Captions expanded, playlist will appear as a new row on the bottom of everything
+                return 12
+            } else {
+                return 0
+            }
+        },
+        playerCols() {
+            if (
+                this.captionsExpanded ||
+                !this.playlistmenu ||
+                this.playlist.length <= 1
+            ) {
+                return 12
+            } else {
+                return 8
+            }
+        },
     },
     data() {
         return {
             sourceIndex: 0,
+            captionsExpanded: false,
         }
     },
     methods: {
@@ -235,6 +271,13 @@ export default {
                 document.exitFullscreen()
                 this.$emit('click:fullscreen', false)
             }
+        },
+        onClickCaptionsExpand(expanded) {
+            this.captionsExpanded = expanded
+            this.$emit('click:captions-expand', expanded)
+        },
+        onClickCaptionsParagraph(isParagraph) {
+            this.$emit('click:captions-paragraph', isParagraph)
         },
         onPlaylistSelect(index) {
             this.sourceIndex = parseInt(index)
