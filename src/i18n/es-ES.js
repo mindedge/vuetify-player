@@ -22,6 +22,7 @@ export default {
         volume_slider: 'Control deslizante de volumen',
         rewind_10: 'Rebobinar 10 segundos',
         play: 'Haz clic para reproducir',
+        replay: 'Haga clic para reproducir',
         pause: 'Haga clic para pausar',
         no_support: 'Lo sentimos, su navegador no admite vídeos incrustados. ',
     },
