@@ -22,6 +22,7 @@ export default {
         volume_slider: 'Ändra volym',
         rewind_10: 'Spola tillbaka 10 sekunder',
         play: 'Klicka för att spela',
+        replay: 'Klicka för att spela om',
         pause: 'Klicka för att pausa',
         no_support: 'Tyvärr, din webbläsare stöder inte inbäddade videor.',
     },

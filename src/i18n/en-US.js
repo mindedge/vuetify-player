@@ -22,6 +22,7 @@ export default {
         volume_slider: 'Volume Slider',
         rewind_10: 'Rewind 10 seconds',
         play: 'Click to play',
+        replay: 'Click to replay',
         pause: 'Click to pause',
         no_support: "Sorry, your browser doesn't support embedded videos.",
     },
