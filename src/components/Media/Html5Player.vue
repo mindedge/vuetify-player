@@ -89,7 +89,7 @@
                             >
                                 <template #prepend>
                                     <!-- Play button -->
-                                    <v-tooltip top>
+                                    <v-tooltip v-if="!showReplay" top>
                                         <template
                                             v-slot:activator="{ on, attrs }"
                                         >
@@ -127,8 +127,39 @@
                                         }}</span>
                                     </v-tooltip>
 
+                                    <!-- Replay button -->
+                                    <v-tooltip v-if="showReplay" top>
+                                        <template
+                                            v-slot:activator="{ on, attrs }"
+                                        >
+                                            <v-btn
+                                                small
+                                                text
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="onClickReplay"
+                                            >
+                                                <v-icon>mdi-replay</v-icon>
+                                                <span class="d-sr-only">
+                                                    {{
+                                                        t(
+                                                            language,
+                                                            'player.replay'
+                                                        )
+                                                    }}
+                                                </span>
+                                            </v-btn>
+                                        </template>
+                                        <span>{{
+                                            t(language, 'player.replay')
+                                        }}</span>
+                                    </v-tooltip>
+
                                     <!-- Rewind Button-->
-                                    <v-tooltip v-if="attributes.rewind" top>
+                                    <v-tooltip
+                                        v-if="attributes.rewind && !activeAd"
+                                        top
+                                    >
                                         <template
                                             v-slot:activator="{ on, attrs }"
                                         >
@@ -579,17 +610,6 @@ export default {
             // We're playing an ad currently
             if (this.activeAd) {
                 return this.activeAd
-
-                // We hit an ad spot~ play_at_percent
-            } else if (
-                !this.activeAd &&
-                typeof this.ads[this.currentPercent] !== 'undefined' &&
-                this.ads[this.currentPercent].sources &&
-                this.ads[this.currentPercent].sources.length &&
-                !this.ads[this.currentPercent].complete
-            ) {
-                this.setActiveAd(this.currentPercent)
-                return this.ads[this.currentPercent]
             } else {
                 // Only change sources if we're not watching an ad or pre/postroll
                 return this.src
@@ -628,11 +648,96 @@ export default {
             watchPlayer: 0,
             scrub: { max: 100 },
             buffering: false,
+            showReplay: false,
+        }
+    },
+    beforeMount() {
+        // Parse the controlslist string
+        if (
+            this.attributes.controlslist &&
+            typeof this.attributes.controlslist === 'string' &&
+            this.attributes.controlslist !== ''
+        ) {
+            this.options.controlslist = this.attributes.controlslist.split(' ')
+        }
+
+        if (
+            typeof this.attributes.playbackrates === 'undefined' ||
+            this.attributes.playbackrates.length === 0
+        ) {
+            throw new Error(
+                'attributes.playbackrates must be defined and an array of numbers!'
+            )
+        }
+
+        // Adjust the playback speed to 1 by default
+        if (this.attributes.playbackrates.indexOf(1) !== -1) {
+            this.options.playbackRateIndex =
+                this.attributes.playbackrates.indexOf(1)
+        } else {
+            // 1 aka normal playback not enabled (What monster would do this?!)
+            // Set the playback rate to "middle of the road" for whatever is available
+            this.options.playbackRateIndex = Math.floor(
+                this.attributes.playbackrates.length / 2
+            )
+        }
+
+        // Initialize the ads aka pre/post/midroll
+        if (this.src.ads && this.src.ads.length) {
+            for (const ad of this.src.ads) {
+                // Map to a percent so we can avoid dupe timings and have easier lookups
+                this.ads[ad.play_at_percent] = ad
+                this.ads[ad.play_at_percent].complete = false
+            }
+        }
+
+        // Determine fullscreen settings
+        if (
+            this.attributes.playsinline ||
+            !document.fullscreenEnabled ||
+            this.options.controlslist.indexOf('nofullscreen') !== -1
+        ) {
+            this.fullscreenEnabled = false
+        } else {
+            this.fullscreenEnabled = true
+        }
+
+        // Determine remote playback settings
+        if (
+            this.attributes.disableremoteplayback ||
+            this.options.controlslist.indexOf('noremoteplayback') !== -1
+        ) {
+            this.options.remoteplayback = false
+        } else {
+            this.options.remoteplayback = true
+        }
+
+        // Determine download settings
+        if (this.options.controlslist.indexOf('nodownload') !== -1) {
+            this.options.download = false
+        } else {
+            this.options.download = true
+        }
+    },
+    mounted() {
+        if (
+            !this.activeAd &&
+            typeof this.ads[this.currentPercent] !== 'undefined' &&
+            this.ads[this.currentPercent].sources &&
+            this.ads[this.currentPercent].sources.length &&
+            !this.ads[this.currentPercent].complete
+        ) {
+            this.activeAd = this.ads[this.currentPercent]
         }
     },
     methods: {
-        setActiveAd(currentPercent) {
+        setActiveAd(currentPercent, e = null) {
             this.activeAd = this.ads[currentPercent]
+
+            // Reload the player to refresh all the sources / tracks
+            this.load(e)
+            // Start playing the main video
+            this.play(e)
         },
         percentToTimeSeconds(percent) {
             const scaleFactor = this.player.duration / this.scrub.max
@@ -697,23 +802,37 @@ export default {
             this.$emit('mouseout', e)
         },
         onEnded(e) {
-            if (this.activeAd) {
+            // Active ad ended but only continue playing if the video didn't just end on a postroll
+            if (this.activeAd && this.activeAd.play_at_percent !== 100) {
                 this.ads[this.activeAd.play_at_percent].complete = true
                 // Go back to the play_at_percent for the main video
                 this.currentPercent = this.activeAd.play_at_percent
+
                 this.activeAd = null
 
                 // Reload the player to refresh all the sources / tracks
                 this.load(e)
+
                 // Start playing the main video
                 this.play(e)
+            } else if (
+                !this.activeAd &&
+                typeof this.ads[this.currentPercent] !== 'undefined' &&
+                this.ads[this.currentPercent].sources &&
+                this.ads[this.currentPercent].sources.length &&
+                !this.ads[this.currentPercent].complete
+            ) {
+                // Video ended but there's an ad (probably 100% ad)
+                this.setActiveAd(this.currentPercent, e)
             } else if (
                 this.activeAd !== null &&
                 this.activeAd.play_at_percent === 100
             ) {
+                this.showReplay = true
                 // Ended but this ad was a postroll
                 this.$emit('ended', e)
             } else {
+                this.showReplay = true
                 // Ended without an ad
                 this.$emit('ended', e)
             }
@@ -764,6 +883,17 @@ export default {
                 (this.player.currentTime / this.player.duration) * 100
             )
 
+            // Check if there's an ad that needs to be played
+            if (
+                !this.activeAd &&
+                typeof this.ads[this.currentPercent] !== 'undefined' &&
+                this.ads[this.currentPercent].sources &&
+                this.ads[this.currentPercent].sources.length &&
+                !this.ads[this.currentPercent].complete
+            ) {
+                this.setActiveAd(this.currentPercent, e)
+            }
+
             this.$emit('timeupdate', {
                 event: e,
                 current_percent: this.currentPercent,
@@ -799,6 +929,31 @@ export default {
             } else {
                 this.pause(e)
             }
+        },
+        onClickReplay(e) {
+            // Re-initialize the ads aka pre/post/midroll
+            if (this.src.ads && this.src.ads.length) {
+                for (const ad of this.src.ads) {
+                    // Map to a percent so we can avoid dupe timings and have easier lookups
+                    this.ads[ad.play_at_percent] = ad
+                    this.ads[ad.play_at_percent].complete = false
+                }
+
+                // There's a pre-roll / start ad. Reassign as the active
+                if (typeof this.ads[0] !== 'undefined') {
+                    this.activeAd = this.ads[0]
+                } else {
+                    // Clear the active ad otherwise
+                    this.activeAd = null
+                }
+            }
+
+            // Reload the player to refresh all the sources / tracks
+            this.load(e)
+            // Start playing the main video
+            this.play(e)
+            // Restart from the beginning
+            this.setTime(0)
         },
         onMuteToggle() {
             if (this.player.muted) {
@@ -902,91 +1057,34 @@ export default {
             this.captions.nonce = Math.random()
         },
         load(e = null) {
-            // Reload the player to refresh all the sources / tracks
-            this.player.load()
-            this.$emit('load', e)
+            if (this.player.load) {
+                // Reload the player to refresh all the sources / tracks
+                this.player.load()
+                this.$emit('load', e)
+            } else {
+                console.log('Cannot load player')
+            }
         },
         pause(e = null) {
-            this.player.pause()
-            this.options.paused = true
-            this.$emit('pause', e)
+            if (this.player.pause) {
+                this.player.pause()
+                this.options.paused = true
+                this.$emit('pause', e)
+            } else {
+                console.log('Cannot pause player')
+            }
         },
         play(e = null) {
-            // Start playing the main video
-            this.player.play()
-            this.options.paused = false
-            this.$emit('play', e)
+            if (this.player.play) {
+                // Start playing the main video
+                this.player.play()
+                this.options.paused = false
+                this.$emit('play', e)
+            } else {
+                console.log('Cannot play player')
+            }
         },
     },
-    beforeMount() {
-        // Parse the controlslist string
-        if (
-            this.attributes.controlslist &&
-            typeof this.attributes.controlslist === 'string' &&
-            this.attributes.controlslist !== ''
-        ) {
-            this.options.controlslist = this.attributes.controlslist.split(' ')
-        }
-
-        if (
-            typeof this.attributes.playbackrates === 'undefined' ||
-            this.attributes.playbackrates.length === 0
-        ) {
-            throw new Error(
-                'attributes.playbackrates must be defined and an array of numbers!'
-            )
-        }
-
-        // Adjust the playback speed to 1 by default
-        if (this.attributes.playbackrates.indexOf(1) !== -1) {
-            this.options.playbackRateIndex =
-                this.attributes.playbackrates.indexOf(1)
-        } else {
-            // 1 aka normal playback not enabled (What monster would do this?!)
-            // Set the playback rate to "middle of the road" for whatever is available
-            this.options.playbackRateIndex = Math.floor(
-                this.attributes.playbackrates.length / 2
-            )
-        }
-
-        // Initialize the ads aka pre/post/midroll
-        if (this.src.ads && this.src.ads.length) {
-            for (const ad of this.src.ads) {
-                // Map to a percent so we can avoid dupe timings and have easier lookups
-                this.ads[ad.play_at_percent] = ad
-                this.ads[ad.play_at_percent].complete = false
-            }
-        }
-
-        // Determine fullscreen settings
-        if (
-            this.attributes.playsinline ||
-            !document.fullscreenEnabled ||
-            this.options.controlslist.indexOf('nofullscreen') !== -1
-        ) {
-            this.fullscreenEnabled = false
-        } else {
-            this.fullscreenEnabled = true
-        }
-
-        // Determine remote playback settings
-        if (
-            this.attributes.disableremoteplayback ||
-            this.options.controlslist.indexOf('noremoteplayback') !== -1
-        ) {
-            this.options.remoteplayback = false
-        } else {
-            this.options.remoteplayback = true
-        }
-
-        // Determine download settings
-        if (this.options.controlslist.indexOf('nodownload') !== -1) {
-            this.options.download = false
-        } else {
-            this.options.download = true
-        }
-    },
-    mounted() {},
 }
 </script>
 
