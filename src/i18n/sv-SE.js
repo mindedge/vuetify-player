@@ -31,5 +31,11 @@ export default {
         collapse: 'Kollaps',
         view_as_paragraph: 'Visa som stycke',
         view_as_captions: 'Visa som bildtexter',
+        enable_autoscroll:
+            'Aktivera automatisk rullning för transkription när media spelas upp',
+        disable_autoscroll:
+            'Inaktivera automatisk rullning för transkribering när media spelas upp',
+        autoscroll_enabled: 'Autoscroll-transkription aktiverad',
+        autoscroll_disabled: 'Autoscroll-transkription inaktiverad',
     },
 }

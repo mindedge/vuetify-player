@@ -31,5 +31,12 @@ export default {
         collapse: 'Colapsar',
         view_as_paragraph: 'Ver como párrafo',
         view_as_captions: 'Ver como subtítulos',
+        enable_autoscroll:
+            'Habilite el desplazamiento automático para la transcripción mientras se reproducen los medios',
+        disable_autoscroll:
+            'Deshabilite el desplazamiento automático para la transcripción mientras se reproducen los medios',
+        autoscroll_enabled:
+            'Transcripción con desplazamiento automático habilitada',
+        autoscroll_disabled: 'Transcripción automática deshabilitado',
     },
 }

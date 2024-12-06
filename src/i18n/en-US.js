@@ -31,5 +31,9 @@ export default {
         collapse: 'Collapse',
         view_as_paragraph: 'View as paragraph',
         view_as_captions: 'View as captions',
+        enable_autoscroll: 'Enable auto-scroll for transcript as media plays',
+        disable_autoscroll: 'Disable auto-scroll for transcript as media plays',
+        autoscroll_enabled: 'Autoscroll transcript enabled',
+        autoscroll_disabled: 'Autoscroll transcript disabled',
     },
 }

@@ -1,8 +1,51 @@
 <template>
     <v-card>
         <v-card-actions class="justify-end">
-            <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+            <v-tooltip top v-if="!hideAutoscroll">
+                <template #activator="{ on, attrs }">
+                    <div v-bind="attrs" v-on="on">
+                        <v-switch
+                            :input-value="autoscrollState"
+                            color="primary"
+                            text
+                            @click="onClickToggleAutoscroll"
+                        >
+                            <template #label>
+                                <div v-if="autoscrollState">
+                                    <v-icon> mdi-arrow-up-down </v-icon>
+                                    <span class="sr-only">
+                                        {{
+                                            t(
+                                                language,
+                                                'captions.autoscroll_enabled'
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+                                <div v-else>
+                                    <v-icon>mdi-arrow-vertical-lock</v-icon>
+                                    <span class="sr-only">
+                                        {{
+                                            t(
+                                                language,
+                                                'captions.autoscroll_disabled'
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+                            </template>
+                        </v-switch>
+                    </div>
+                </template>
+                <span>{{
+                    autoscrollState
+                        ? t(language, 'captions.disable_autoscroll')
+                        : t(language, 'captions.enable_autoscroll')
+                }}</span>
+            </v-tooltip>
+
+            <v-tooltip top v-if="!hideParagraphView">
+                <template #activator="{ on, attrs }">
                     <v-btn
                         color="primary"
                         text
@@ -11,25 +54,26 @@
                         @click="onClickToggleParagraphView"
                     >
                         <v-icon>{{
-                            paragraphView
+                            paragraphViewState
                                 ? 'mdi-closed-caption-outline'
                                 : 'mdi-text-box-outline'
                         }}</v-icon>
                         <span class="sr-only">{{
-                            paragraphView
+                            paragraphViewState
                                 ? t(language, 'captions.view_as_captions')
                                 : t(language, 'captions.view_as_paragraph')
                         }}</span>
                     </v-btn></template
                 >
                 <span>{{
-                    paragraphView
+                    paragraphViewState
                         ? t(language, 'captions.view_as_captions')
                         : t(language, 'captions.view_as_paragraph')
                 }}</span>
             </v-tooltip>
-            <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+
+            <v-tooltip top v-if="!hideExpand">
+                <template #activator="{ on, attrs }">
                     <v-btn
                         color="primary"
                         text
@@ -38,17 +82,19 @@
                         @click="onClickToggleExpand"
                     >
                         <v-icon>{{
-                            expanded ? 'mdi-arrow-collapse' : 'mdi-arrow-expand'
+                            expandedState
+                                ? 'mdi-arrow-collapse'
+                                : 'mdi-arrow-expand'
                         }}</v-icon>
                         <span class="sr-only">{{
-                            expanded
+                            expandedState
                                 ? t(language, 'captions.collapse')
                                 : t(language, 'captions.expand')
                         }}</span>
                     </v-btn></template
                 >
                 <span>{{
-                    expanded
+                    expandedState
                         ? t(language, 'captions.collapse')
                         : t(language, 'captions.expand')
                 }}</span>
@@ -61,11 +107,11 @@
                         ref="captionItems"
                         v-for="(cue, index) in cues"
                         :key="index"
-                        :two-line="expanded"
+                        :two-line="expandedState"
                         @click="onCueClick(cue.startTime)"
                     >
-                        <template v-if="!expanded">
-                            <v-list-item-icon v-if="!paragraphView">
+                        <template v-if="!expandedState">
+                            <v-list-item-icon v-if="!paragraphViewState">
                                 <v-icon
                                     >{{
                                         index === captionIndex
@@ -80,7 +126,7 @@
                                     class="caption-text"
                                 ></v-list-item-title>
                             </v-list-item-content>
-                            <v-list-item-action v-if="!paragraphView">
+                            <v-list-item-action v-if="!paragraphViewState">
                                 <span aria-hidden="true">
                                     {{
                                         filters.playerShortDuration(
@@ -94,13 +140,15 @@
                                 </span>
                             </v-list-item-action>
                         </template>
-                        <template v-if="expanded">
+                        <template v-if="expandedState">
                             <v-list-item-content>
                                 <v-list-item-title
                                     v-html="cue.rawText || cue.text"
                                     class="caption-text"
                                 ></v-list-item-title>
-                                <v-list-item-subtitle v-if="!paragraphView">
+                                <v-list-item-subtitle
+                                    v-if="!paragraphViewState"
+                                >
                                     <v-icon
                                         >{{
                                             index === captionIndex
@@ -139,10 +187,25 @@ export default {
     props: {
         value: { type: [Object, Array], required: true },
         language: { type: String, required: false, default: 'en-US' },
+        expanded: { type: Boolean, required: false, default: undefined },
+        hideExpand: { type: Boolean, required: false, default: true },
+        paragraphView: { type: Boolean, required: false, default: undefined },
+        hideParagraphView: { type: Boolean, required: false, default: false },
+        autoscroll: { type: Boolean, required: false, default: undefined },
+        hideAutoscroll: { type: Boolean, required: false, default: false },
     },
+    emits: [
+        'click:cue',
+        'click:expand',
+        'click:paragraph',
+        'click:autoscroll',
+        'update:expanded',
+        'update:paragraph-view',
+        'update:autoscroll',
+    ],
     computed: {
         captionsList() {
-            return !this.expanded
+            return !this.expandedState
                 ? 'captions-list captions-list--state-collapsed'
                 : 'captions-list captions-list--state-expanded'
         },
@@ -150,12 +213,12 @@ export default {
             // Normal cues view
             if (
                 typeof this.captions.cues !== 'undefined' &&
-                !this.paragraphView
+                !this.paragraphViewState
             ) {
                 return this.captions.cues
             } else if (
                 typeof this.captions.cues !== 'undefined' &&
-                this.paragraphView
+                this.paragraphViewState
             ) {
                 // Paragraph view
                 let cues = this.captions.cues
@@ -215,6 +278,45 @@ export default {
                 return []
             }
         },
+        expandedState: {
+            get() {
+                if (typeof this.expanded !== 'undefined') {
+                    return this.expanded
+                } else {
+                    return this.localExpanded
+                }
+            },
+            set(v) {
+                this.$emit('update:expanded', v)
+                this.localExpanded = v
+            },
+        },
+        paragraphViewState: {
+            get() {
+                if (typeof this.paragraphView !== 'undefined') {
+                    return this.paragraphView
+                } else {
+                    return this.localParagraphView
+                }
+            },
+            set(v) {
+                this.$emit('update:paragraph-view', v)
+                this.localParagraphView = v
+            },
+        },
+        autoscrollState: {
+            get() {
+                if (typeof this.autoscroll !== 'undefined') {
+                    return this.autoscroll
+                } else {
+                    return this.localAutoscroll
+                }
+            },
+            set(v) {
+                this.$emit('update:autoscroll', v)
+                this.localAutoscroll = v
+            },
+        },
     },
     data() {
         return {
@@ -222,8 +324,9 @@ export default {
             filters,
             captions: {},
             captionIndex: 0,
-            expanded: false,
-            paragraphView: false,
+            localExpanded: false,
+            localParagraphView: false,
+            localAutoscroll: true,
         }
     },
     watch: {
@@ -258,6 +361,7 @@ export default {
             // If the captions ref and index is available and the list ref is available
             // Auto-scroll the list to the current caption
             if (
+                this.autoscrollState &&
                 this.$refs.captionItems &&
                 this.$refs.captionItems[currentIndex] &&
                 this.$refs.captionItems[currentIndex].$el &&
@@ -274,12 +378,16 @@ export default {
             this.$emit('click:cue', time)
         },
         onClickToggleExpand() {
-            this.expanded = !this.expanded
-            this.$emit('click:expand', this.expanded)
+            this.expandedState = !this.expandedState
+            this.$emit('click:expand', this.expandedState)
         },
         onClickToggleParagraphView() {
-            this.paragraphView = !this.paragraphView
-            this.$emit('click:paragraph', this.paragraphView)
+            this.paragraphViewState = !this.paragraphViewState
+            this.$emit('click:paragraph-view', this.paragraphViewState)
+        },
+        onClickToggleAutoscroll() {
+            this.autoscrollState = !this.autoscrollState
+            this.$emit('click:autoscroll', !this.autoscroll)
         },
     },
     mounted() {

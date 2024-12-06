@@ -569,9 +569,23 @@
                 <CaptionsMenu
                     v-model="captions"
                     :language="language"
+                    :expanded="captionsExpanded"
+                    :hide-expand="captionsHideExpand"
+                    :paragraph-view="captionsParagraphView"
+                    :hide-paragraph-view="captionsHideParagraphView"
+                    :autoscroll="captionsAutoscroll"
+                    :hide-autoscroll="captionsHideAutoscroll"
+                    @update:expanded="$emit('update:captions-expanded', $event)"
+                    @update:paragraph-view="
+                        $emit('update:captions-paragraph-view', $event)
+                    "
+                    @update:autoscroll="
+                        $emit('update:captions-autoscroll', $event)
+                    "
                     @click:cue="onCueClick"
                     @click:expand="onClickExpandCaptions"
-                    @click:paragraph="onClickParagraph"
+                    @click:paragraph-view="onClickParagraph"
+                    @click:autoscroll="onClickAutoscroll"
                 ></CaptionsMenu>
             </v-col>
         </v-row>
@@ -603,8 +617,72 @@ export default {
             type: Object,
             required: true,
         },
+        captionsExpanded: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideExpand: { type: Boolean, required: false, default: true },
+        captionsParagraphView: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideParagraphView: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
     },
-    watch: {},
+    emits: [
+        'error',
+        'canplaythrough',
+        'emptied',
+        'stalled',
+        'abort',
+        'canplay',
+        'waiting',
+        'play',
+        'pause',
+        'load',
+        'mouseover',
+        'mouseout',
+        'ended',
+        'trackchange',
+        'ratechange',
+        'timeupdate',
+        'seeking',
+        'progress',
+        'volumechange',
+        'cuechange',
+        'loadeddata',
+        'loadedmetadata',
+        'click:fullscreen',
+        'click:pictureinpicture',
+        'click:remoteplayback',
+        'click:captions-expand',
+        'click:captions-paragraph-view',
+        'click:captions-autoscroll',
+        'click:captions-cue',
+        'update:captions-expanded',
+        'update:captions-paragraph-view',
+        'update:captions-autoscroll',
+    ],
+    watch: {
+        'options.controls': function () {
+            this.setCuePosition()
+        },
+    },
     computed: {
         current() {
             // We're playing an ad currently
@@ -753,13 +831,17 @@ export default {
         },
         onCueClick(time) {
             this.setTime(time)
+            this.$emit('click:captions-cue', time)
         },
         onClickExpandCaptions(expanded) {
             this.options.expandedCaptions = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickParagraph(isParagraph) {
-            this.$emit('click:captions-paragraph', isParagraph)
+            this.$emit('click:captions-paragraph-view', isParagraph)
+        },
+        onClickAutoscroll(autoscroll) {
+            this.$emit('click:captions-autoscroll', autoscroll)
         },
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
