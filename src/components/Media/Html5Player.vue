@@ -939,16 +939,14 @@ export default {
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
-                    const tt = this.player.textTracks[i]
-
-                    if (tt.language === lang) {
+                    if (this.player.textTracks[i].language === lang) {
                         this.options.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
 
-                        this.setCues(tt)
+                        this.setCues(this.player.textTracks[i])
 
                         // Emit the current track
-                        this.$emit('trackchange', tt)
+                        this.$emit('trackchange', this.player.textTracks[i])
                     } else {
                         this.player.textTracks[i].mode = 'disabled'
                     }
@@ -1076,6 +1074,19 @@ export default {
                     if (typeof track.activeCues[0].rawText === 'undefined') {
                         track.activeCues[0].rawText = track.activeCues[0].text
                     }
+                    // Retain the original values for the line/size props
+                    if (
+                        typeof track.activeCues[0].defaultLine === 'undefined'
+                    ) {
+                        track.activeCues[0].defaultLine =
+                            track.activeCues[0].line
+                    }
+                    if (
+                        typeof track.activeCues[0].defaultSize === 'undefined'
+                    ) {
+                        track.activeCues[0].defaultSize =
+                            track.activeCues[0].size
+                    }
 
                     // Now remove `<c.transcript>` tags
                     const transcriptTagRegex = /<c.transcript>.*?<\/c>/gi
@@ -1085,6 +1096,8 @@ export default {
                             transcriptTagRegex,
                             ''
                         )
+
+                    this.setCuePosition()
                 }
 
                 this.setCues(track)
@@ -1137,6 +1150,55 @@ export default {
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
+        },
+        setCuePosition() {
+            if (
+                this.player &&
+                this.player.textTracks &&
+                this.player.textTracks.length > 0
+            ) {
+                for (let i = 0; i < this.player.textTracks.length; i++) {
+                    // Only alter the currently showing text track
+                    if (this.player.textTracks[i].mode === 'showing') {
+                        // If the controls are showing then bump the alignment to the start
+                        if (
+                            this.options.controls &&
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0
+                        ) {
+                            // Count the number of line breaks in the cue to figure out our offset from the bottom
+                            // VTTCue doesn't have a "margin from bottom" by default
+                            const numLines = (
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].text.match(/\n/g) || []
+                            ).length
+
+                            // Limit the cues to 90% of the screen width
+                            // If this is left default / set to 100 then the above line
+                            this.player.textTracks[i].activeCues[0].line =
+                                -3 - numLines
+                            this.player.textTracks[i].activeCues[0].size = 95
+                        } else if (
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0 &&
+                            typeof this.player.textTracks[i].activeCues[0]
+                                .defaultLine !== 'undefined' &&
+                            typeof this.player.textTracks[i].activeCues[0]
+                                .defaultSize !== 'undefined'
+                        ) {
+                            this.player.textTracks[i].activeCues[0].line =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaultLine
+                            this.player.textTracks[i].activeCues[0].size =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaultSize
+                        }
+                    }
+                }
+            }
         },
         load(e = null) {
             if (this.player.load) {
