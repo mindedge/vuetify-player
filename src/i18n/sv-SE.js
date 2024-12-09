@@ -27,6 +27,10 @@ export default {
         no_support: 'Tyvärr, din webbläsare stöder inte inbäddade videor.',
     },
     captions: {
+        show_transcript: 'Visa avskrift',
+        close: 'Stäng',
+        search: 'Sök',
+        none_found: "Inga bildtexter hittades för '{0}'",
         expand: 'Bygga ut',
         collapse: 'Kollaps',
         view_as_paragraph: 'Visa som stycke',
