@@ -18,12 +18,13 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
-                    :captions-expanded="captionsExpandedState"
+                    :captions-expanded="captionsExpanded"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
                     :captions-hide-paragraph-view="captionsHideParagraphView"
                     :captions-autoscroll="captionsAutoscroll"
                     :captions-hide-autoscroll="captionsHideAutoscroll"
+                    :captions-visible="captionsVisible"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
                     @loadeddata="onLoadeddata"
@@ -52,12 +53,16 @@
                     @update:captions-autoscroll="
                         $emit('update:captions-autoscroll', $event)
                     "
+                    @update:captions-visible="
+                        $emit('update:captions-visible', $event)
+                    "
                     @click:fullscreen="onFullscreen"
                     @click:pictureinpicture="onPictureInPicture"
                     @click:remoteplayback="onRemoteplayback"
                     @click:captions-expand="onClickCaptionsExpand"
                     @click:captions-paragraph-view="onClickCaptionsParagraph"
                     @click:captions-autoscroll="onClickCaptionsAutoscroll"
+                    @click:captions-close="onClickCaptionsClose"
                 ></Html5Player>
             </v-col>
 
@@ -165,6 +170,16 @@ export default {
             required: false,
             default: false,
         },
+        captionsHideClose: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsVisible: {
+            type: Boolean,
+            required: false,
+            default: true,
+        },
         playlistmenu: { type: Boolean, required: false, default: true }, // Show the playlist menu if there's multiple videos
         playlistautoadvance: { type: Boolean, required: false, default: true }, // Play the next source group
         playbackrates: {
@@ -200,9 +215,11 @@ export default {
         'click:captions-expand',
         'click:captions-paragraph-view',
         'click:captions-autoscroll',
+        'click:captions-close',
         'update:captions-expanded',
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
+        'update:captions-visible',
     ],
     watch: {},
     computed: {
@@ -252,13 +269,13 @@ export default {
         playlistCols() {
             // Captions collapsed, playlist will appear on the right
             if (
-                !this.captionsExpandedState &&
+                !this.captionsExpanded &&
                 this.playlistmenu &&
                 this.playlist.length > 1
             ) {
                 return 4
             } else if (
-                this.captionsExpandedState &&
+                this.captionsExpanded &&
                 this.playlistmenu &&
                 this.playlist.length > 1
             ) {
@@ -270,7 +287,7 @@ export default {
         },
         playerCols() {
             if (
-                this.captionsExpandedState ||
+                this.captionsExpanded ||
                 !this.playlistmenu ||
                 this.playlist.length <= 1
             ) {
@@ -278,19 +295,6 @@ export default {
             } else {
                 return 8
             }
-        },
-        captionsExpandedState: {
-            get() {
-                if (typeof this.captionsExpanded !== 'undefined') {
-                    return this.captionsExpanded
-                } else {
-                    return this.captions.expanded
-                }
-            },
-            set(v) {
-                this.$emit('update:captions-expanded', v)
-                this.captions.expanded = v
-            },
         },
     },
     data() {
@@ -359,7 +363,6 @@ export default {
             }
         },
         onClickCaptionsExpand(expanded) {
-            this.captionsExpandedState = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickCaptionsParagraph(isParagraph) {
@@ -367,6 +370,9 @@ export default {
         },
         onClickCaptionsAutoscroll(autoscroll) {
             this.$emit('click:captions-autoscroll', autoscroll)
+        },
+        onClickCaptionsClose() {
+            this.$emit('click:captions-close')
         },
         onPlaylistSelect(index) {
             this.sourceIndex = parseInt(index)
