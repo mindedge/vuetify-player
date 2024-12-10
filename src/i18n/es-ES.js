@@ -27,6 +27,10 @@ export default {
         no_support: 'Lo sentimos, su navegador no admite vídeos incrustados. ',
     },
     captions: {
+        show_transcript: 'Mostrar transcripción',
+        close: 'Cerca',
+        search: 'Buscar',
+        none_found: "No se encontraron subtítulos para '{0}'",
         expand: 'Expandir',
         collapse: 'Colapsar',
         view_as_paragraph: 'Ver como párrafo',

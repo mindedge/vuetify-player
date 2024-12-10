@@ -1,111 +1,146 @@
 <template>
-    <v-card>
-        <v-card-actions class="justify-end">
-            <v-tooltip top v-if="!hideAutoscroll">
-                <template #activator="{ on, attrs }">
-                    <div v-bind="attrs" v-on="on">
-                        <v-switch
-                            :input-value="autoscrollState"
+    <v-card v-if="visibleState">
+        <v-card-actions class="d-flex flex-wrap flex-row-reverse mb-0 pb-0">
+            <div class="d-flex ml-auto">
+                <v-tooltip v-if="!hideAutoscroll" top>
+                    <template #activator="{ on, attrs }">
+                        <div v-bind="attrs" v-on="on">
+                            <v-switch
+                                :input-value="autoscrollState"
+                                color="primary"
+                                text
+                                class="d-flex align-self-center"
+                                @click="onClickToggleAutoscroll"
+                            >
+                                <template #label>
+                                    <div v-if="autoscrollState">
+                                        <v-icon> mdi-lock-open-variant </v-icon>
+                                        <span class="sr-only">
+                                            {{
+                                                t(
+                                                    language,
+                                                    'captions.autoscroll_enabled'
+                                                )
+                                            }}
+                                        </span>
+                                    </div>
+                                    <div v-else>
+                                        <v-icon>mdi-arrow-vertical-lock</v-icon>
+                                        <span class="sr-only">
+                                            {{
+                                                t(
+                                                    language,
+                                                    'captions.autoscroll_disabled'
+                                                )
+                                            }}
+                                        </span>
+                                    </div>
+                                </template>
+                            </v-switch>
+                        </div>
+                    </template>
+                    <span>{{
+                        autoscrollState
+                            ? t(language, 'captions.disable_autoscroll')
+                            : t(language, 'captions.enable_autoscroll')
+                    }}</span>
+                </v-tooltip>
+
+                <v-tooltip v-if="!hideParagraphView" top>
+                    <template #activator="{ on, attrs }">
+                        <v-btn
                             color="primary"
                             text
-                            @click="onClickToggleAutoscroll"
+                            class="d-flex align-self-center"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="onClickToggleParagraphView"
                         >
-                            <template #label>
-                                <div v-if="autoscrollState">
-                                    <v-icon> mdi-arrow-up-down </v-icon>
-                                    <span class="sr-only">
-                                        {{
-                                            t(
-                                                language,
-                                                'captions.autoscroll_enabled'
-                                            )
-                                        }}
-                                    </span>
-                                </div>
-                                <div v-else>
-                                    <v-icon>mdi-arrow-vertical-lock</v-icon>
-                                    <span class="sr-only">
-                                        {{
-                                            t(
-                                                language,
-                                                'captions.autoscroll_disabled'
-                                            )
-                                        }}
-                                    </span>
-                                </div>
-                            </template>
-                        </v-switch>
-                    </div>
-                </template>
-                <span>{{
-                    autoscrollState
-                        ? t(language, 'captions.disable_autoscroll')
-                        : t(language, 'captions.enable_autoscroll')
-                }}</span>
-            </v-tooltip>
-
-            <v-tooltip top v-if="!hideParagraphView">
-                <template #activator="{ on, attrs }">
-                    <v-btn
-                        color="primary"
-                        text
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="onClickToggleParagraphView"
+                            <v-icon>{{
+                                paragraphViewState
+                                    ? 'mdi-closed-caption-outline'
+                                    : 'mdi-text-box-outline'
+                            }}</v-icon>
+                            <span class="sr-only">{{
+                                paragraphViewState
+                                    ? t(language, 'captions.view_as_captions')
+                                    : t(language, 'captions.view_as_paragraph')
+                            }}</span>
+                        </v-btn></template
                     >
-                        <v-icon>{{
-                            paragraphViewState
-                                ? 'mdi-closed-caption-outline'
-                                : 'mdi-text-box-outline'
-                        }}</v-icon>
-                        <span class="sr-only">{{
-                            paragraphViewState
-                                ? t(language, 'captions.view_as_captions')
-                                : t(language, 'captions.view_as_paragraph')
-                        }}</span>
-                    </v-btn></template
-                >
-                <span>{{
-                    paragraphViewState
-                        ? t(language, 'captions.view_as_captions')
-                        : t(language, 'captions.view_as_paragraph')
-                }}</span>
-            </v-tooltip>
+                    <span>{{
+                        paragraphViewState
+                            ? t(language, 'captions.view_as_captions')
+                            : t(language, 'captions.view_as_paragraph')
+                    }}</span>
+                </v-tooltip>
 
-            <v-tooltip top v-if="!hideExpand">
-                <template #activator="{ on, attrs }">
-                    <v-btn
-                        color="primary"
-                        text
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="onClickToggleExpand"
+                <v-tooltip v-if="!hideExpand" top>
+                    <template #activator="{ on, attrs }">
+                        <v-btn
+                            color="primary"
+                            text
+                            class="d-flex align-self-center"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="onClickToggleExpand"
+                        >
+                            <v-icon>{{
+                                expandedState
+                                    ? 'mdi-arrow-collapse'
+                                    : 'mdi-arrow-expand'
+                            }}</v-icon>
+                            <span class="sr-only">{{
+                                expandedState
+                                    ? t(language, 'captions.collapse')
+                                    : t(language, 'captions.expand')
+                            }}</span>
+                        </v-btn></template
                     >
-                        <v-icon>{{
-                            expandedState
-                                ? 'mdi-arrow-collapse'
-                                : 'mdi-arrow-expand'
-                        }}</v-icon>
-                        <span class="sr-only">{{
-                            expandedState
-                                ? t(language, 'captions.collapse')
-                                : t(language, 'captions.expand')
-                        }}</span>
-                    </v-btn></template
+                    <span>{{
+                        expandedState
+                            ? t(language, 'captions.collapse')
+                            : t(language, 'captions.expand')
+                    }}</span>
+                </v-tooltip>
+
+                <v-tooltip v-if="!hideClose" top>
+                    <template #activator="{ on, attrs }">
+                        <v-btn
+                            color="primary"
+                            text
+                            class="d-flex align-self-center"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="onClickClose"
+                        >
+                            <v-icon>mdi-close</v-icon>
+                        </v-btn></template
+                    >
+                    <span>{{ t(language, 'captions.close') }}</span>
+                </v-tooltip>
+            </div>
+
+            <div class="d-flex flex-grow-1">
+                <v-text-field
+                    v-model="search"
+                    :label="t(language, 'captions.search')"
+                    append-icon="mdi-magnify"
+                    class="ml-2 mr-12"
+                    clearable
                 >
-                <span>{{
-                    expandedState
-                        ? t(language, 'captions.collapse')
-                        : t(language, 'captions.expand')
-                }}</span>
-            </v-tooltip>
+                </v-text-field>
+            </div>
         </v-card-actions>
-        <v-card-text>
+        <v-card-text class="mt-0 pt-0">
+            <span v-if="search && !filteredCues.length" class="caption">
+                {{ t(language, 'captions.none_found', [search]) }}
+            </span>
             <v-list ref="captionList" :class="captionsList">
                 <v-list-item-group v-model="captionIndex">
                     <v-list-item
                         ref="captionItems"
-                        v-for="(cue, index) in cues"
+                        v-for="(cue, index) in filteredCues"
                         :key="index"
                         :two-line="expandedState"
                         @click="onCueClick(cue.startTime)"
@@ -193,17 +228,34 @@ export default {
         hideParagraphView: { type: Boolean, required: false, default: false },
         autoscroll: { type: Boolean, required: false, default: undefined },
         hideAutoscroll: { type: Boolean, required: false, default: false },
+        visible: { type: Boolean, required: false, default: undefined },
+        hideClose: { type: Boolean, required: false, default: false },
     },
     emits: [
         'click:cue',
         'click:expand',
         'click:paragraph',
         'click:autoscroll',
+        'click:close',
         'update:expanded',
         'update:paragraph-view',
         'update:autoscroll',
+        'update:visible',
     ],
     computed: {
+        filteredCues() {
+            // Cues are an object with keys of 0,1,2,3...
+            const cues = Object.values(this.cues)
+            if (this.search !== '') {
+                return cues.filter((c) =>
+                    c.text
+                        .toLowerCase()
+                        .includes((this.search || '').toLowerCase())
+                )
+            } else {
+                return cues
+            }
+        },
         captionsList() {
             return !this.expandedState
                 ? 'captions-list captions-list--state-collapsed'
@@ -287,8 +339,8 @@ export default {
                 }
             },
             set(v) {
-                this.$emit('update:expanded', v)
                 this.localExpanded = v
+                this.$emit('update:expanded', v)
             },
         },
         paragraphViewState: {
@@ -317,16 +369,31 @@ export default {
                 this.localAutoscroll = v
             },
         },
+        visibleState: {
+            get() {
+                if (typeof this.visible !== 'undefined') {
+                    return this.visible
+                } else {
+                    return this.localVisible
+                }
+            },
+            set(v) {
+                this.$emit('update:visible', v)
+                this.localVisible = v
+            },
+        },
     },
     data() {
         return {
             t,
             filters,
+            search: '',
             captions: {},
             captionIndex: 0,
             localExpanded: false,
             localParagraphView: false,
             localAutoscroll: true,
+            localVisible: true,
         }
     },
     watch: {
@@ -338,6 +405,11 @@ export default {
             },
         },
     },
+
+    mounted() {
+        this.captions = this.value
+        this.captionIndex = this.currentCue(this.captions)
+    },
     methods: {
         currentCue(captions) {
             let currentIndex = 0
@@ -345,10 +417,13 @@ export default {
             if (
                 typeof captions.cues !== 'undefined' &&
                 typeof captions.activeCues !== 'undefined' &&
-                captions.activeCues.length
+                captions.activeCues.length &&
+                this.filteredCues.length
             ) {
-                for (let i = 0; i < captions.cues.length; i++) {
-                    const cue = captions.cues[i]
+                currentIndex = -1
+                // Loop over the filtered cues and see if we can find the index
+                for (let i = 0; i < this.filteredCues.length; i++) {
+                    const cue = this.filteredCues[i]
                     if (captions.activeCues[0].startTime === cue.startTime) {
                         currentIndex = i
                     }
@@ -389,10 +464,10 @@ export default {
             this.autoscrollState = !this.autoscrollState
             this.$emit('click:autoscroll', !this.autoscroll)
         },
-    },
-    mounted() {
-        this.captions = this.value
-        this.captionIndex = this.currentCue(this.captions)
+        onClickClose() {
+            this.visibleState = false
+            this.$emit('click:close')
+        },
     },
 }
 </script>
@@ -402,28 +477,10 @@ export default {
     overflow-y: scroll;
 }
 .captions-list--state-collapsed {
-    max-height: 10em;
-    /* Fade the top/bottom 20% effect. The "red" mask is so the scrollbar doesn't get this effect*/
-    mask: linear-gradient(90deg, rgba(255, 0, 0, 0) 98%, rgba(255, 0, 0, 1) 98%),
-        linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0) 0%,
-            rgba(0, 0, 0, 1) 20%,
-            rgba(0, 0, 0, 1) 80%,
-            rgba(0, 0, 0, 0) 100%
-        );
+    max-height: 15em;
 }
 .captions-list--state-expanded {
     aspect-ratio: 16 / 9;
-    /* Fade the top/bottom 20% effect. The "red" mask is so the scrollbar doesn't get this effect*/
-    mask: linear-gradient(90deg, rgba(255, 0, 0, 0) 98%, rgba(255, 0, 0, 1) 98%),
-        linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0) 0%,
-            rgba(0, 0, 0, 1) 5%,
-            rgba(0, 0, 0, 1) 95%,
-            rgba(0, 0, 0, 0) 100%
-        );
 }
 .caption-text {
     overflow: visible;

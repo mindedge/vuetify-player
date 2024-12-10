@@ -27,6 +27,10 @@ export default {
         no_support: "Sorry, your browser doesn't support embedded videos.",
     },
     captions: {
+        show_transcript: 'Show Transcript',
+        close: 'Close',
+        search: 'Search',
+        none_found: "No captions found for '{0}'",
         expand: 'Expand',
         collapse: 'Collapse',
         view_as_paragraph: 'View as paragraph',
