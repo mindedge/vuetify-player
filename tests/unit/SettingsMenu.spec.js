@@ -6,9 +6,6 @@ import { defaultMocks } from '../mocks'
 
 Vue.use(Vuetify)
 
-// Mock VTTCue since it doesn't exist for cli unit tests
-const VTTCue = jest.fn().mockImplementation()
-
 describe('SettingsMenu', () => {
     test('SettingsMenu is a Vue instance', () => {
         const wrapper = shallowMount(SettingsMenu, {
