@@ -339,7 +339,6 @@ export default {
                 }
             },
             set(v) {
-                console.log('CaptionsMenu set/emit expandedState', v)
                 this.localExpanded = v
                 this.$emit('update:expanded', v)
             },
@@ -455,10 +454,6 @@ export default {
         },
         onClickToggleExpand() {
             this.expandedState = !this.expandedState
-            console.log(
-                'CaptionsMenu click:expand expandedState',
-                this.expandedState
-            )
             this.$emit('click:expand', this.expandedState)
         },
         onClickToggleParagraphView() {
