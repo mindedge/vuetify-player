@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-row>
-            <v-col :cols="!options.expandedCaptions ? 12 : 6">
+            <v-col :cols="!options.expandedCaptions ? 12 : 6" class="pb-0 mb-0">
                 <div v-if="buffering" class="player-overlay">
                     <v-progress-circular
                         :size="50"
@@ -464,6 +464,7 @@
                     Object.keys(captions.cues).length
                 "
                 :cols="!options.expandedCaptions ? 12 : 6"
+                class="pt-0 mt-0"
             >
                 <CaptionsMenu
                     v-model="captions"
