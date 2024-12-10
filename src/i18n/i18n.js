@@ -18,7 +18,7 @@ function get(obj, path) {
     return get(obj[parts[0]], parts.slice(1).join('.'))
 }
 
-const t = (lang, path) => {
+const t = (lang, path, replacements = []) => {
     if (typeof i18n[lang] === 'undefined') {
         console.warn(
             '[VuetifyPlayer] No support for locale ' +
@@ -35,6 +35,11 @@ const t = (lang, path) => {
         console.warn(
             '[VuetifyPlayer] localization path ' + path + ' does not exist'
         )
+    } else {
+        // Apply replacements
+        for (const key in replacements) {
+            localized = localized.replaceAll('{' + key + '}', replacements[key])
+        }
     }
 
     return localized

@@ -18,6 +18,13 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    :captions-expanded="captionsExpanded"
+                    :captions-hide-expand="captionsHideExpand"
+                    :captions-paragraph-view="captionsParagraphView"
+                    :captions-hide-paragraph-view="captionsHideParagraphView"
+                    :captions-autoscroll="captionsAutoscroll"
+                    :captions-hide-autoscroll="captionsHideAutoscroll"
+                    :captions-visible="captionsVisible"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
                     @loadeddata="onLoadeddata"
@@ -37,11 +44,25 @@
                     @abort="$emit('abort', $event)"
                     @mouseover="$emit('mouseover', $event)"
                     @mouseout="$emit('mouseout', $event)"
+                    @update:captions-expanded="
+                        $emit('update:captions-expanded', $event)
+                    "
+                    @update:captions-paragraph-view="
+                        $emit('update:captions-paragraph-view', $event)
+                    "
+                    @update:captions-autoscroll="
+                        $emit('update:captions-autoscroll', $event)
+                    "
+                    @update:captions-visible="
+                        $emit('update:captions-visible', $event)
+                    "
                     @click:fullscreen="onFullscreen"
                     @click:pictureinpicture="onPictureInPicture"
                     @click:remoteplayback="onRemoteplayback"
                     @click:captions-expand="onClickCaptionsExpand"
-                    @click:captions-paragraph="onClickCaptionsParagraph"
+                    @click:captions-paragraph-view="onClickCaptionsParagraph"
+                    @click:captions-autoscroll="onClickCaptionsAutoscroll"
+                    @click:captions-close="onClickCaptionsClose"
                 ></Html5Player>
             </v-col>
 
@@ -123,6 +144,42 @@ export default {
         poster: { type: String, required: false, default: '' }, // Overridden with the playlist.poster if one is set there
         preload: { type: String, required: false, default: '' },
         captionsmenu: { type: Boolean, required: false, default: true }, // Show the captions below the video
+        captionsExpanded: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideExpand: { type: Boolean, required: false, default: true },
+        captionsParagraphView: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideParagraphView: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsHideClose: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsVisible: {
+            type: Boolean,
+            required: false,
+            default: true,
+        },
         playlistmenu: { type: Boolean, required: false, default: true }, // Show the playlist menu if there's multiple videos
         playlistautoadvance: { type: Boolean, required: false, default: true }, // Play the next source group
         playbackrates: {
@@ -133,6 +190,37 @@ export default {
             },
         }, // Default playback speeds
     },
+    emits: [
+        'load',
+        'loadeddata',
+        'loadedmetadata',
+        'play',
+        'pause',
+        'seeking',
+        'timeupdate',
+        'progress',
+        'canplay',
+        'waiting',
+        'canplaythrough',
+        'error',
+        'emptied',
+        'ratechange',
+        'stalled',
+        'abort',
+        'mouseover',
+        'mouseout',
+        'ended',
+        'click:pictureinpicture',
+        'click:fullscreen',
+        'click:captions-expand',
+        'click:captions-paragraph-view',
+        'click:captions-autoscroll',
+        'click:captions-close',
+        'update:captions-expanded',
+        'update:captions-paragraph-view',
+        'update:captions-autoscroll',
+        'update:captions-visible',
+    ],
     watch: {},
     computed: {
         player() {
@@ -212,7 +300,9 @@ export default {
     data() {
         return {
             sourceIndex: 0,
-            captionsExpanded: false,
+            captions: {
+                expanded: false,
+            },
         }
     },
     methods: {
@@ -273,11 +363,16 @@ export default {
             }
         },
         onClickCaptionsExpand(expanded) {
-            this.captionsExpanded = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickCaptionsParagraph(isParagraph) {
-            this.$emit('click:captions-paragraph', isParagraph)
+            this.$emit('click:captions-paragraph-view', isParagraph)
+        },
+        onClickCaptionsAutoscroll(autoscroll) {
+            this.$emit('click:captions-autoscroll', autoscroll)
+        },
+        onClickCaptionsClose() {
+            this.$emit('click:captions-close')
         },
         onPlaylistSelect(index) {
             this.sourceIndex = parseInt(index)
