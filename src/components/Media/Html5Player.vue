@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-row>
-            <v-col :cols="!options.expandedCaptions ? 12 : 6">
+            <v-col :cols="!options.expandedCaptions ? 12 : 6" class="pb-0 mb-0">
                 <div v-if="buffering" class="player-overlay">
                     <v-progress-circular
                         :size="50"
@@ -437,118 +437,17 @@
                                         }}</span>
                                     </v-tooltip>
 
-                                    <!-- Settings -->
-                                    <v-menu
-                                        top
-                                        offset-y
-                                        :close-on-content-click="false"
-                                        nudge-left="100"
-                                    >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
-                                            <v-btn
-                                                small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon>mdi-cog</v-icon>
-                                                <span class="d-sr-only">{{
-                                                    t(
-                                                        language,
-                                                        'player.toggle_settings'
-                                                    )
-                                                }}</span>
-                                            </v-btn>
-                                        </template>
-
-                                        <v-list>
-                                            <v-list-item>
-                                                <v-list-item-title>
-                                                    <v-icon
-                                                        >mdi-play-speed</v-icon
-                                                    >
-                                                    {{
-                                                        t(
-                                                            language,
-                                                            'player.playback_speed'
-                                                        )
-                                                    }}
-                                                </v-list-item-title>
-                                            </v-list-item>
-                                            <v-list-item>
-                                                <v-list-item-title
-                                                    class="text-center"
-                                                >
-                                                    <v-btn
-                                                        small
-                                                        :disabled="
-                                                            options.playbackRateIndex ===
-                                                            0
-                                                        "
-                                                        @click="
-                                                            onPlaybackSpeed(
-                                                                options.playbackRateIndex -
-                                                                    1
-                                                            )
-                                                        "
-                                                    >
-                                                        <v-icon>
-                                                            mdi-clock-minus-outline
-                                                        </v-icon>
-                                                        <span
-                                                            class="d-sr-only"
-                                                            >{{
-                                                                t(
-                                                                    language,
-                                                                    'player.playback_decrease'
-                                                                )
-                                                            }}</span
-                                                        >
-                                                    </v-btn>
-                                                    <span class="pl-2 pr-2"
-                                                        >{{
-                                                            attributes
-                                                                .playbackrates[
-                                                                options
-                                                                    .playbackRateIndex
-                                                            ]
-                                                        }}x</span
-                                                    >
-                                                    <v-btn
-                                                        small
-                                                        :disabled="
-                                                            options.playbackRateIndex >=
-                                                            attributes
-                                                                .playbackrates
-                                                                .length -
-                                                                1
-                                                        "
-                                                        @click="
-                                                            onPlaybackSpeed(
-                                                                options.playbackRateIndex +
-                                                                    1
-                                                            )
-                                                        "
-                                                    >
-                                                        <v-icon>
-                                                            mdi-clock-plus-outline
-                                                        </v-icon>
-                                                        <span
-                                                            class="d-sr-only"
-                                                            >{{
-                                                                t(
-                                                                    language,
-                                                                    'player.playback_increase'
-                                                                )
-                                                            }}</span
-                                                        >
-                                                    </v-btn>
-                                                </v-list-item-title>
-                                            </v-list-item>
-                                        </v-list>
-                                    </v-menu>
+                                    <SettingsMenu
+                                        :options="options"
+                                        :attributes="attributes"
+                                        :language="language"
+                                        :captions-visible.sync="
+                                            captionsVisibleState
+                                        "
+                                        @change:playback-rate-index="
+                                            onPlaybackSpeedChange
+                                        "
+                                    ></SettingsMenu>
                                 </template>
                             </v-slider>
                         </div>
@@ -565,13 +464,31 @@
                     Object.keys(captions.cues).length
                 "
                 :cols="!options.expandedCaptions ? 12 : 6"
+                class="pt-0 mt-0"
             >
                 <CaptionsMenu
                     v-model="captions"
                     :language="language"
+                    :expanded.sync="captionsExpandedState"
+                    :hide-expand="captionsHideExpand"
+                    :paragraph-view="captionsParagraphView"
+                    :hide-paragraph-view="captionsHideParagraphView"
+                    :autoscroll="captionsAutoscroll"
+                    :visible.sync="captionsVisibleState"
+                    :hide-autoscroll="captionsHideAutoscroll"
+                    :hide-close="captionsHideClose"
+                    @update:paragraph-view="
+                        $emit('update:captions-paragraph-view', $event)
+                    "
+                    @update:autoscroll="
+                        $emit('update:captions-autoscroll', $event)
+                    "
+                    @update:close="$emit('update:captions-visible', $event)"
                     @click:cue="onCueClick"
                     @click:expand="onClickExpandCaptions"
-                    @click:paragraph="onClickParagraph"
+                    @click:paragraph-view="onClickParagraph"
+                    @click:autoscroll="onClickAutoscroll"
+                    @click:close="onClickCaptionsClose"
                 ></CaptionsMenu>
             </v-col>
         </v-row>
@@ -580,12 +497,14 @@
 
 <script>
 import filters from '../filters'
+import SettingsMenu from './SettingsMenu.vue'
 import CaptionsMenu from './CaptionsMenu.vue'
 import { t } from '../../i18n/i18n'
 
 export default {
     name: 'Html5Player',
     components: {
+        SettingsMenu,
         CaptionsMenu,
     },
     props: {
@@ -603,8 +522,84 @@ export default {
             type: Object,
             required: true,
         },
+        captionsExpanded: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideExpand: { type: Boolean, required: false, default: true },
+        captionsParagraphView: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideParagraphView: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsVisible: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsHideClose: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
     },
-    watch: {},
+    emits: [
+        'error',
+        'canplaythrough',
+        'emptied',
+        'stalled',
+        'abort',
+        'canplay',
+        'waiting',
+        'play',
+        'pause',
+        'load',
+        'mouseover',
+        'mouseout',
+        'ended',
+        'trackchange',
+        'ratechange',
+        'timeupdate',
+        'seeking',
+        'progress',
+        'volumechange',
+        'cuechange',
+        'loadeddata',
+        'loadedmetadata',
+        'click:fullscreen',
+        'click:pictureinpicture',
+        'click:remoteplayback',
+        'click:captions-expand',
+        'click:captions-paragraph-view',
+        'click:captions-autoscroll',
+        'click:captions-close',
+        'click:captions-cue',
+        'update:captions-expanded',
+        'update:captions-paragraph-view',
+        'update:captions-autoscroll',
+        'update:captions-visible',
+    ],
+    watch: {
+        'options.controls': function () {
+            this.setCuePosition()
+        },
+    },
     computed: {
         current() {
             // We're playing an ad currently
@@ -618,6 +613,32 @@ export default {
         playerClass() {
             let classList = 'player-' + this.type
             return classList
+        },
+        captionsVisibleState: {
+            get() {
+                if (typeof this.captionsVisible !== 'undefined') {
+                    return this.captionsVisible
+                } else {
+                    return this.options.captionsVisible
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-visible', v)
+                this.options.captionsVisible = v
+            },
+        },
+        captionsExpandedState: {
+            get() {
+                if (typeof this.captionsExpanded !== 'undefined') {
+                    return this.captionsExpanded
+                } else {
+                    return this.options.expandedCaptions
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-expanded', v)
+                this.options.expandedCaptions = v
+            },
         },
     },
     data() {
@@ -641,6 +662,7 @@ export default {
                 playbackRateIndex: 0,
                 fullscreen: false,
                 expandedCaptions: false,
+                captionsVisible: true,
                 download: false,
                 remoteplayback: false,
                 controlslist: [],
@@ -753,13 +775,20 @@ export default {
         },
         onCueClick(time) {
             this.setTime(time)
+            this.$emit('click:captions-cue', time)
         },
         onClickExpandCaptions(expanded) {
-            this.options.expandedCaptions = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickParagraph(isParagraph) {
-            this.$emit('click:captions-paragraph', isParagraph)
+            this.$emit('click:captions-paragraph-view', isParagraph)
+        },
+        onClickAutoscroll(autoscroll) {
+            this.$emit('click:captions-autoscroll', autoscroll)
+        },
+        onClickCaptionsClose() {
+            this.options.captionsVisible = false
+            this.$emit('click:captions-close')
         },
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
@@ -857,23 +886,21 @@ export default {
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
-                    const tt = this.player.textTracks[i]
-
-                    if (tt.language === lang) {
+                    if (this.player.textTracks[i].language === lang) {
                         this.options.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
 
-                        this.setCues(tt)
+                        this.setCues(this.player.textTracks[i])
 
                         // Emit the current track
-                        this.$emit('trackchange', tt)
+                        this.$emit('trackchange', this.player.textTracks[i])
                     } else {
                         this.player.textTracks[i].mode = 'disabled'
                     }
                 }
             }
         },
-        onPlaybackSpeed(index) {
+        onPlaybackSpeedChange(index) {
             this.player.playbackRate = this.attributes.playbackrates[index]
             this.options.playbackRateIndex = index
             this.$emit('ratechange', this.player.playbackRate)
@@ -994,6 +1021,19 @@ export default {
                     if (typeof track.activeCues[0].rawText === 'undefined') {
                         track.activeCues[0].rawText = track.activeCues[0].text
                     }
+                    // Retain the original values for the line/size props
+                    if (
+                        typeof track.activeCues[0].defaultLine === 'undefined'
+                    ) {
+                        track.activeCues[0].defaultLine =
+                            track.activeCues[0].line
+                    }
+                    if (
+                        typeof track.activeCues[0].defaultSize === 'undefined'
+                    ) {
+                        track.activeCues[0].defaultSize =
+                            track.activeCues[0].size
+                    }
 
                     // Now remove `<c.transcript>` tags
                     const transcriptTagRegex = /<c.transcript>.*?<\/c>/gi
@@ -1003,6 +1043,8 @@ export default {
                             transcriptTagRegex,
                             ''
                         )
+
+                    this.setCuePosition()
                 }
 
                 this.setCues(track)
@@ -1055,6 +1097,55 @@ export default {
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
+        },
+        setCuePosition() {
+            if (
+                this.player &&
+                this.player.textTracks &&
+                this.player.textTracks.length > 0
+            ) {
+                for (let i = 0; i < this.player.textTracks.length; i++) {
+                    // Only alter the currently showing text track
+                    if (this.player.textTracks[i].mode === 'showing') {
+                        // If the controls are showing then bump the alignment to the start
+                        if (
+                            this.options.controls &&
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0
+                        ) {
+                            // Count the number of line breaks in the cue to figure out our offset from the bottom
+                            // VTTCue doesn't have a "margin from bottom" by default
+                            const numLines = (
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].text.match(/\n/g) || []
+                            ).length
+
+                            // Limit the cues to 90% of the screen width
+                            // If this is left default / set to 100 then the above line
+                            this.player.textTracks[i].activeCues[0].line =
+                                -3 - numLines
+                            this.player.textTracks[i].activeCues[0].size = 95
+                        } else if (
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0 &&
+                            typeof this.player.textTracks[i].activeCues[0]
+                                .defaultLine !== 'undefined' &&
+                            typeof this.player.textTracks[i].activeCues[0]
+                                .defaultSize !== 'undefined'
+                        ) {
+                            this.player.textTracks[i].activeCues[0].line =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaultLine
+                            this.player.textTracks[i].activeCues[0].size =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaultSize
+                        }
+                    }
+                }
+            }
         },
         load(e = null) {
             if (this.player.load) {
