@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row>
+        <v-row tabindex="0">
             <v-col :cols="playerCols">
                 <YoutubePlayer
                     ref="youtubePlayer"
@@ -9,6 +9,8 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    @focusin="onFocusin"
+                    @focusout="onFocusout"
                     @click:fullscreen="onFullscreen"
                 ></YoutubePlayer>
                 <Html5Player
@@ -60,6 +62,8 @@
                     @click:captions-paragraph-view="onClickCaptionsParagraph"
                     @click:captions-autoscroll="onClickCaptionsAutoscroll"
                     @click:captions-close="onClickCaptionsClose"
+                    @focusin="onFocusin"
+                    @focusout="onFocusout"
                 ></Html5Player>
             </v-col>
 
@@ -314,6 +318,8 @@ export default {
                 visible: true,
                 expanded: false,
             },
+            mediaFocus: false,
+            keyListener: null,
         }
     },
     methods: {
@@ -408,6 +414,44 @@ export default {
                 return 'youtube'
             } else {
                 return 'html5'
+            }
+        },
+        onFocusin() {
+            this.mediaFocus = true
+            if (this.player && this.player.$el) {
+                this.player.$el.addEventListener('keydown', this.onKeydown)
+            }
+        },
+        onFocusout() {
+            this.mediaFocus = false
+            if (this.player && this.player.$el) {
+                this.player.$el.removeEventListener('keydown', this.onKeydown)
+            }
+        },
+        onKeydown(e) {
+            // Only process keyboard events if the media is focused
+            // This is just in case the media lost focus but the event listener wasn't removed for some reason
+            if (this.mediaFocus) {
+                e.preventDefault()
+                const map = {
+                    Space: { cb: this.player.playToggle, params: [e] },
+                    KeyK: { cb: this.player.playToggle, params: [e] },
+                    KeyM: { cb: this.player.muteToggle, params: [e] },
+                    ArrowLeft: { cb: this.player.rewind, params: [5] },
+                    ArrowRight: { cb: this.player.fastForward, params: [5] },
+                    KeyJ: { cb: this.player.rewind, params: [10] },
+                    KeyL: { cb: this.player.fastForward, params: [10] },
+                    ArrowUp: { cb: this.player.volumeAdjust, params: [0.1] },
+                    ArrowDown: { cb: this.player.volumeAdjust, params: [-0.1] },
+                    KeyF: { cb: this.player.fullscreenToggle, params: [e] },
+                    KeyC: { cb: this.player.CCToggle, params: [e] },
+                }
+                if (
+                    typeof map[e.code] !== 'undefined' &&
+                    typeof map[e.code].cb !== 'undefined'
+                ) {
+                    map[e.code].cb(...map[e.code].params)
+                }
             }
         },
     },

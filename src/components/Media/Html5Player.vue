@@ -31,7 +31,7 @@
                     :playsinline="attributes.playsinline"
                     :poster="src.poster || attributes.poster"
                     :preload="attributes.preload"
-                    @click="onPlayToggle"
+                    @click="playToggle"
                     @seeking="onSeeking"
                     @timeupdate="onTimeupdate"
                     @progress="onMediaProgress"
@@ -48,6 +48,8 @@
                     @emptied="$emit('emptied', $event)"
                     @stalled="$emit('stalled', $event)"
                     @abort="$emit('abort', $event)"
+                    @focusin="$emit('focusin', $event)"
+                    @focusout="$emit('focusout', $event)"
                 >
                     <source
                         v-for="(source, index) of current.sources"
@@ -101,7 +103,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onPlayToggle"
+                                                @click="playToggle"
                                             >
                                                 <v-icon>{{
                                                     options.paused
@@ -167,7 +169,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onRewind"
+                                                @click="rewind"
                                             >
                                                 <v-icon>mdi-rewind-10</v-icon>
                                                 <span class="sr-only">{{
@@ -202,7 +204,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onCCToggle"
+                                                @click="CCToggle"
                                             >
                                                 <v-icon>{{
                                                     options.cc
@@ -250,7 +252,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onMuteToggle"
+                                                @click="muteToggle"
                                             >
                                                 <v-icon
                                                     v-if="
@@ -306,7 +308,7 @@
                                                 :max="1"
                                                 :step="0.1"
                                                 vertical
-                                                @change="onVolumeChange"
+                                                @change="volumeChange"
                                             ></v-slider>
                                         </v-sheet>
                                     </v-menu>
@@ -319,7 +321,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onFullscreen"
+                                                @click="fullscreenToggle"
                                             >
                                                 <v-icon>{{
                                                     !options.fullscreen
@@ -788,17 +790,21 @@ export default {
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
         },
-        onRewind() {
-            // Rewind in seconds
-            const seconds = 10
-
+        rewind(seconds = 10) {
             if (this.player.currentTime <= seconds) {
                 this.setTime(0)
             } else {
                 this.setTime(this.player.currentTime - seconds)
             }
         },
-        onFullscreen() {
+        fastForward(seconds = 10) {
+            if (this.player.currentTime + seconds >= this.player.duration) {
+                this.setTime(this.player.duration)
+            } else {
+                this.setTime(this.player.currentTime + seconds)
+            }
+        },
+        fullscreenToggle() {
             this.options.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
             this.$emit('click:fullscreen', this.$refs.playerContainer)
@@ -927,29 +933,13 @@ export default {
         onMediaProgress(e) {
             this.$emit('progress', e)
         },
-        onCCToggle() {
+        CCToggle() {
             this.options.cc = !this.options.cc
 
             if (this.options.cc) {
                 this.onSelectTrack(this.options.ccLang)
             } else {
                 this.onSelectTrack()
-            }
-        },
-        onPlayToggle(e) {
-            const self = this
-            this.options.controls = true
-
-            // Clear any existing timeouts and close the controls in 5 seconds
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
-            }, 5000)
-
-            if (this.player.paused) {
-                this.play(e)
-            } else {
-                this.pause(e)
             }
         },
         onClickReplay(e) {
@@ -977,7 +967,7 @@ export default {
             // Restart from the beginning
             this.setTime(0)
         },
-        onMuteToggle() {
+        muteToggle() {
             if (this.player.muted) {
                 this.options.muted = false
                 this.player.muted = false
@@ -1072,10 +1062,20 @@ export default {
             this.player.volume = this.options.volume
             this.$emit('volumechange', this.options.volume)
         },
-        onVolumeChange(value) {
+        volumeChange(value) {
+            // Value needs to be a decimal value between 0 and 1
+            if (value > 1) {
+                value = 1
+            } else if (value < 0) {
+                value = 0
+            }
             this.options.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
+        },
+        volumeAdjust(value) {
+            const newVolume = this.options.volume + value
+            this.volumeChange(newVolume)
         },
         onDurationChange() {
             // console.log('onDurationChange');
@@ -1168,6 +1168,22 @@ export default {
                 this.$emit('play', e)
             } else {
                 console.log('Cannot play player')
+            }
+        },
+        playToggle(e) {
+            const self = this
+            this.options.controls = true
+
+            // Clear any existing timeouts and close the controls in 5 seconds
+            clearTimeout(this.options.controlsDebounce)
+            this.options.controlsDebounce = setTimeout(() => {
+                self.options.controls = false
+            }, 5000)
+
+            if (this.player.paused) {
+                this.play(e)
+            } else {
+                this.pause(e)
             }
         },
     },
