@@ -70,7 +70,7 @@ export default {
     components: {},
     props: {
         language: { type: String, required: false, default: 'en-US' },
-        attach: { type: [Object, Boolean], required: false, default: false },
+        attach: { type: null, required: false, default: false },
         options: {
             type: Object,
             required: true,
