@@ -1,6 +1,6 @@
 <template>
     <!-- Settings -->
-    <v-menu top offset-y :close-on-content-click="false" nudge-left="100">
+    <v-menu :attach="attach" top left offset-y :close-on-content-click="false">
         <template #activator="{ on, attrs }">
             <v-btn small text v-bind="attrs" v-on="on">
                 <v-icon>mdi-cog</v-icon>
@@ -70,6 +70,7 @@ export default {
     components: {},
     props: {
         language: { type: String, required: false, default: 'en-US' },
+        attach: { type: [Object, Boolean], required: false, default: false },
         options: {
             type: Object,
             required: true,

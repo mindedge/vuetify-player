@@ -69,6 +69,7 @@
                 </video>
 
                 <div
+                    ref="controlsContainer"
                     class="controls-container"
                     v-if="attributes.controls"
                     @mouseover="onControlsHover"
@@ -190,9 +191,10 @@
                                             current.tracks &&
                                             current.tracks.length > 0
                                         "
+                                        :attach="$refs.controlsContainer"
                                         open-on-hover
-                                        top
                                         offset-y
+                                        top
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
@@ -236,7 +238,12 @@
                                     </v-menu>
 
                                     <!-- Volume -->
-                                    <v-menu open-on-hover top offset-y>
+                                    <v-menu
+                                        :attach="$refs.controlsContainer"
+                                        open-on-hover
+                                        offset-y
+                                        top
+                                    >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -423,7 +430,9 @@
                                         }}</span>
                                     </v-tooltip>
 
+                                    <!-- Settings -->
                                     <SettingsMenu
+                                        :attach="$refs.controlsContainer"
                                         :options="options"
                                         :attributes="attributes"
                                         :language="language"
@@ -1171,28 +1180,10 @@ export default {
     position: relative;
     top: -50px;
     margin-bottom: -40px;
-    overflow: hidden;
 }
 .controls {
     height: 40px;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
-}
-.volume-slider {
-    position: relative;
-    right: -50px;
-    top: -180px;
-    height: 180px;
-    width: 50px;
-    margin-left: -50px;
-    padding-bottom: 10px;
-}
-.slider-active-area {
-    width: 50px;
-    height: 200px;
-    margin-right: -50px;
-    margin-bottom: -200px;
-    position: relative;
-    top: -160px; /* height of this - controls height */
 }
 .player-audio {
     height: 40px;
