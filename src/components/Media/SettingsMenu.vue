@@ -80,7 +80,7 @@ export default {
         },
         captionsVisible: { type: Boolean, required: false, default: undefined },
     },
-    emits: [],
+    emits: ['update:captions-visible', 'change:playback-rate-index'],
     watch: {},
     computed: {},
     data() {

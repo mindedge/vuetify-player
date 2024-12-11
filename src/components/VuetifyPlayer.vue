@@ -24,7 +24,7 @@
                     :captions-hide-paragraph-view="captionsHideParagraphView"
                     :captions-autoscroll="captionsAutoscroll"
                     :captions-hide-autoscroll="captionsHideAutoscroll"
-                    :captions-visible="captionsVisible"
+                    :captions-visible.sync="captionsVisibleState"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
                     @loadeddata="onLoadeddata"
@@ -52,9 +52,6 @@
                     "
                     @update:captions-autoscroll="
                         $emit('update:captions-autoscroll', $event)
-                    "
-                    @update:captions-visible="
-                        $emit('update:captions-visible', $event)
                     "
                     @click:fullscreen="onFullscreen"
                     @click:pictureinpicture="onPictureInPicture"
@@ -296,11 +293,25 @@ export default {
                 return 8
             }
         },
+        captionsVisibleState: {
+            get() {
+                if (typeof this.captionsVisible !== 'undefined') {
+                    return this.captionsVisible
+                } else {
+                    return this.captions.visible
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-visible', v)
+                this.captions.visible = v
+            },
+        },
     },
     data() {
         return {
             sourceIndex: 0,
             captions: {
+                visible: true,
                 expanded: false,
             },
         }

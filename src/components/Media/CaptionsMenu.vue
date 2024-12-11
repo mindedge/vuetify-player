@@ -123,6 +123,7 @@
 
             <div class="d-flex flex-grow-1">
                 <v-text-field
+                    id="captions-search"
                     v-model="search"
                     :label="t(language, 'captions.search')"
                     append-icon="mdi-magnify"

@@ -1,7 +1,11 @@
 <template>
     <v-container>
         <v-row>
-            <v-col :cols="!options.expandedCaptions ? 12 : 6" class="pb-0 mb-0">
+            <v-col
+                ref="playerContainer"
+                :cols="!options.expandedCaptions ? 12 : 6"
+                class="pb-0 mb-0"
+            >
                 <div v-if="buffering" class="player-overlay">
                     <v-progress-circular
                         :size="50"
@@ -90,9 +94,7 @@
                                 <template #prepend>
                                     <!-- Play button -->
                                     <v-tooltip v-if="!showReplay" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -129,9 +131,7 @@
 
                                     <!-- Replay button -->
                                     <v-tooltip v-if="showReplay" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -160,9 +160,7 @@
                                         v-if="attributes.rewind && !activeAd"
                                         top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -196,9 +194,7 @@
                                         top
                                         offset-y
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -241,9 +237,7 @@
 
                                     <!-- Volume -->
                                     <v-menu open-on-hover top offset-y>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -312,9 +306,7 @@
 
                                     <!-- Fullscreen -->
                                     <v-tooltip v-if="fullscreenEnabled" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -350,9 +342,7 @@
                                         "
                                         top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -384,9 +374,7 @@
                                         v-if="options.remoteplayback"
                                         top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -413,9 +401,7 @@
 
                                     <!-- Download -->
                                     <v-tooltip v-if="options.download" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -806,7 +792,7 @@ export default {
         onFullscreen() {
             this.options.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
-            this.$emit('click:fullscreen', this.$el)
+            this.$emit('click:fullscreen', this.$refs.playerContainer)
         },
         onPictureInPicture() {
             //this.options.pip = !document.fullscreenElement;
