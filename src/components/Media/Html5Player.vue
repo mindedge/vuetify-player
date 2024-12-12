@@ -3,7 +3,7 @@
         <v-row>
             <v-col
                 ref="playerContainer"
-                :cols="!options.expandedCaptions ? 12 : 6"
+                :cols="!state.expandedCaptions ? 12 : 6"
                 class="pb-0 mb-0"
             >
                 <div v-if="buffering" class="player-overlay">
@@ -77,7 +77,7 @@
                     @mouseover="onControlsHover"
                 >
                     <v-slide-y-reverse-transition>
-                        <div v-if="player && options.controls" class="controls">
+                        <div v-if="player && state.controls" class="controls">
                             <v-slider
                                 dark
                                 v-model="currentPercent"
@@ -106,13 +106,13 @@
                                                 @click="playToggle"
                                             >
                                                 <v-icon>{{
-                                                    options.paused
+                                                    state.paused
                                                         ? 'mdi-play'
                                                         : 'mdi-pause'
                                                 }}</v-icon>
                                                 <span class="d-sr-only">
                                                     {{
-                                                        options.paused
+                                                        state.paused
                                                             ? t(
                                                                   language,
                                                                   'player.play'
@@ -126,7 +126,7 @@
                                             </v-btn>
                                         </template>
                                         <span>{{
-                                            options.paused
+                                            state.paused
                                                 ? t(language, 'player.play')
                                                 : t(language, 'player.pause')
                                         }}</span>
@@ -207,7 +207,7 @@
                                                 @click="CCToggle"
                                             >
                                                 <v-icon>{{
-                                                    options.cc
+                                                    state.cc
                                                         ? 'mdi-closed-caption'
                                                         : 'mdi-closed-caption-outline'
                                                 }}</v-icon>
@@ -256,32 +256,31 @@
                                             >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume > 0.75
+                                                        !state.muted &&
+                                                        state.volume > 0.75
                                                     "
                                                     >mdi-volume-high</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume >=
-                                                            0.25 &&
-                                                        options.volume <= 0.75
+                                                        !state.muted &&
+                                                        state.volume >= 0.25 &&
+                                                        state.volume <= 0.75
                                                     "
                                                     >mdi-volume-medium</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume > 0 &&
-                                                        options.volume < 0.25
+                                                        !state.muted &&
+                                                        state.volume > 0 &&
+                                                        state.volume < 0.25
                                                     "
                                                     >mdi-volume-low</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        options.muted ||
-                                                        options.volume === 0
+                                                        state.muted ||
+                                                        state.volume === 0
                                                     "
                                                     >mdi-volume-off</v-icon
                                                 >
@@ -302,7 +301,7 @@
                                                 )
                                             }}</span>
                                             <v-slider
-                                                v-model="options.volume"
+                                                v-model="state.volume"
                                                 inverse-label
                                                 :min="0"
                                                 :max="1"
@@ -314,7 +313,7 @@
                                     </v-menu>
 
                                     <!-- Fullscreen -->
-                                    <v-tooltip v-if="fullscreenEnabled" top>
+                                    <v-tooltip v-if="allowFullscreen" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -324,7 +323,7 @@
                                                 @click="fullscreenToggle"
                                             >
                                                 <v-icon>{{
-                                                    !options.fullscreen
+                                                    !state.fullscreen
                                                         ? 'mdi-fullscreen'
                                                         : 'mdi-fullscreen-exit'
                                                 }}</v-icon>
@@ -379,10 +378,7 @@
                                     </v-tooltip>
 
                                     <!-- Remote playback -->
-                                    <v-tooltip
-                                        v-if="options.remoteplayback"
-                                        top
-                                    >
+                                    <v-tooltip v-if="allowRemotePlayback" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -409,7 +405,7 @@
                                     </v-tooltip>
 
                                     <!-- Download -->
-                                    <v-tooltip v-if="options.download" top>
+                                    <v-tooltip v-if="allowDownload" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -435,7 +431,7 @@
                                     <!-- Settings -->
                                     <SettingsMenu
                                         :attach="$refs.controlsContainer"
-                                        :options="options"
+                                        :state="state"
                                         :attributes="attributes"
                                         :language="language"
                                         :captions-visible.sync="
@@ -460,7 +456,7 @@
                     captions.cues &&
                     Object.keys(captions.cues).length
                 "
-                :cols="!options.expandedCaptions ? 12 : 6"
+                :cols="!state.expandedCaptions ? 12 : 6"
                 class="pt-0 mt-0"
             >
                 <CaptionsMenu
@@ -593,7 +589,7 @@ export default {
         'update:captions-visible',
     ],
     watch: {
-        'options.controls': function () {
+        'state.controls': function () {
             this.setCuePosition()
         },
     },
@@ -616,12 +612,12 @@ export default {
                 if (typeof this.captionsVisible !== 'undefined') {
                     return this.captionsVisible
                 } else {
-                    return this.options.captionsVisible
+                    return this.state.captionsVisible
                 }
             },
             set(v) {
                 this.$emit('update:captions-visible', v)
-                this.options.captionsVisible = v
+                this.state.captionsVisible = v
             },
         },
         captionsExpandedState: {
@@ -629,13 +625,47 @@ export default {
                 if (typeof this.captionsExpanded !== 'undefined') {
                     return this.captionsExpanded
                 } else {
-                    return this.options.expandedCaptions
+                    return this.state.expandedCaptions
                 }
             },
             set(v) {
                 this.$emit('update:captions-expanded', v)
-                this.options.expandedCaptions = v
+                this.state.expandedCaptions = v
             },
+        },
+        allowFullscreen() {
+            // Determine fullscreen settings
+            // If we explicitly disabled fullscreen in the attributes
+            // Or the browser doesn't support fullscreen
+            // Or we passed the HTML nofullscreen attribute
+            if (
+                this.attributes.playsinline ||
+                !document.fullscreenEnabled ||
+                this.state.controlslist.indexOf('nofullscreen') !== -1
+            ) {
+                return false
+            } else {
+                return true
+            }
+        },
+        allowRemotePlayback() {
+            // Determine remote playback settings
+            if (
+                this.attributes.disableremoteplayback ||
+                this.state.controlslist.indexOf('noremoteplayback') !== -1
+            ) {
+                return false
+            } else {
+                return true
+            }
+        },
+        allowDownload() {
+            // Determine download settings
+            if (this.state.controlslist.indexOf('nodownload') !== -1) {
+                return false
+            } else {
+                return true
+            }
         },
     },
     data() {
@@ -647,8 +677,7 @@ export default {
             currentPercent: 0,
             player: {},
             captions: { nonce: 0 },
-            fullscreenEnabled: false,
-            options: {
+            state: {
                 cc: true,
                 ccLang: this.language,
                 controls: true,
@@ -660,8 +689,6 @@ export default {
                 fullscreen: false,
                 expandedCaptions: false,
                 captionsVisible: true,
-                download: false,
-                remoteplayback: false,
                 controlslist: [],
             },
             watchPlayer: 0,
@@ -671,13 +698,13 @@ export default {
         }
     },
     beforeMount() {
-        // Parse the controlslist string
+        // Parse the html controlslist attribute string
         if (
             this.attributes.controlslist &&
             typeof this.attributes.controlslist === 'string' &&
             this.attributes.controlslist !== ''
         ) {
-            this.options.controlslist = this.attributes.controlslist.split(' ')
+            this.state.controlslist = this.attributes.controlslist.split(' ')
         }
 
         if (
@@ -691,12 +718,12 @@ export default {
 
         // Adjust the playback speed to 1 by default
         if (this.attributes.playbackrates.indexOf(1) !== -1) {
-            this.options.playbackRateIndex =
+            this.state.playbackRateIndex =
                 this.attributes.playbackrates.indexOf(1)
         } else {
             // 1 aka normal playback not enabled (What monster would do this?!)
             // Set the playback rate to "middle of the road" for whatever is available
-            this.options.playbackRateIndex = Math.floor(
+            this.state.playbackRateIndex = Math.floor(
                 this.attributes.playbackrates.length / 2
             )
         }
@@ -708,34 +735,6 @@ export default {
                 this.ads[ad.play_at_percent] = ad
                 this.ads[ad.play_at_percent].complete = false
             }
-        }
-
-        // Determine fullscreen settings
-        if (
-            this.attributes.playsinline ||
-            !document.fullscreenEnabled ||
-            this.options.controlslist.indexOf('nofullscreen') !== -1
-        ) {
-            this.fullscreenEnabled = false
-        } else {
-            this.fullscreenEnabled = true
-        }
-
-        // Determine remote playback settings
-        if (
-            this.attributes.disableremoteplayback ||
-            this.options.controlslist.indexOf('noremoteplayback') !== -1
-        ) {
-            this.options.remoteplayback = false
-        } else {
-            this.options.remoteplayback = true
-        }
-
-        // Determine download settings
-        if (this.options.controlslist.indexOf('nodownload') !== -1) {
-            this.options.download = false
-        } else {
-            this.options.download = true
         }
     },
     mounted() {
@@ -784,7 +783,7 @@ export default {
             this.$emit('click:captions-autoscroll', autoscroll)
         },
         onClickCaptionsClose() {
-            this.options.captionsVisible = false
+            this.state.captionsVisible = false
             this.$emit('click:captions-close')
         },
         onDownload() {
@@ -805,12 +804,12 @@ export default {
             }
         },
         fullscreenToggle() {
-            this.options.fullscreen = !document.fullscreenElement
+            this.state.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
             this.$emit('click:fullscreen', this.$refs.playerContainer)
         },
         onPictureInPicture() {
-            //this.options.pip = !document.fullscreenElement;
+            //this.state.pip = !document.fullscreenElement;
             // Return the player aka HTMLVideoElement
             this.$emit('click:pictureinpicture', this.$refs.player)
         },
@@ -818,16 +817,16 @@ export default {
             this.$emit('click:remoteplayback', this.$refs.player)
         },
         onVideoHover(e) {
-            this.options.controls = true
-            clearTimeout(this.options.controlsDebounce)
+            this.state.controls = true
+            clearTimeout(this.state.controlsDebounce)
             this.$emit('mouseover', e)
         },
         onVideoLeave(e) {
             const self = this
             // Clear any existing timeouts before we create one
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controlsDebounce = setTimeout(() => {
+                self.state.controls = false
             }, 50)
             this.$emit('mouseout', e)
         },
@@ -868,15 +867,15 @@ export default {
             }
         },
         onControlsHover() {
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controls = true
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controls = true
         },
         onControlsLeave() {
             const self = this
             // Clear any existing timeouts before we create one
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controlsDebounce = setTimeout(() => {
+                self.state.controls = false
             }, 50)
         },
         /**
@@ -888,7 +887,7 @@ export default {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
                     if (this.player.textTracks[i].language === lang) {
-                        this.options.ccLang = lang
+                        this.state.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
 
                         this.setCues(this.player.textTracks[i])
@@ -903,7 +902,7 @@ export default {
         },
         onPlaybackSpeedChange(index) {
             this.player.playbackRate = this.attributes.playbackrates[index]
-            this.options.playbackRateIndex = index
+            this.state.playbackRateIndex = index
             this.$emit('ratechange', this.player.playbackRate)
         },
         onTimeupdate(e) {
@@ -934,10 +933,10 @@ export default {
             this.$emit('progress', e)
         },
         CCToggle() {
-            this.options.cc = !this.options.cc
+            this.state.cc = !this.state.cc
 
-            if (this.options.cc) {
-                this.onSelectTrack(this.options.ccLang)
+            if (this.state.cc) {
+                this.onSelectTrack(this.state.ccLang)
             } else {
                 this.onSelectTrack()
             }
@@ -969,11 +968,11 @@ export default {
         },
         muteToggle() {
             if (this.player.muted) {
-                this.options.muted = false
+                this.state.muted = false
                 this.player.muted = false
-                this.$emit('volumechange', this.options.volume)
+                this.$emit('volumechange', this.state.volume)
             } else {
-                this.options.muted = true
+                this.state.muted = true
                 this.player.muted = true
                 this.$emit('volumechange', 0)
             }
@@ -1059,8 +1058,8 @@ export default {
             //this.player.media = this.$refs.player;
             this.$emit('loadedmetadata', e)
             this.player = this.$refs.player
-            this.player.volume = this.options.volume
-            this.$emit('volumechange', this.options.volume)
+            this.player.volume = this.state.volume
+            this.$emit('volumechange', this.state.volume)
         },
         volumeChange(value) {
             // Value needs to be a decimal value between 0 and 1
@@ -1069,12 +1068,12 @@ export default {
             } else if (value < 0) {
                 value = 0
             }
-            this.options.volume = value
+            this.state.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
         },
         volumeAdjust(value) {
-            const newVolume = this.options.volume + value
+            const newVolume = this.state.volume + value
             this.volumeChange(newVolume)
         },
         onDurationChange() {
@@ -1104,7 +1103,7 @@ export default {
                     if (this.player.textTracks[i].mode === 'showing') {
                         // If the controls are showing then bump the alignment to the start
                         if (
-                            this.options.controls &&
+                            this.state.controls &&
                             this.player.textTracks[i].activeCues &&
                             this.player.textTracks[i].activeCues.length > 0
                         ) {
@@ -1148,13 +1147,13 @@ export default {
                 this.player.load()
                 this.$emit('load', e)
             } else {
-                console.log('Cannot load player')
+                console.error('Cannot load player')
             }
         },
         pause(e = null) {
             if (this.player.pause) {
                 this.player.pause()
-                this.options.paused = true
+                this.state.paused = true
                 this.$emit('pause', e)
             } else {
                 console.log('Cannot pause player')
@@ -1164,7 +1163,7 @@ export default {
             if (this.player.play) {
                 // Start playing the main video
                 this.player.play()
-                this.options.paused = false
+                this.state.paused = false
                 this.$emit('play', e)
             } else {
                 console.log('Cannot play player')
@@ -1172,12 +1171,12 @@ export default {
         },
         playToggle(e) {
             const self = this
-            this.options.controls = true
+            this.state.controls = true
 
             // Clear any existing timeouts and close the controls in 5 seconds
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controlsDebounce = setTimeout(() => {
+                self.state.controls = false
             }, 5000)
 
             if (this.player.paused) {

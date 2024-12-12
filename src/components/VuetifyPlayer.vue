@@ -1,7 +1,23 @@
 <template>
     <div>
         <v-row tabindex="0">
-            <v-col :cols="playerCols">
+            <v-col cols="12">
+                <div v-if="parseSourceType(current.src.sources) === null">
+                    <div class="player-skeleton--no-source">
+                        <slot name="no-source">
+                            <div>
+                                <v-icon x-large>mdi-cloud-question</v-icon>
+                                <p>
+                                    {{ t(language, 'player.not_configured') }}
+                                </p>
+                            </div>
+                        </slot>
+                    </div>
+                    <v-skeleton-loader
+                        type="image, image, list-item-avatar"
+                        class="player-skeleton"
+                    ></v-skeleton-loader>
+                </div>
                 <YoutubePlayer
                     ref="youtubePlayer"
                     v-if="parseSourceType(current.src.sources) === 'youtube'"
@@ -20,7 +36,7 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
-                    :captions-expanded="captionsExpanded"
+                    :captions-expanded.sync="captionsExpandedState"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
                     :captions-hide-paragraph-view="captionsHideParagraphView"
@@ -68,10 +84,7 @@
             </v-col>
 
             <!-- Playlist stuff -->
-            <v-col
-                v-if="playlistmenu && playlist.length > 1"
-                :cols="playlistCols"
-            >
+            <v-col v-if="showPlaylist" cols="12" class="mt-0 pt-0">
                 <PlaylistMenu
                     v-model="sourceIndex"
                     :language="language"
@@ -85,6 +98,7 @@
 </template>
 
 <script>
+import { t } from '../i18n/i18n'
 import YoutubePlayer from './Media/YoutubePlayer.vue'
 import Html5Player from './Media/Html5Player.vue'
 import PlaylistMenu from './Media/PlaylistMenu.vue'
@@ -269,17 +283,9 @@ export default {
         },
         playlistCols() {
             // Captions collapsed, playlist will appear on the right
-            if (
-                !this.captionsExpanded &&
-                this.playlistmenu &&
-                this.playlist.length > 1
-            ) {
+            if (!this.captionsExpandedState && this.showPlaylist) {
                 return 4
-            } else if (
-                this.captionsExpanded &&
-                this.playlistmenu &&
-                this.playlist.length > 1
-            ) {
+            } else if (this.captionsExpandedState && this.showPlaylist) {
                 // Captions expanded, playlist will appear as a new row on the bottom of everything
                 return 12
             } else {
@@ -287,11 +293,7 @@ export default {
             }
         },
         playerCols() {
-            if (
-                this.captionsExpanded ||
-                !this.playlistmenu ||
-                this.playlist.length <= 1
-            ) {
+            if (this.captionsExpandedState || !this.showPlaylist) {
                 return 12
             } else {
                 return 8
@@ -310,9 +312,26 @@ export default {
                 this.captions.visible = v
             },
         },
+        captionsExpandedState: {
+            get() {
+                if (typeof this.captionsExpanded !== 'undefined') {
+                    return this.captionsExpanded
+                } else {
+                    return this.captions.expanded
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-expanded', v)
+                this.captions.expanded = v
+            },
+        },
+        showPlaylist() {
+            return this.playlistmenu && this.playlist.length > 1
+        },
     },
     data() {
         return {
+            t,
             sourceIndex: 0,
             captions: {
                 visible: true,
@@ -393,8 +412,12 @@ export default {
         },
         onPlaylistSelect(index) {
             this.sourceIndex = parseInt(index)
-            this.player.load()
-            this.player.play()
+
+            // If we give a bad media type then the player won't resolve
+            if (this.player && typeof this.player.load !== 'undefined') {
+                this.player.load()
+                this.player.play()
+            }
         },
         parseSourceType(sources) {
             const ytRegex =
@@ -461,3 +484,16 @@ export default {
     beforeDestroy() {},
 }
 </script>
+
+<style scoped>
+.player-skeleton {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+.player-skeleton--no-source {
+    height: 0px;
+    position: relative;
+    top: 100px;
+    text-align: center;
+}
+</style>
