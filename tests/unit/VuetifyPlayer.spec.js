@@ -48,4 +48,50 @@ describe('VuetifyPlayer', () => {
         expect(wrapper.vm.controls).toBeTruthy()
         expect(wrapper.vm.loop).toBeFalsy()
     })
+
+    test('VuetifyPlayer playlist of 2 items is marked as a playlist', () => {
+        const wrapper = shallowMount(VuetifyPlayer, {
+            mocks: defaultMocks,
+            propsData: {
+                playlist: [
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                ],
+            },
+        })
+        expect(wrapper.vm.showPlaylist).toEqual(true)
+    })
+
+    test('VuetifyPlayer playlist of 1 item is not marked as a playlist', () => {
+        const wrapper = shallowMount(VuetifyPlayer, {
+            mocks: defaultMocks,
+            propsData: {
+                playlist: [
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                ],
+            },
+        })
+        expect(wrapper.vm.showPlaylist).toEqual(false)
+    })
 })

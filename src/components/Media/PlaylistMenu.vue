@@ -2,33 +2,40 @@
     <v-card>
         <v-card-title>{{ t(language, 'playlist.up_next') }}</v-card-title>
         <v-card-text>
-            <v-list>
+            <v-list class="playlist-list">
                 <v-list-item-group v-model="sourceIndex">
-                    <v-list-item
+                    <v-tooltip
+                        bottom
                         v-for="(source, index) of playlist"
                         :key="index + 'playlistSources'"
-                        @click="onPlaylistSelect(index)"
                     >
-                        <v-list-item-icon>
-                            <v-avatar
-                                v-if="getPoster(source.poster, poster)"
-                                tile
+                        <template #activator="{ on, attrs }">
+                            <v-list-item
+                                class="pl-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="onPlaylistSelect(index)"
                             >
-                                <img :src="getPoster(source.poster, poster)" />
-                            </v-avatar>
-                            <v-skeleton-loader
-                                v-if="!getPoster(source.poster, poster)"
-                                class="ma-3"
-                                type="avatar"
-                                tile
-                            ></v-skeleton-loader>
-                        </v-list-item-icon>
-                        <v-list-item-content>
-                            <v-tooltip bottom>
-                                <template v-slot:activator="{ on, attrs }">
+                                <v-list-item-icon class="ma-2">
+                                    <v-avatar
+                                        v-if="getPoster(source.poster, poster)"
+                                        tile
+                                    >
+                                        <img
+                                            :src="
+                                                getPoster(source.poster, poster)
+                                            "
+                                        />
+                                    </v-avatar>
+                                    <v-skeleton-loader
+                                        v-if="!getPoster(source.poster, poster)"
+                                        class="ma-3"
+                                        type="avatar"
+                                        tile
+                                    ></v-skeleton-loader>
+                                </v-list-item-icon>
+                                <v-list-item-content>
                                     <div
-                                        v-bind="attrs"
-                                        v-on="on"
                                         class="text-lg-subtitle-1 text-truncate"
                                     >
                                         {{
@@ -36,16 +43,16 @@
                                             t(language, 'playlist.default_name')
                                         }}
                                     </div>
-                                </template>
-                                <span>
-                                    {{
-                                        source.name ||
-                                        t(language, 'playlist.default_name')
-                                    }}
-                                </span>
-                            </v-tooltip>
-                        </v-list-item-content>
-                    </v-list-item>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </template>
+                        <span>
+                            {{
+                                source.name ||
+                                t(language, 'playlist.default_name')
+                            }}
+                        </span>
+                    </v-tooltip>
                 </v-list-item-group>
             </v-list>
         </v-card-text>
@@ -122,17 +129,8 @@ export default {
 </script>
 
 <style scoped>
-.captions-list {
-    max-height: 10em;
+.playlist-list {
+    max-height: 200px;
     overflow-y: scroll;
-    /* Fade the top/bottom 20% effect. The "red" mask is so the scrollbar doesn't get this effect*/
-    mask: linear-gradient(90deg, rgba(255, 0, 0, 0) 98%, rgba(255, 0, 0, 1) 98%),
-        linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0) 0%,
-            rgba(0, 0, 0, 1) 20%,
-            rgba(0, 0, 0, 1) 80%,
-            rgba(0, 0, 0, 0) 100%
-        );
 }
 </style>

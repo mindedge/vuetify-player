@@ -11,7 +11,9 @@ An accessible, localized, full featured media player with Vuetifyjs
 -   [Define ads / preroll / postroll](#the-ads-array)
 -   [Supported Attributes](#supported-vuetifyplayer-attributes)
 -   [Supported Events](#supported-vuetifyplayer-events)
+-   [Supported Slots](#supported-vuetifyplayer-slots)
 -   [Captions](#captions)
+-   [Supported Keyboard Shortcuts](#supported-keyboard-shortcuts)
 -   [License](#license)
 
 ---
@@ -215,16 +217,14 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `playlistmenu`                 | `Boolean` | true \| false                                      | true                          | Show the playlist menu if there's multiple videos                                                                                                                                         |
 | `playlistautoadvance`          | `Boolean` | true \| false                                      | true                          | Play the next source group                                                                                                                                                                |
 | `playbackrates`                | `Array`   | [`array of numbers`]                               | [0.5, 1, 1.5, 2]              | Default playback speeds. Anything below 0.25 and above 4 will make cause audio distortion                                                                                                 |
-| `captions-expanded`            | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript being expanded.                                                                                                            | 
-| `captions-hide-expand`         | `Boolean` | true \| false                                      | true                          | Show / allow the captions transcript expand button for users                                                                                                                              | 
-| `captions-paragraph-view`      | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript paragraph view                                                                                                             | 
-| `captions-hide-paragraph-view` | `Boolean` | true \| false                                      | false                         | Allow the captions transcript paragraph view for users                                                                                                                                    | 
-| `captions-autoscroll`          | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript autoscroll state                                                                                                          | 
-| `captions-hide-autoscroll`     | `Boolean` | true \| false                                      | undefined                     | Allow users to enable / disable captions transcript autoscrolling                                                                                                                         | 
-| `captions-hide-close`          | `Boolean` | true \| false                                      | false                         | Allow users to show / hide the captions transcript box                                                                                                                                    | 
-| `captions-visible`             | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript visibility                                                                                                                | 
-
-
+| `captions-expanded`            | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript being expanded.                                                                                                            |
+| `captions-hide-expand`         | `Boolean` | true \| false                                      | true                          | Show / allow the captions transcript expand button for users                                                                                                                              |
+| `captions-paragraph-view`      | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript paragraph view                                                                                                             |
+| `captions-hide-paragraph-view` | `Boolean` | true \| false                                      | false                         | Allow the captions transcript paragraph view for users                                                                                                                                    |
+| `captions-autoscroll`          | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript autoscroll state                                                                                                          |
+| `captions-hide-autoscroll`     | `Boolean` | true \| false                                      | undefined                     | Allow users to enable / disable captions transcript autoscrolling                                                                                                                         |
+| `captions-hide-close`          | `Boolean` | true \| false                                      | false                         | Allow users to show / hide the captions transcript box                                                                                                                                    |
+| `captions-visible`             | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript visibility                                                                                                                |
 
 ## Supported `<VuetifyPlayer>` Events
 
@@ -253,13 +253,19 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `click:fullscreen`               | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                               |
 | `click:pictureinpicture`         | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                                    |
 | `click:captions-expand`          | `true` \| `false` | When the expand captions button is clicked. true on expanded, false on collapsed                                     |
-| `click:captions-paragraph-view`  | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |                                                                                                                                                 
+| `click:captions-paragraph-view`  | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
 | `click:captions-autoscroll`      | `true` \| `false` | When the autoscroll captions button is clicked. true on autoscrolling otherwise false                                |
 | `click:captions-close`           | `true` \| `false` | When the c;pse captions button is clicked. true on closed, false on visible                                          |
 | `update:captions-expanded`       | `true` \| `false` | When the captions expand state is updated                                                                            |
 | `update:captions-paragraph-view` | `true` \| `false` | When the captions paragraph-view state is updated                                                                    |
 | `update:captions-autoscroll`     | `true` \| `false` | When the captions autoscroll state is updated                                                                        |
 | `update:captions-visible`        | `true` \| `false` | When the captions visible state is updated                                                                           |
+
+## Supported `<VuetifyPlayer>` Slots
+
+| Slot name   | Attributes | Description                                                                 |
+| ----------- | ---------- | --------------------------------------------------------------------------- |
+| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured |
 
 ## Captions
 
@@ -280,6 +286,21 @@ This text will show up on a new line in the player.
 00:00:03.000 --> 00:00:5.999
 sentence here to break it up
 ```
+
+## Supported Keyboard Shortcuts
+
+| Key             | Action                  |
+| --------------- | ----------------------- |
+| `k`             | Toggle play / pause     |
+| `m`             | Toggle mute             |
+| `{Left Arrow}`  | Rewind 5 seconds        |
+| `{Right Arrow}` | Fast forward 5 seconds  |
+| `j`             | Rewind 10 seconds       |
+| `l`             | Fast forward 10 seconds |
+| `{Up Arrow}`    | Increase volume by 10%  |
+| `{Down Arrow}`  | Decrease volume by 10%  |
+| `f`             | Toggle fullscreen       |
+| `c`             | Toggle closed captions  |
 
 ## License
 

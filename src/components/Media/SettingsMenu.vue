@@ -1,6 +1,6 @@
 <template>
     <!-- Settings -->
-    <v-menu top offset-y :close-on-content-click="false" nudge-left="100">
+    <v-menu :attach="attach" top left offset-y :close-on-content-click="false">
         <template #activator="{ on, attrs }">
             <v-btn small text v-bind="attrs" v-on="on">
                 <v-icon>mdi-cog</v-icon>
@@ -30,8 +30,8 @@
                 <v-list-item-title class="text-center">
                     <v-btn
                         small
-                        :disabled="options.playbackRateIndex === 0"
-                        @click="onPlaybackSpeed(options.playbackRateIndex - 1)"
+                        :disabled="state.playbackRateIndex === 0"
+                        @click="onPlaybackSpeed(state.playbackRateIndex - 1)"
                     >
                         <v-icon> mdi-clock-minus-outline </v-icon>
                         <span class="d-sr-only">{{
@@ -40,16 +40,16 @@
                     </v-btn>
                     <span class="pl-2 pr-2"
                         >{{
-                            attributes.playbackrates[options.playbackRateIndex]
+                            attributes.playbackrates[state.playbackRateIndex]
                         }}x</span
                     >
                     <v-btn
                         small
                         :disabled="
-                            options.playbackRateIndex >=
+                            state.playbackRateIndex >=
                             attributes.playbackrates.length - 1
                         "
-                        @click="onPlaybackSpeed(options.playbackRateIndex + 1)"
+                        @click="onPlaybackSpeed(state.playbackRateIndex + 1)"
                     >
                         <v-icon> mdi-clock-plus-outline </v-icon>
                         <span class="d-sr-only">{{
@@ -70,7 +70,8 @@ export default {
     components: {},
     props: {
         language: { type: String, required: false, default: 'en-US' },
-        options: {
+        attach: { type: null, required: false, default: false },
+        state: {
             type: Object,
             required: true,
         },
@@ -80,7 +81,7 @@ export default {
         },
         captionsVisible: { type: Boolean, required: false, default: undefined },
     },
-    emits: [],
+    emits: ['update:captions-visible', 'change:playback-rate-index'],
     watch: {},
     computed: {},
     data() {
