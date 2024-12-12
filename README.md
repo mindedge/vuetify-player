@@ -11,6 +11,7 @@ An accessible, localized, full featured media player with Vuetifyjs
 -   [Define ads / preroll / postroll](#the-ads-array)
 -   [Supported Attributes](#supported-vuetifyplayer-attributes)
 -   [Supported Events](#supported-vuetifyplayer-events)
+-   [Supported Slots](#supported-vuetifyplayer-slots)
 -   [Captions](#captions)
 -   [License](#license)
 
@@ -260,6 +261,14 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `update:captions-paragraph-view` | `true` \| `false` | When the captions paragraph-view state is updated                                                                    |
 | `update:captions-autoscroll`     | `true` \| `false` | When the captions autoscroll state is updated                                                                        |
 | `update:captions-visible`        | `true` \| `false` | When the captions visible state is updated                                                                           |
+
+
+## Supported `<VuetifyPlayer>` Slots
+
+| Slot name                        | Attributes        | Description                                                                                                          |
+| -------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `no-source`                      | `none`            | Displayed over the media skeleton loader when no media source is configured                                          |
+
 
 ## Captions
 
