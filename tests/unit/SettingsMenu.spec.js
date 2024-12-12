@@ -11,7 +11,7 @@ describe('SettingsMenu', () => {
         const wrapper = shallowMount(SettingsMenu, {
             mocks: defaultMocks,
             propsData: {
-                options: { playbackRateIndex: 0 },
+                state: { playbackRateIndex: 0 },
                 attributes: {
                     captionsmenu: true,
                     playbackrates: [0.5, 1, 1.5, 2],
