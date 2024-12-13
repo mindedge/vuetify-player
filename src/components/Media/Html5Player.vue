@@ -7,10 +7,19 @@
                 class="pb-0 mb-0"
             >
                 <div v-if="buffering" class="player-overlay">
-                    <v-progress-circular
-                        :size="50"
-                        indeterminate
-                    ></v-progress-circular>
+                    <div class="player-overlay--icon">
+                        <v-progress-circular
+                            :size="50"
+                            indeterminate
+                        ></v-progress-circular>
+                    </div>
+                </div>
+                <div v-if="state.replay" class="player-overlay">
+                    <div class="player-overlay--icon">
+                        <v-icon class="player-overlay--replay-icon">
+                            mdi-replay
+                        </v-icon>
+                    </div>
                 </div>
                 <video
                     ref="player"
@@ -1079,6 +1088,8 @@ export default {
             // console.log(e);
         },
         setTime(time) {
+            // Scrubbing / manually setting the time should remove the replay button
+            this.state.replay = false
             this.player.currentTime = time
         },
         setCues(track) {
@@ -1177,19 +1188,25 @@ export default {
             }
         },
         playToggle(e) {
-            const self = this
-            this.state.controls = true
-
-            // Clear any existing timeouts and close the controls in 5 seconds
-            clearTimeout(this.state.controlsDebounce)
-            this.state.controlsDebounce = setTimeout(() => {
-                self.state.controls = false
-            }, 5000)
-
-            if (this.player.paused) {
-                this.play(e)
+            // If the replay button is active then we actually need to call the onClickReplay method instead
+            // Otherwise we'd just end up replaying any postroll ad
+            if (this.state.replay) {
+                this.onClickReplay(e)
             } else {
-                this.pause(e)
+                const self = this
+                this.state.controls = true
+
+                // Clear any existing timeouts and close the controls in 5 seconds
+                clearTimeout(this.state.controlsDebounce)
+                this.state.controlsDebounce = setTimeout(() => {
+                    self.state.controls = false
+                }, 5000)
+
+                if (this.player.paused) {
+                    this.play(e)
+                } else {
+                    this.pause(e)
+                }
             }
         },
     },
@@ -1224,12 +1241,18 @@ export default {
     color: #fff;
     left: 25%;
     width: 50%;
-    top: 100px;
+    top: 35%;
     height: 0;
     text-align: center;
 }
-.player-overlay > div {
+.player-overlay--replay-icon {
+    color: #fff;
+    font-size: 5rem;
+}
+.player-overlay > .player-overlay--icon {
+    display: inline-block;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 100%;
+    padding: 1rem;
 }
 </style>
