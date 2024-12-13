@@ -886,6 +886,10 @@ export default {
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
+                    // Disable all tracks by default
+                    // We only want to enable the correct active track otherwise track switches / replays will overlay tracks
+                    this.player.textTracks[i].mode = 'disabled'
+
                     if (this.player.textTracks[i].language === lang) {
                         this.state.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
@@ -894,8 +898,6 @@ export default {
 
                         // Emit the current track
                         this.$emit('trackchange', this.player.textTracks[i])
-                    } else {
-                        this.player.textTracks[i].mode = 'disabled'
                     }
                 }
             }
