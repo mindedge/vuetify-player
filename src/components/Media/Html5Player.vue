@@ -96,7 +96,7 @@
                             >
                                 <template #prepend>
                                     <!-- Play button -->
-                                    <v-tooltip v-if="!showReplay" top>
+                                    <v-tooltip v-if="!state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -133,7 +133,7 @@
                                     </v-tooltip>
 
                                     <!-- Replay button -->
-                                    <v-tooltip v-if="showReplay" top>
+                                    <v-tooltip v-if="state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -678,6 +678,7 @@ export default {
             player: {},
             captions: { nonce: 0 },
             state: {
+                replay: false,
                 cc: true,
                 ccLang: this.language,
                 controls: true,
@@ -694,7 +695,6 @@ export default {
             watchPlayer: 0,
             scrub: { max: 100 },
             buffering: false,
-            showReplay: false,
         }
     },
     beforeMount() {
@@ -857,11 +857,11 @@ export default {
                 this.activeAd !== null &&
                 this.activeAd.play_at_percent === 100
             ) {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended but this ad was a postroll
                 this.$emit('ended', e)
             } else {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended without an ad
                 this.$emit('ended', e)
             }
@@ -1168,6 +1168,7 @@ export default {
                 // Start playing the main video
                 this.player.play()
                 this.state.paused = false
+                this.state.replay = false
                 this.$emit('play', e)
             } else {
                 console.log('Cannot play player')
