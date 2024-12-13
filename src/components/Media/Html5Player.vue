@@ -1005,18 +1005,14 @@ export default {
                     if (typeof track.activeCues[0].rawText === 'undefined') {
                         track.activeCues[0].rawText = track.activeCues[0].text
                     }
-                    // Retain the original values for the line/size props
-                    if (
-                        typeof track.activeCues[0].defaultLine === 'undefined'
-                    ) {
-                        track.activeCues[0].defaultLine =
-                            track.activeCues[0].line
-                    }
-                    if (
-                        typeof track.activeCues[0].defaultSize === 'undefined'
-                    ) {
-                        track.activeCues[0].defaultSize =
-                            track.activeCues[0].size
+                    // Retain the original cue display values
+                    // This way we can swap between a modified display when the controls are visible
+                    if (typeof track.activeCues[0].defaults === 'undefined') {
+                        track.activeCues[0].defaults = {
+                            line: track.activeCues[0].line,
+                            size: track.activeCues[0].size,
+                            snapToLines: track.activeCues[0].snapToLines,
+                        }
                     }
 
                     // Now remove `<c.transcript>` tags
@@ -1117,25 +1113,33 @@ export default {
 
                             // Limit the cues to 90% of the screen width
                             // If this is left default / set to 100 then the above line
+                            // Also set snapToLines to true otherwise if there's a line % in the vtt file the display will be relative and make the lines not aligned properly
                             this.player.textTracks[i].activeCues[0].line =
                                 -3 - numLines
-                            this.player.textTracks[i].activeCues[0].size = 95
+                            this.player.textTracks[i].activeCues[0].size = 99
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines = true
                         } else if (
                             this.player.textTracks[i].activeCues &&
                             this.player.textTracks[i].activeCues.length > 0 &&
                             typeof this.player.textTracks[i].activeCues[0]
-                                .defaultLine !== 'undefined' &&
-                            typeof this.player.textTracks[i].activeCues[0]
-                                .defaultSize !== 'undefined'
+                                .defaults !== 'undefined'
                         ) {
                             this.player.textTracks[i].activeCues[0].line =
                                 this.player.textTracks[
                                     i
-                                ].activeCues[0].defaultLine
+                                ].activeCues[0].defaults.line
                             this.player.textTracks[i].activeCues[0].size =
                                 this.player.textTracks[
                                     i
-                                ].activeCues[0].defaultSize
+                                ].activeCues[0].defaults.size
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaults.snapToLines
                         }
                     }
                 }
