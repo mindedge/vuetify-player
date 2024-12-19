@@ -126,7 +126,7 @@ export default {
                 return []
             },
         },
-        type: { type: String, required: false, default: 'video' }, // Allowed video|audio. In audio mode the player has a max-height of 40px
+        type: { type: String, required: false, default: 'auto' }, // Allowed auto|video|audio. In audio mode the player has a max-height of 40px
         autoplay: { type: Boolean, required: false, default: false }, // Autoplay on load. It's in the spec but DON'T USE THIS
         autopictureinpicture: {
             type: Boolean,

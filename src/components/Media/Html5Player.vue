@@ -6,16 +6,31 @@
                 :cols="!state.expandedCaptions ? 12 : 6"
                 class="pb-0 mb-0"
             >
-                <div v-if="buffering" class="player-overlay">
-                    <v-progress-circular
-                        :size="50"
-                        indeterminate
-                    ></v-progress-circular>
+                <div
+                    v-if="resolvedType === 'video' && buffering"
+                    class="player-overlay"
+                >
+                    <div class="player-overlay--icon">
+                        <v-progress-circular
+                            :size="50"
+                            indeterminate
+                        ></v-progress-circular>
+                    </div>
+                </div>
+                <div
+                    v-if="resolvedType === 'video' && state.replay"
+                    class="player-overlay"
+                >
+                    <div class="player-overlay--icon">
+                        <v-icon class="player-overlay--replay-icon">
+                            mdi-replay
+                        </v-icon>
+                    </div>
                 </div>
                 <video
                     ref="player"
                     tabindex="0"
-                    :class="'player-' + type"
+                    :class="'player-' + resolvedType"
                     :height="attributes.height"
                     :width="attributes.width"
                     :autoplay="attributes.autoplay"
@@ -96,7 +111,7 @@
                             >
                                 <template #prepend>
                                     <!-- Play button -->
-                                    <v-tooltip v-if="!showReplay" top>
+                                    <v-tooltip v-if="!state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -133,7 +148,7 @@
                                     </v-tooltip>
 
                                     <!-- Replay button -->
-                                    <v-tooltip v-if="showReplay" top>
+                                    <v-tooltip v-if="state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
@@ -505,7 +520,7 @@ export default {
         type: {
             type: String,
             required: false,
-            default: 'video',
+            default: 'auto',
         },
         attributes: {
             type: Object,
@@ -604,8 +619,37 @@ export default {
             }
         },
         playerClass() {
-            let classList = 'player-' + this.type
+            let classList = 'player-' + this.resolvedType
             return classList
+        },
+        resolvedType() {
+            // Default to video if the type can't be resolved
+            let type = 'video'
+
+            // Make sure current is set and valid and has sources
+            if (
+                this.current &&
+                this.current.sources &&
+                this.current.sources.length > 0
+            ) {
+                const source = this.current.sources[0]
+
+                // Determine off the type / mime field first, then check the extensions
+                if (source.type && source.type.match(/^video\//i)) {
+                    type = 'video'
+                } else if (source.type && source.type.match(/^audio\//i)) {
+                    type = 'audio'
+                } else if (
+                    source.src &&
+                    source.src.match(/(?:mp4|webm|ogg)$/)
+                ) {
+                    type = 'video'
+                } else if (source.src && source.src.match(/(?:mp3|wav)$/)) {
+                    type = 'audio'
+                }
+            }
+
+            return type
         },
         captionsVisibleState: {
             get() {
@@ -678,6 +722,7 @@ export default {
             player: {},
             captions: { nonce: 0 },
             state: {
+                replay: false,
                 cc: true,
                 ccLang: this.language,
                 controls: true,
@@ -694,7 +739,6 @@ export default {
             watchPlayer: 0,
             scrub: { max: 100 },
             buffering: false,
-            showReplay: false,
         }
     },
     beforeMount() {
@@ -857,11 +901,11 @@ export default {
                 this.activeAd !== null &&
                 this.activeAd.play_at_percent === 100
             ) {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended but this ad was a postroll
                 this.$emit('ended', e)
             } else {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended without an ad
                 this.$emit('ended', e)
             }
@@ -886,6 +930,10 @@ export default {
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
+                    // Disable all tracks by default
+                    // We only want to enable the correct active track otherwise track switches / replays will overlay tracks
+                    this.player.textTracks[i].mode = 'disabled'
+
                     if (this.player.textTracks[i].language === lang) {
                         this.state.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
@@ -894,8 +942,6 @@ export default {
 
                         // Emit the current track
                         this.$emit('trackchange', this.player.textTracks[i])
-                    } else {
-                        this.player.textTracks[i].mode = 'disabled'
                     }
                 }
             }
@@ -1005,18 +1051,14 @@ export default {
                     if (typeof track.activeCues[0].rawText === 'undefined') {
                         track.activeCues[0].rawText = track.activeCues[0].text
                     }
-                    // Retain the original values for the line/size props
-                    if (
-                        typeof track.activeCues[0].defaultLine === 'undefined'
-                    ) {
-                        track.activeCues[0].defaultLine =
-                            track.activeCues[0].line
-                    }
-                    if (
-                        typeof track.activeCues[0].defaultSize === 'undefined'
-                    ) {
-                        track.activeCues[0].defaultSize =
-                            track.activeCues[0].size
+                    // Retain the original cue display values
+                    // This way we can swap between a modified display when the controls are visible
+                    if (typeof track.activeCues[0].defaults === 'undefined') {
+                        track.activeCues[0].defaults = {
+                            line: track.activeCues[0].line,
+                            size: track.activeCues[0].size,
+                            snapToLines: track.activeCues[0].snapToLines,
+                        }
                     }
 
                     // Now remove `<c.transcript>` tags
@@ -1081,6 +1123,8 @@ export default {
             // console.log(e);
         },
         setTime(time) {
+            // Scrubbing / manually setting the time should remove the replay button
+            this.state.replay = false
             this.player.currentTime = time
         },
         setCues(track) {
@@ -1117,25 +1161,33 @@ export default {
 
                             // Limit the cues to 90% of the screen width
                             // If this is left default / set to 100 then the above line
+                            // Also set snapToLines to true otherwise if there's a line % in the vtt file the display will be relative and make the lines not aligned properly
                             this.player.textTracks[i].activeCues[0].line =
                                 -3 - numLines
-                            this.player.textTracks[i].activeCues[0].size = 95
+                            this.player.textTracks[i].activeCues[0].size = 99
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines = true
                         } else if (
                             this.player.textTracks[i].activeCues &&
                             this.player.textTracks[i].activeCues.length > 0 &&
                             typeof this.player.textTracks[i].activeCues[0]
-                                .defaultLine !== 'undefined' &&
-                            typeof this.player.textTracks[i].activeCues[0]
-                                .defaultSize !== 'undefined'
+                                .defaults !== 'undefined'
                         ) {
                             this.player.textTracks[i].activeCues[0].line =
                                 this.player.textTracks[
                                     i
-                                ].activeCues[0].defaultLine
+                                ].activeCues[0].defaults.line
                             this.player.textTracks[i].activeCues[0].size =
                                 this.player.textTracks[
                                     i
-                                ].activeCues[0].defaultSize
+                                ].activeCues[0].defaults.size
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaults.snapToLines
                         }
                     }
                 }
@@ -1164,25 +1216,32 @@ export default {
                 // Start playing the main video
                 this.player.play()
                 this.state.paused = false
+                this.state.replay = false
                 this.$emit('play', e)
             } else {
                 console.log('Cannot play player')
             }
         },
         playToggle(e) {
-            const self = this
-            this.state.controls = true
-
-            // Clear any existing timeouts and close the controls in 5 seconds
-            clearTimeout(this.state.controlsDebounce)
-            this.state.controlsDebounce = setTimeout(() => {
-                self.state.controls = false
-            }, 5000)
-
-            if (this.player.paused) {
-                this.play(e)
+            // If the replay button is active then we actually need to call the onClickReplay method instead
+            // Otherwise we'd just end up replaying any postroll ad
+            if (this.state.replay) {
+                this.onClickReplay(e)
             } else {
-                this.pause(e)
+                const self = this
+                this.state.controls = true
+
+                // Clear any existing timeouts and close the controls in 5 seconds
+                clearTimeout(this.state.controlsDebounce)
+                this.state.controlsDebounce = setTimeout(() => {
+                    self.state.controls = false
+                }, 5000)
+
+                if (this.player.paused) {
+                    this.play(e)
+                } else {
+                    this.pause(e)
+                }
             }
         },
     },
@@ -1217,12 +1276,18 @@ export default {
     color: #fff;
     left: 25%;
     width: 50%;
-    top: 100px;
+    top: 35%;
     height: 0;
     text-align: center;
 }
-.player-overlay > div {
+.player-overlay--replay-icon {
+    color: #fff;
+    font-size: 5rem;
+}
+.player-overlay > .player-overlay--icon {
+    display: inline-block;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 100%;
+    padding: 1rem;
 }
 </style>
