@@ -1,17 +1,36 @@
 <template>
     <v-container>
         <v-row>
-            <v-col :cols="!options.expandedCaptions ? 12 : 6">
-                <div v-if="buffering" class="player-overlay">
-                    <v-progress-circular
-                        :size="50"
-                        indeterminate
-                    ></v-progress-circular>
+            <v-col
+                ref="playerContainer"
+                :cols="!state.expandedCaptions ? 12 : 6"
+                class="pb-0 mb-0"
+            >
+                <div
+                    v-if="resolvedType === 'video' && buffering"
+                    class="player-overlay"
+                >
+                    <div class="player-overlay--icon">
+                        <v-progress-circular
+                            :size="50"
+                            indeterminate
+                        ></v-progress-circular>
+                    </div>
+                </div>
+                <div
+                    v-if="resolvedType === 'video' && state.replay"
+                    class="player-overlay"
+                >
+                    <div class="player-overlay--icon">
+                        <v-icon class="player-overlay--replay-icon">
+                            mdi-replay
+                        </v-icon>
+                    </div>
                 </div>
                 <video
                     ref="player"
                     tabindex="0"
-                    :class="'player-' + type"
+                    :class="'player-' + resolvedType"
                     :height="attributes.height"
                     :width="attributes.width"
                     :autoplay="attributes.autoplay"
@@ -27,7 +46,7 @@
                     :playsinline="attributes.playsinline"
                     :poster="src.poster || attributes.poster"
                     :preload="attributes.preload"
-                    @click="onPlayToggle"
+                    @click="playToggle"
                     @seeking="onSeeking"
                     @timeupdate="onTimeupdate"
                     @progress="onMediaProgress"
@@ -44,6 +63,8 @@
                     @emptied="$emit('emptied', $event)"
                     @stalled="$emit('stalled', $event)"
                     @abort="$emit('abort', $event)"
+                    @focusin="$emit('focusin', $event)"
+                    @focusout="$emit('focusout', $event)"
                 >
                     <source
                         v-for="(source, index) of current.sources"
@@ -65,12 +86,13 @@
                 </video>
 
                 <div
+                    ref="controlsContainer"
                     class="controls-container"
                     v-if="attributes.controls"
                     @mouseover="onControlsHover"
                 >
                     <v-slide-y-reverse-transition>
-                        <div v-if="player && options.controls" class="controls">
+                        <div v-if="player && state.controls" class="controls">
                             <v-slider
                                 dark
                                 v-model="currentPercent"
@@ -89,25 +111,23 @@
                             >
                                 <template #prepend>
                                     <!-- Play button -->
-                                    <v-tooltip v-if="!showReplay" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-tooltip v-if="!state.replay" top>
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onPlayToggle"
+                                                @click="playToggle"
                                             >
                                                 <v-icon>{{
-                                                    options.paused
+                                                    state.paused
                                                         ? 'mdi-play'
                                                         : 'mdi-pause'
                                                 }}</v-icon>
                                                 <span class="d-sr-only">
                                                     {{
-                                                        options.paused
+                                                        state.paused
                                                             ? t(
                                                                   language,
                                                                   'player.play'
@@ -121,17 +141,15 @@
                                             </v-btn>
                                         </template>
                                         <span>{{
-                                            options.paused
+                                            state.paused
                                                 ? t(language, 'player.play')
                                                 : t(language, 'player.pause')
                                         }}</span>
                                     </v-tooltip>
 
                                     <!-- Replay button -->
-                                    <v-tooltip v-if="showReplay" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-tooltip v-if="state.replay" top>
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -160,15 +178,13 @@
                                         v-if="attributes.rewind && !activeAd"
                                         top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onRewind"
+                                                @click="rewind"
                                             >
                                                 <v-icon>mdi-rewind-10</v-icon>
                                                 <span class="sr-only">{{
@@ -192,22 +208,21 @@
                                             current.tracks &&
                                             current.tracks.length > 0
                                         "
+                                        :attach="$refs.controlsContainer"
                                         open-on-hover
-                                        top
                                         offset-y
+                                        top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onCCToggle"
+                                                @click="CCToggle"
                                             >
                                                 <v-icon>{{
-                                                    options.cc
+                                                    state.cc
                                                         ? 'mdi-closed-caption'
                                                         : 'mdi-closed-caption-outline'
                                                 }}</v-icon>
@@ -240,45 +255,47 @@
                                     </v-menu>
 
                                     <!-- Volume -->
-                                    <v-menu open-on-hover top offset-y>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-menu
+                                        :attach="$refs.controlsContainer"
+                                        open-on-hover
+                                        offset-y
+                                        top
+                                    >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onMuteToggle"
+                                                @click="muteToggle"
                                             >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume > 0.75
+                                                        !state.muted &&
+                                                        state.volume > 0.75
                                                     "
                                                     >mdi-volume-high</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume >=
-                                                            0.25 &&
-                                                        options.volume <= 0.75
+                                                        !state.muted &&
+                                                        state.volume >= 0.25 &&
+                                                        state.volume <= 0.75
                                                     "
                                                     >mdi-volume-medium</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        !options.muted &&
-                                                        options.volume > 0 &&
-                                                        options.volume < 0.25
+                                                        !state.muted &&
+                                                        state.volume > 0 &&
+                                                        state.volume < 0.25
                                                     "
                                                     >mdi-volume-low</v-icon
                                                 >
                                                 <v-icon
                                                     v-if="
-                                                        options.muted ||
-                                                        options.volume === 0
+                                                        state.muted ||
+                                                        state.volume === 0
                                                     "
                                                     >mdi-volume-off</v-icon
                                                 >
@@ -299,31 +316,29 @@
                                                 )
                                             }}</span>
                                             <v-slider
-                                                v-model="options.volume"
+                                                v-model="state.volume"
                                                 inverse-label
                                                 :min="0"
                                                 :max="1"
                                                 :step="0.1"
                                                 vertical
-                                                @change="onVolumeChange"
+                                                @change="volumeChange"
                                             ></v-slider>
                                         </v-sheet>
                                     </v-menu>
 
                                     <!-- Fullscreen -->
-                                    <v-tooltip v-if="fullscreenEnabled" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-tooltip v-if="allowFullscreen" top>
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="onFullscreen"
+                                                @click="fullscreenToggle"
                                             >
                                                 <v-icon>{{
-                                                    !options.fullscreen
+                                                    !state.fullscreen
                                                         ? 'mdi-fullscreen'
                                                         : 'mdi-fullscreen-exit'
                                                 }}</v-icon>
@@ -350,9 +365,7 @@
                                         "
                                         top
                                     >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -380,13 +393,8 @@
                                     </v-tooltip>
 
                                     <!-- Remote playback -->
-                                    <v-tooltip
-                                        v-if="options.remoteplayback"
-                                        top
-                                    >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-tooltip v-if="allowRemotePlayback" top>
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -412,10 +420,8 @@
                                     </v-tooltip>
 
                                     <!-- Download -->
-                                    <v-tooltip v-if="options.download" top>
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
+                                    <v-tooltip v-if="allowDownload" top>
+                                        <template #activator="{ on, attrs }">
                                             <v-btn
                                                 small
                                                 text
@@ -438,117 +444,18 @@
                                     </v-tooltip>
 
                                     <!-- Settings -->
-                                    <v-menu
-                                        top
-                                        offset-y
-                                        :close-on-content-click="false"
-                                        nudge-left="100"
-                                    >
-                                        <template
-                                            v-slot:activator="{ on, attrs }"
-                                        >
-                                            <v-btn
-                                                small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon>mdi-cog</v-icon>
-                                                <span class="d-sr-only">{{
-                                                    t(
-                                                        language,
-                                                        'player.toggle_settings'
-                                                    )
-                                                }}</span>
-                                            </v-btn>
-                                        </template>
-
-                                        <v-list>
-                                            <v-list-item>
-                                                <v-list-item-title>
-                                                    <v-icon
-                                                        >mdi-play-speed</v-icon
-                                                    >
-                                                    {{
-                                                        t(
-                                                            language,
-                                                            'player.playback_speed'
-                                                        )
-                                                    }}
-                                                </v-list-item-title>
-                                            </v-list-item>
-                                            <v-list-item>
-                                                <v-list-item-title
-                                                    class="text-center"
-                                                >
-                                                    <v-btn
-                                                        small
-                                                        :disabled="
-                                                            options.playbackRateIndex ===
-                                                            0
-                                                        "
-                                                        @click="
-                                                            onPlaybackSpeed(
-                                                                options.playbackRateIndex -
-                                                                    1
-                                                            )
-                                                        "
-                                                    >
-                                                        <v-icon>
-                                                            mdi-clock-minus-outline
-                                                        </v-icon>
-                                                        <span
-                                                            class="d-sr-only"
-                                                            >{{
-                                                                t(
-                                                                    language,
-                                                                    'player.playback_decrease'
-                                                                )
-                                                            }}</span
-                                                        >
-                                                    </v-btn>
-                                                    <span class="pl-2 pr-2"
-                                                        >{{
-                                                            attributes
-                                                                .playbackrates[
-                                                                options
-                                                                    .playbackRateIndex
-                                                            ]
-                                                        }}x</span
-                                                    >
-                                                    <v-btn
-                                                        small
-                                                        :disabled="
-                                                            options.playbackRateIndex >=
-                                                            attributes
-                                                                .playbackrates
-                                                                .length -
-                                                                1
-                                                        "
-                                                        @click="
-                                                            onPlaybackSpeed(
-                                                                options.playbackRateIndex +
-                                                                    1
-                                                            )
-                                                        "
-                                                    >
-                                                        <v-icon>
-                                                            mdi-clock-plus-outline
-                                                        </v-icon>
-                                                        <span
-                                                            class="d-sr-only"
-                                                            >{{
-                                                                t(
-                                                                    language,
-                                                                    'player.playback_increase'
-                                                                )
-                                                            }}</span
-                                                        >
-                                                    </v-btn>
-                                                </v-list-item-title>
-                                            </v-list-item>
-                                        </v-list>
-                                    </v-menu>
+                                    <SettingsMenu
+                                        :attach="$refs.controlsContainer"
+                                        :state="state"
+                                        :attributes="attributes"
+                                        :language="language"
+                                        :captions-visible.sync="
+                                            captionsVisibleState
+                                        "
+                                        @change:playback-rate-index="
+                                            onPlaybackSpeedChange
+                                        "
+                                    ></SettingsMenu>
                                 </template>
                             </v-slider>
                         </div>
@@ -564,14 +471,32 @@
                     captions.cues &&
                     Object.keys(captions.cues).length
                 "
-                :cols="!options.expandedCaptions ? 12 : 6"
+                :cols="!state.expandedCaptions ? 12 : 6"
+                class="pt-0 mt-0"
             >
                 <CaptionsMenu
                     v-model="captions"
                     :language="language"
+                    :expanded.sync="captionsExpandedState"
+                    :hide-expand="captionsHideExpand"
+                    :paragraph-view="captionsParagraphView"
+                    :hide-paragraph-view="captionsHideParagraphView"
+                    :autoscroll="captionsAutoscroll"
+                    :visible.sync="captionsVisibleState"
+                    :hide-autoscroll="captionsHideAutoscroll"
+                    :hide-close="captionsHideClose"
+                    @update:paragraph-view="
+                        $emit('update:captions-paragraph-view', $event)
+                    "
+                    @update:autoscroll="
+                        $emit('update:captions-autoscroll', $event)
+                    "
+                    @update:close="$emit('update:captions-visible', $event)"
                     @click:cue="onCueClick"
                     @click:expand="onClickExpandCaptions"
-                    @click:paragraph="onClickParagraph"
+                    @click:paragraph-view="onClickParagraph"
+                    @click:autoscroll="onClickAutoscroll"
+                    @click:close="onClickCaptionsClose"
                 ></CaptionsMenu>
             </v-col>
         </v-row>
@@ -580,12 +505,14 @@
 
 <script>
 import filters from '../filters'
+import SettingsMenu from './SettingsMenu.vue'
 import CaptionsMenu from './CaptionsMenu.vue'
 import { t } from '../../i18n/i18n'
 
 export default {
     name: 'Html5Player',
     components: {
+        SettingsMenu,
         CaptionsMenu,
     },
     props: {
@@ -593,7 +520,7 @@ export default {
         type: {
             type: String,
             required: false,
-            default: 'video',
+            default: 'auto',
         },
         attributes: {
             type: Object,
@@ -603,8 +530,84 @@ export default {
             type: Object,
             required: true,
         },
+        captionsExpanded: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideExpand: { type: Boolean, required: false, default: true },
+        captionsParagraphView: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideParagraphView: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsVisible: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsHideClose: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
     },
-    watch: {},
+    emits: [
+        'error',
+        'canplaythrough',
+        'emptied',
+        'stalled',
+        'abort',
+        'canplay',
+        'waiting',
+        'play',
+        'pause',
+        'load',
+        'mouseover',
+        'mouseout',
+        'ended',
+        'trackchange',
+        'ratechange',
+        'timeupdate',
+        'seeking',
+        'progress',
+        'volumechange',
+        'cuechange',
+        'loadeddata',
+        'loadedmetadata',
+        'click:fullscreen',
+        'click:pictureinpicture',
+        'click:remoteplayback',
+        'click:captions-expand',
+        'click:captions-paragraph-view',
+        'click:captions-autoscroll',
+        'click:captions-close',
+        'click:captions-cue',
+        'update:captions-expanded',
+        'update:captions-paragraph-view',
+        'update:captions-autoscroll',
+        'update:captions-visible',
+    ],
+    watch: {
+        'state.controls': function () {
+            this.setCuePosition()
+        },
+    },
     computed: {
         current() {
             // We're playing an ad currently
@@ -616,8 +619,97 @@ export default {
             }
         },
         playerClass() {
-            let classList = 'player-' + this.type
+            let classList = 'player-' + this.resolvedType
             return classList
+        },
+        resolvedType() {
+            // Default to video if the type can't be resolved
+            let type = 'video'
+
+            // Make sure current is set and valid and has sources
+            if (
+                this.current &&
+                this.current.sources &&
+                this.current.sources.length > 0
+            ) {
+                const source = this.current.sources[0]
+
+                // Determine off the type / mime field first, then check the extensions
+                if (source.type && source.type.match(/^video\//i)) {
+                    type = 'video'
+                } else if (source.type && source.type.match(/^audio\//i)) {
+                    type = 'audio'
+                } else if (
+                    source.src &&
+                    source.src.match(/(?:mp4|webm|ogg)$/)
+                ) {
+                    type = 'video'
+                } else if (source.src && source.src.match(/(?:mp3|wav)$/)) {
+                    type = 'audio'
+                }
+            }
+
+            return type
+        },
+        captionsVisibleState: {
+            get() {
+                if (typeof this.captionsVisible !== 'undefined') {
+                    return this.captionsVisible
+                } else {
+                    return this.state.captionsVisible
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-visible', v)
+                this.state.captionsVisible = v
+            },
+        },
+        captionsExpandedState: {
+            get() {
+                if (typeof this.captionsExpanded !== 'undefined') {
+                    return this.captionsExpanded
+                } else {
+                    return this.state.expandedCaptions
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-expanded', v)
+                this.state.expandedCaptions = v
+            },
+        },
+        allowFullscreen() {
+            // Determine fullscreen settings
+            // If we explicitly disabled fullscreen in the attributes
+            // Or the browser doesn't support fullscreen
+            // Or we passed the HTML nofullscreen attribute
+            if (
+                this.attributes.playsinline ||
+                !document.fullscreenEnabled ||
+                this.state.controlslist.indexOf('nofullscreen') !== -1
+            ) {
+                return false
+            } else {
+                return true
+            }
+        },
+        allowRemotePlayback() {
+            // Determine remote playback settings
+            if (
+                this.attributes.disableremoteplayback ||
+                this.state.controlslist.indexOf('noremoteplayback') !== -1
+            ) {
+                return false
+            } else {
+                return true
+            }
+        },
+        allowDownload() {
+            // Determine download settings
+            if (this.state.controlslist.indexOf('nodownload') !== -1) {
+                return false
+            } else {
+                return true
+            }
         },
     },
     data() {
@@ -629,8 +721,8 @@ export default {
             currentPercent: 0,
             player: {},
             captions: { nonce: 0 },
-            fullscreenEnabled: false,
-            options: {
+            state: {
+                replay: false,
                 cc: true,
                 ccLang: this.language,
                 controls: true,
@@ -641,24 +733,22 @@ export default {
                 playbackRateIndex: 0,
                 fullscreen: false,
                 expandedCaptions: false,
-                download: false,
-                remoteplayback: false,
+                captionsVisible: true,
                 controlslist: [],
             },
             watchPlayer: 0,
             scrub: { max: 100 },
             buffering: false,
-            showReplay: false,
         }
     },
     beforeMount() {
-        // Parse the controlslist string
+        // Parse the html controlslist attribute string
         if (
             this.attributes.controlslist &&
             typeof this.attributes.controlslist === 'string' &&
             this.attributes.controlslist !== ''
         ) {
-            this.options.controlslist = this.attributes.controlslist.split(' ')
+            this.state.controlslist = this.attributes.controlslist.split(' ')
         }
 
         if (
@@ -672,12 +762,12 @@ export default {
 
         // Adjust the playback speed to 1 by default
         if (this.attributes.playbackrates.indexOf(1) !== -1) {
-            this.options.playbackRateIndex =
+            this.state.playbackRateIndex =
                 this.attributes.playbackrates.indexOf(1)
         } else {
             // 1 aka normal playback not enabled (What monster would do this?!)
             // Set the playback rate to "middle of the road" for whatever is available
-            this.options.playbackRateIndex = Math.floor(
+            this.state.playbackRateIndex = Math.floor(
                 this.attributes.playbackrates.length / 2
             )
         }
@@ -689,34 +779,6 @@ export default {
                 this.ads[ad.play_at_percent] = ad
                 this.ads[ad.play_at_percent].complete = false
             }
-        }
-
-        // Determine fullscreen settings
-        if (
-            this.attributes.playsinline ||
-            !document.fullscreenEnabled ||
-            this.options.controlslist.indexOf('nofullscreen') !== -1
-        ) {
-            this.fullscreenEnabled = false
-        } else {
-            this.fullscreenEnabled = true
-        }
-
-        // Determine remote playback settings
-        if (
-            this.attributes.disableremoteplayback ||
-            this.options.controlslist.indexOf('noremoteplayback') !== -1
-        ) {
-            this.options.remoteplayback = false
-        } else {
-            this.options.remoteplayback = true
-        }
-
-        // Determine download settings
-        if (this.options.controlslist.indexOf('nodownload') !== -1) {
-            this.options.download = false
-        } else {
-            this.options.download = true
         }
     },
     mounted() {
@@ -753,34 +815,45 @@ export default {
         },
         onCueClick(time) {
             this.setTime(time)
+            this.$emit('click:captions-cue', time)
         },
         onClickExpandCaptions(expanded) {
-            this.options.expandedCaptions = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickParagraph(isParagraph) {
-            this.$emit('click:captions-paragraph', isParagraph)
+            this.$emit('click:captions-paragraph-view', isParagraph)
+        },
+        onClickAutoscroll(autoscroll) {
+            this.$emit('click:captions-autoscroll', autoscroll)
+        },
+        onClickCaptionsClose() {
+            this.state.captionsVisible = false
+            this.$emit('click:captions-close')
         },
         onDownload() {
             window.open(this.src.sources[0].src, '_blank')
         },
-        onRewind() {
-            // Rewind in seconds
-            const seconds = 10
-
+        rewind(seconds = 10) {
             if (this.player.currentTime <= seconds) {
                 this.setTime(0)
             } else {
                 this.setTime(this.player.currentTime - seconds)
             }
         },
-        onFullscreen() {
-            this.options.fullscreen = !document.fullscreenElement
+        fastForward(seconds = 10) {
+            if (this.player.currentTime + seconds >= this.player.duration) {
+                this.setTime(this.player.duration)
+            } else {
+                this.setTime(this.player.currentTime + seconds)
+            }
+        },
+        fullscreenToggle() {
+            this.state.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
-            this.$emit('click:fullscreen', this.$el)
+            this.$emit('click:fullscreen', this.$refs.playerContainer)
         },
         onPictureInPicture() {
-            //this.options.pip = !document.fullscreenElement;
+            //this.state.pip = !document.fullscreenElement;
             // Return the player aka HTMLVideoElement
             this.$emit('click:pictureinpicture', this.$refs.player)
         },
@@ -788,16 +861,16 @@ export default {
             this.$emit('click:remoteplayback', this.$refs.player)
         },
         onVideoHover(e) {
-            this.options.controls = true
-            clearTimeout(this.options.controlsDebounce)
+            this.state.controls = true
+            clearTimeout(this.state.controlsDebounce)
             this.$emit('mouseover', e)
         },
         onVideoLeave(e) {
             const self = this
             // Clear any existing timeouts before we create one
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controlsDebounce = setTimeout(() => {
+                self.state.controls = false
             }, 50)
             this.$emit('mouseout', e)
         },
@@ -828,25 +901,25 @@ export default {
                 this.activeAd !== null &&
                 this.activeAd.play_at_percent === 100
             ) {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended but this ad was a postroll
                 this.$emit('ended', e)
             } else {
-                this.showReplay = true
+                this.state.replay = true
                 // Ended without an ad
                 this.$emit('ended', e)
             }
         },
         onControlsHover() {
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controls = true
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controls = true
         },
         onControlsLeave() {
             const self = this
             // Clear any existing timeouts before we create one
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
+            clearTimeout(this.state.controlsDebounce)
+            this.state.controlsDebounce = setTimeout(() => {
+                self.state.controls = false
             }, 50)
         },
         /**
@@ -857,25 +930,25 @@ export default {
         onSelectTrack(lang = null) {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
-                    const tt = this.player.textTracks[i]
+                    // Disable all tracks by default
+                    // We only want to enable the correct active track otherwise track switches / replays will overlay tracks
+                    this.player.textTracks[i].mode = 'disabled'
 
-                    if (tt.language === lang) {
-                        this.options.ccLang = lang
+                    if (this.player.textTracks[i].language === lang) {
+                        this.state.ccLang = lang
                         this.player.textTracks[i].mode = 'showing'
 
-                        this.setCues(tt)
+                        this.setCues(this.player.textTracks[i])
 
                         // Emit the current track
-                        this.$emit('trackchange', tt)
-                    } else {
-                        this.player.textTracks[i].mode = 'disabled'
+                        this.$emit('trackchange', this.player.textTracks[i])
                     }
                 }
             }
         },
-        onPlaybackSpeed(index) {
+        onPlaybackSpeedChange(index) {
             this.player.playbackRate = this.attributes.playbackrates[index]
-            this.options.playbackRateIndex = index
+            this.state.playbackRateIndex = index
             this.$emit('ratechange', this.player.playbackRate)
         },
         onTimeupdate(e) {
@@ -905,29 +978,13 @@ export default {
         onMediaProgress(e) {
             this.$emit('progress', e)
         },
-        onCCToggle() {
-            this.options.cc = !this.options.cc
+        CCToggle() {
+            this.state.cc = !this.state.cc
 
-            if (this.options.cc) {
-                this.onSelectTrack(this.options.ccLang)
+            if (this.state.cc) {
+                this.onSelectTrack(this.state.ccLang)
             } else {
                 this.onSelectTrack()
-            }
-        },
-        onPlayToggle(e) {
-            const self = this
-            this.options.controls = true
-
-            // Clear any existing timeouts and close the controls in 5 seconds
-            clearTimeout(this.options.controlsDebounce)
-            this.options.controlsDebounce = setTimeout(() => {
-                self.options.controls = false
-            }, 5000)
-
-            if (this.player.paused) {
-                this.play(e)
-            } else {
-                this.pause(e)
             }
         },
         onClickReplay(e) {
@@ -955,13 +1012,13 @@ export default {
             // Restart from the beginning
             this.setTime(0)
         },
-        onMuteToggle() {
+        muteToggle() {
             if (this.player.muted) {
-                this.options.muted = false
+                this.state.muted = false
                 this.player.muted = false
-                this.$emit('volumechange', this.options.volume)
+                this.$emit('volumechange', this.state.volume)
             } else {
-                this.options.muted = true
+                this.state.muted = true
                 this.player.muted = true
                 this.$emit('volumechange', 0)
             }
@@ -994,6 +1051,15 @@ export default {
                     if (typeof track.activeCues[0].rawText === 'undefined') {
                         track.activeCues[0].rawText = track.activeCues[0].text
                     }
+                    // Retain the original cue display values
+                    // This way we can swap between a modified display when the controls are visible
+                    if (typeof track.activeCues[0].defaults === 'undefined') {
+                        track.activeCues[0].defaults = {
+                            line: track.activeCues[0].line,
+                            size: track.activeCues[0].size,
+                            snapToLines: track.activeCues[0].snapToLines,
+                        }
+                    }
 
                     // Now remove `<c.transcript>` tags
                     const transcriptTagRegex = /<c.transcript>.*?<\/c>/gi
@@ -1003,6 +1069,8 @@ export default {
                             transcriptTagRegex,
                             ''
                         )
+
+                    this.setCuePosition()
                 }
 
                 this.setCues(track)
@@ -1032,19 +1100,31 @@ export default {
             //this.player.media = this.$refs.player;
             this.$emit('loadedmetadata', e)
             this.player = this.$refs.player
-            this.player.volume = this.options.volume
-            this.$emit('volumechange', this.options.volume)
+            this.player.volume = this.state.volume
+            this.$emit('volumechange', this.state.volume)
         },
-        onVolumeChange(value) {
-            this.options.volume = value
+        volumeChange(value) {
+            // Value needs to be a decimal value between 0 and 1
+            if (value > 1) {
+                value = 1
+            } else if (value < 0) {
+                value = 0
+            }
+            this.state.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
+        },
+        volumeAdjust(value) {
+            const newVolume = this.state.volume + value
+            this.volumeChange(newVolume)
         },
         onDurationChange() {
             // console.log('onDurationChange');
             // console.log(e);
         },
         setTime(time) {
+            // Scrubbing / manually setting the time should remove the replay button
+            this.state.replay = false
             this.player.currentTime = time
         },
         setCues(track) {
@@ -1056,19 +1136,76 @@ export default {
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
         },
+        setCuePosition() {
+            if (
+                this.player &&
+                this.player.textTracks &&
+                this.player.textTracks.length > 0
+            ) {
+                for (let i = 0; i < this.player.textTracks.length; i++) {
+                    // Only alter the currently showing text track
+                    if (this.player.textTracks[i].mode === 'showing') {
+                        // If the controls are showing then bump the alignment to the start
+                        if (
+                            this.state.controls &&
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0
+                        ) {
+                            // Count the number of line breaks in the cue to figure out our offset from the bottom
+                            // VTTCue doesn't have a "margin from bottom" by default
+                            const numLines = (
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].text.match(/\n/g) || []
+                            ).length
+
+                            // Limit the cues to 90% of the screen width
+                            // If this is left default / set to 100 then the above line
+                            // Also set snapToLines to true otherwise if there's a line % in the vtt file the display will be relative and make the lines not aligned properly
+                            this.player.textTracks[i].activeCues[0].line =
+                                -3 - numLines
+                            this.player.textTracks[i].activeCues[0].size = 99
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines = true
+                        } else if (
+                            this.player.textTracks[i].activeCues &&
+                            this.player.textTracks[i].activeCues.length > 0 &&
+                            typeof this.player.textTracks[i].activeCues[0]
+                                .defaults !== 'undefined'
+                        ) {
+                            this.player.textTracks[i].activeCues[0].line =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaults.line
+                            this.player.textTracks[i].activeCues[0].size =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaults.size
+                            this.player.textTracks[
+                                i
+                            ].activeCues[0].snapToLines =
+                                this.player.textTracks[
+                                    i
+                                ].activeCues[0].defaults.snapToLines
+                        }
+                    }
+                }
+            }
+        },
         load(e = null) {
             if (this.player.load) {
                 // Reload the player to refresh all the sources / tracks
                 this.player.load()
                 this.$emit('load', e)
             } else {
-                console.log('Cannot load player')
+                console.error('Cannot load player')
             }
         },
         pause(e = null) {
             if (this.player.pause) {
                 this.player.pause()
-                this.options.paused = true
+                this.state.paused = true
                 this.$emit('pause', e)
             } else {
                 console.log('Cannot pause player')
@@ -1078,10 +1215,33 @@ export default {
             if (this.player.play) {
                 // Start playing the main video
                 this.player.play()
-                this.options.paused = false
+                this.state.paused = false
+                this.state.replay = false
                 this.$emit('play', e)
             } else {
                 console.log('Cannot play player')
+            }
+        },
+        playToggle(e) {
+            // If the replay button is active then we actually need to call the onClickReplay method instead
+            // Otherwise we'd just end up replaying any postroll ad
+            if (this.state.replay) {
+                this.onClickReplay(e)
+            } else {
+                const self = this
+                this.state.controls = true
+
+                // Clear any existing timeouts and close the controls in 5 seconds
+                clearTimeout(this.state.controlsDebounce)
+                this.state.controlsDebounce = setTimeout(() => {
+                    self.state.controls = false
+                }, 5000)
+
+                if (this.player.paused) {
+                    this.play(e)
+                } else {
+                    this.pause(e)
+                }
             }
         },
     },
@@ -1094,28 +1254,10 @@ export default {
     position: relative;
     top: -50px;
     margin-bottom: -40px;
-    overflow: hidden;
 }
 .controls {
     height: 40px;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
-}
-.volume-slider {
-    position: relative;
-    right: -50px;
-    top: -180px;
-    height: 180px;
-    width: 50px;
-    margin-left: -50px;
-    padding-bottom: 10px;
-}
-.slider-active-area {
-    width: 50px;
-    height: 200px;
-    margin-right: -50px;
-    margin-bottom: -200px;
-    position: relative;
-    top: -160px; /* height of this - controls height */
 }
 .player-audio {
     height: 40px;
@@ -1134,12 +1276,18 @@ export default {
     color: #fff;
     left: 25%;
     width: 50%;
-    top: 100px;
+    top: 35%;
     height: 0;
     text-align: center;
 }
-.player-overlay > div {
+.player-overlay--replay-icon {
+    color: #fff;
+    font-size: 5rem;
+}
+.player-overlay > .player-overlay--icon {
+    display: inline-block;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 100%;
+    padding: 1rem;
 }
 </style>

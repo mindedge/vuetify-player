@@ -41,11 +41,82 @@ describe('VuetifyPlayer', () => {
         })
         expect(wrapper.vm.language).toEqual('en-US')
         expect(wrapper.vm).toBeTruthy()
+        expect(wrapper.vm.type).toEqual('auto')
+        expect(wrapper.vm.src).toBeTruthy()
+        expect(wrapper.vm.playlist).toBeTruthy()
+        expect(wrapper.vm.autoplay).toBeFalsy()
+        expect(wrapper.vm.controls).toBeTruthy()
+        expect(wrapper.vm.loop).toBeFalsy()
+    })
+
+    test('VuetifyPlayer props type video', () => {
+        const wrapper = shallowMount(VuetifyPlayer, {
+            mocks: defaultMocks,
+            propsData: {
+                src: {
+                    sources: [
+                        {
+                            src: 'https://jest.jest/video.mp4',
+                            type: 'video.mp4',
+                        },
+                    ],
+                },
+                type: 'video',
+            },
+        })
+        expect(wrapper.vm.language).toEqual('en-US')
+        expect(wrapper.vm).toBeTruthy()
         expect(wrapper.vm.type).toEqual('video')
         expect(wrapper.vm.src).toBeTruthy()
         expect(wrapper.vm.playlist).toBeTruthy()
         expect(wrapper.vm.autoplay).toBeFalsy()
         expect(wrapper.vm.controls).toBeTruthy()
         expect(wrapper.vm.loop).toBeFalsy()
+    })
+
+    test('VuetifyPlayer playlist of 2 items is marked as a playlist', () => {
+        const wrapper = shallowMount(VuetifyPlayer, {
+            mocks: defaultMocks,
+            propsData: {
+                playlist: [
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                ],
+            },
+        })
+        expect(wrapper.vm.showPlaylist).toEqual(true)
+    })
+
+    test('VuetifyPlayer playlist of 1 item is not marked as a playlist', () => {
+        const wrapper = shallowMount(VuetifyPlayer, {
+            mocks: defaultMocks,
+            propsData: {
+                playlist: [
+                    {
+                        sources: [
+                            {
+                                src: 'https://jest.jest/video.mp4',
+                                type: 'video.mp4',
+                            },
+                        ],
+                    },
+                ],
+            },
+        })
+        expect(wrapper.vm.showPlaylist).toEqual(false)
     })
 })

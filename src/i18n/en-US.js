@@ -10,6 +10,7 @@ export default {
         next: 'Play next item in playlist',
     },
     player: {
+        not_configured: 'Media not configured',
         playback_speed: 'Playback Speed',
         playback_decrease: 'Decrease playback speed',
         playback_increase: 'Increase playback speed',
@@ -27,9 +28,17 @@ export default {
         no_support: "Sorry, your browser doesn't support embedded videos.",
     },
     captions: {
+        show_transcript: 'Show Transcript',
+        close: 'Close',
+        search: 'Search',
+        none_found: "No captions found for '{0}'",
         expand: 'Expand',
         collapse: 'Collapse',
         view_as_paragraph: 'View as paragraph',
         view_as_captions: 'View as captions',
+        enable_autoscroll: 'Enable auto-scroll for transcript as media plays',
+        disable_autoscroll: 'Disable auto-scroll for transcript as media plays',
+        autoscroll_enabled: 'Autoscroll transcript enabled',
+        autoscroll_disabled: 'Autoscroll transcript disabled',
     },
 }

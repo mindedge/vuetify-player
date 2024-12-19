@@ -10,6 +10,7 @@ export default {
         next: 'Reproducir el siguiente elemento en la lista de reproducción',
     },
     player: {
+        not_configured: 'Medios no configurados',
         playback_speed: 'Velocidad de reproducción',
         playback_decrease: 'Disminuir la velocidad de reproducción',
         playback_increase: 'Aumentar la velocidad de reproducción',
@@ -27,9 +28,20 @@ export default {
         no_support: 'Lo sentimos, su navegador no admite vídeos incrustados. ',
     },
     captions: {
+        show_transcript: 'Mostrar transcripción',
+        close: 'Cerca',
+        search: 'Buscar',
+        none_found: "No se encontraron subtítulos para '{0}'",
         expand: 'Expandir',
         collapse: 'Colapsar',
         view_as_paragraph: 'Ver como párrafo',
         view_as_captions: 'Ver como subtítulos',
+        enable_autoscroll:
+            'Habilite el desplazamiento automático para la transcripción mientras se reproducen los medios',
+        disable_autoscroll:
+            'Deshabilite el desplazamiento automático para la transcripción mientras se reproducen los medios',
+        autoscroll_enabled:
+            'Transcripción con desplazamiento automático habilitada',
+        autoscroll_disabled: 'Transcripción automática deshabilitado',
     },
 }

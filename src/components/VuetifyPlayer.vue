@@ -1,7 +1,23 @@
 <template>
     <div>
-        <v-row>
-            <v-col :cols="playerCols">
+        <v-row tabindex="0">
+            <v-col cols="12">
+                <div v-if="parseSourceType(current.src.sources) === null">
+                    <div class="player-skeleton--no-source">
+                        <slot name="no-source">
+                            <div>
+                                <v-icon x-large>mdi-cloud-question</v-icon>
+                                <p>
+                                    {{ t(language, 'player.not_configured') }}
+                                </p>
+                            </div>
+                        </slot>
+                    </div>
+                    <v-skeleton-loader
+                        type="image, image, list-item-avatar"
+                        class="player-skeleton"
+                    ></v-skeleton-loader>
+                </div>
                 <YoutubePlayer
                     ref="youtubePlayer"
                     v-if="parseSourceType(current.src.sources) === 'youtube'"
@@ -9,6 +25,8 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    @focusin="onFocusin"
+                    @focusout="onFocusout"
                     @click:fullscreen="onFullscreen"
                 ></YoutubePlayer>
                 <Html5Player
@@ -18,6 +36,13 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    :captions-expanded.sync="captionsExpandedState"
+                    :captions-hide-expand="captionsHideExpand"
+                    :captions-paragraph-view="captionsParagraphView"
+                    :captions-hide-paragraph-view="captionsHideParagraphView"
+                    :captions-autoscroll="captionsAutoscroll"
+                    :captions-hide-autoscroll="captionsHideAutoscroll"
+                    :captions-visible.sync="captionsVisibleState"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
                     @loadeddata="onLoadeddata"
@@ -37,19 +62,29 @@
                     @abort="$emit('abort', $event)"
                     @mouseover="$emit('mouseover', $event)"
                     @mouseout="$emit('mouseout', $event)"
+                    @update:captions-expanded="
+                        $emit('update:captions-expanded', $event)
+                    "
+                    @update:captions-paragraph-view="
+                        $emit('update:captions-paragraph-view', $event)
+                    "
+                    @update:captions-autoscroll="
+                        $emit('update:captions-autoscroll', $event)
+                    "
                     @click:fullscreen="onFullscreen"
                     @click:pictureinpicture="onPictureInPicture"
                     @click:remoteplayback="onRemoteplayback"
                     @click:captions-expand="onClickCaptionsExpand"
-                    @click:captions-paragraph="onClickCaptionsParagraph"
+                    @click:captions-paragraph-view="onClickCaptionsParagraph"
+                    @click:captions-autoscroll="onClickCaptionsAutoscroll"
+                    @click:captions-close="onClickCaptionsClose"
+                    @focusin="onFocusin"
+                    @focusout="onFocusout"
                 ></Html5Player>
             </v-col>
 
             <!-- Playlist stuff -->
-            <v-col
-                v-if="playlistmenu && playlist.length > 1"
-                :cols="playlistCols"
-            >
+            <v-col v-if="showPlaylist" cols="12" class="mt-0 pt-0">
                 <PlaylistMenu
                     v-model="sourceIndex"
                     :language="language"
@@ -63,6 +98,7 @@
 </template>
 
 <script>
+import { t } from '../i18n/i18n'
 import YoutubePlayer from './Media/YoutubePlayer.vue'
 import Html5Player from './Media/Html5Player.vue'
 import PlaylistMenu from './Media/PlaylistMenu.vue'
@@ -90,7 +126,7 @@ export default {
                 return []
             },
         },
-        type: { type: String, required: false, default: 'video' }, // Allowed video|audio. In audio mode the player has a max-height of 40px
+        type: { type: String, required: false, default: 'auto' }, // Allowed auto|video|audio. In audio mode the player has a max-height of 40px
         autoplay: { type: Boolean, required: false, default: false }, // Autoplay on load. It's in the spec but DON'T USE THIS
         autopictureinpicture: {
             type: Boolean,
@@ -123,6 +159,42 @@ export default {
         poster: { type: String, required: false, default: '' }, // Overridden with the playlist.poster if one is set there
         preload: { type: String, required: false, default: '' },
         captionsmenu: { type: Boolean, required: false, default: true }, // Show the captions below the video
+        captionsExpanded: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideExpand: { type: Boolean, required: false, default: true },
+        captionsParagraphView: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideParagraphView: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
+        captionsHideAutoscroll: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsHideClose: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        captionsVisible: {
+            type: Boolean,
+            required: false,
+            default: true,
+        },
         playlistmenu: { type: Boolean, required: false, default: true }, // Show the playlist menu if there's multiple videos
         playlistautoadvance: { type: Boolean, required: false, default: true }, // Play the next source group
         playbackrates: {
@@ -133,6 +205,37 @@ export default {
             },
         }, // Default playback speeds
     },
+    emits: [
+        'load',
+        'loadeddata',
+        'loadedmetadata',
+        'play',
+        'pause',
+        'seeking',
+        'timeupdate',
+        'progress',
+        'canplay',
+        'waiting',
+        'canplaythrough',
+        'error',
+        'emptied',
+        'ratechange',
+        'stalled',
+        'abort',
+        'mouseover',
+        'mouseout',
+        'ended',
+        'click:pictureinpicture',
+        'click:fullscreen',
+        'click:captions-expand',
+        'click:captions-paragraph-view',
+        'click:captions-autoscroll',
+        'click:captions-close',
+        'update:captions-expanded',
+        'update:captions-paragraph-view',
+        'update:captions-autoscroll',
+        'update:captions-visible',
+    ],
     watch: {},
     computed: {
         player() {
@@ -180,17 +283,9 @@ export default {
         },
         playlistCols() {
             // Captions collapsed, playlist will appear on the right
-            if (
-                !this.captionsExpanded &&
-                this.playlistmenu &&
-                this.playlist.length > 1
-            ) {
+            if (!this.captionsExpandedState && this.showPlaylist) {
                 return 4
-            } else if (
-                this.captionsExpanded &&
-                this.playlistmenu &&
-                this.playlist.length > 1
-            ) {
+            } else if (this.captionsExpandedState && this.showPlaylist) {
                 // Captions expanded, playlist will appear as a new row on the bottom of everything
                 return 12
             } else {
@@ -198,21 +293,52 @@ export default {
             }
         },
         playerCols() {
-            if (
-                this.captionsExpanded ||
-                !this.playlistmenu ||
-                this.playlist.length <= 1
-            ) {
+            if (this.captionsExpandedState || !this.showPlaylist) {
                 return 12
             } else {
                 return 8
             }
         },
+        captionsVisibleState: {
+            get() {
+                if (typeof this.captionsVisible !== 'undefined') {
+                    return this.captionsVisible
+                } else {
+                    return this.captions.visible
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-visible', v)
+                this.captions.visible = v
+            },
+        },
+        captionsExpandedState: {
+            get() {
+                if (typeof this.captionsExpanded !== 'undefined') {
+                    return this.captionsExpanded
+                } else {
+                    return this.captions.expanded
+                }
+            },
+            set(v) {
+                this.$emit('update:captions-expanded', v)
+                this.captions.expanded = v
+            },
+        },
+        showPlaylist() {
+            return this.playlistmenu && this.playlist.length > 1
+        },
     },
     data() {
         return {
+            t,
             sourceIndex: 0,
-            captionsExpanded: false,
+            captions: {
+                visible: true,
+                expanded: false,
+            },
+            mediaFocus: false,
+            keyListener: null,
         }
     },
     methods: {
@@ -273,16 +399,25 @@ export default {
             }
         },
         onClickCaptionsExpand(expanded) {
-            this.captionsExpanded = expanded
             this.$emit('click:captions-expand', expanded)
         },
         onClickCaptionsParagraph(isParagraph) {
-            this.$emit('click:captions-paragraph', isParagraph)
+            this.$emit('click:captions-paragraph-view', isParagraph)
+        },
+        onClickCaptionsAutoscroll(autoscroll) {
+            this.$emit('click:captions-autoscroll', autoscroll)
+        },
+        onClickCaptionsClose() {
+            this.$emit('click:captions-close')
         },
         onPlaylistSelect(index) {
             this.sourceIndex = parseInt(index)
-            this.player.load()
-            this.player.play()
+
+            // If we give a bad media type then the player won't resolve
+            if (this.player && typeof this.player.load !== 'undefined') {
+                this.player.load()
+                this.player.play()
+            }
         },
         parseSourceType(sources) {
             const ytRegex =
@@ -304,6 +439,44 @@ export default {
                 return 'html5'
             }
         },
+        onFocusin() {
+            this.mediaFocus = true
+            if (this.player && this.player.$el) {
+                this.player.$el.addEventListener('keydown', this.onKeydown)
+            }
+        },
+        onFocusout() {
+            this.mediaFocus = false
+            if (this.player && this.player.$el) {
+                this.player.$el.removeEventListener('keydown', this.onKeydown)
+            }
+        },
+        onKeydown(e) {
+            // Only process keyboard events if the media is focused
+            // This is just in case the media lost focus but the event listener wasn't removed for some reason
+            if (this.mediaFocus) {
+                e.preventDefault()
+                const map = {
+                    Space: { cb: this.player.playToggle, params: [e] },
+                    KeyK: { cb: this.player.playToggle, params: [e] },
+                    KeyM: { cb: this.player.muteToggle, params: [e] },
+                    ArrowLeft: { cb: this.player.rewind, params: [5] },
+                    ArrowRight: { cb: this.player.fastForward, params: [5] },
+                    KeyJ: { cb: this.player.rewind, params: [10] },
+                    KeyL: { cb: this.player.fastForward, params: [10] },
+                    ArrowUp: { cb: this.player.volumeAdjust, params: [0.1] },
+                    ArrowDown: { cb: this.player.volumeAdjust, params: [-0.1] },
+                    KeyF: { cb: this.player.fullscreenToggle, params: [e] },
+                    KeyC: { cb: this.player.CCToggle, params: [e] },
+                }
+                if (
+                    typeof map[e.code] !== 'undefined' &&
+                    typeof map[e.code].cb !== 'undefined'
+                ) {
+                    map[e.code].cb(...map[e.code].params)
+                }
+            }
+        },
     },
     beforeCreate() {},
     beforeMount() {},
@@ -311,3 +484,16 @@ export default {
     beforeDestroy() {},
 }
 </script>
+
+<style scoped>
+.player-skeleton {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+.player-skeleton--no-source {
+    height: 0px;
+    position: relative;
+    top: 100px;
+    text-align: center;
+}
+</style>

@@ -10,6 +10,7 @@ export default {
         next: 'Spela nästa',
     },
     player: {
+        not_configured: 'Media inte konfigurerad',
         playback_speed: 'Uppspelningshastighet',
         playback_decrease: 'Minska uppspelningshastigheten',
         playback_increase: 'Öka uppspelningshastigheten',
@@ -27,9 +28,19 @@ export default {
         no_support: 'Tyvärr, din webbläsare stöder inte inbäddade videor.',
     },
     captions: {
+        show_transcript: 'Visa avskrift',
+        close: 'Stäng',
+        search: 'Sök',
+        none_found: "Inga bildtexter hittades för '{0}'",
         expand: 'Bygga ut',
         collapse: 'Kollaps',
         view_as_paragraph: 'Visa som stycke',
         view_as_captions: 'Visa som bildtexter',
+        enable_autoscroll:
+            'Aktivera automatisk rullning för transkription när media spelas upp',
+        disable_autoscroll:
+            'Inaktivera automatisk rullning för transkribering när media spelas upp',
+        autoscroll_enabled: 'Autoscroll-transkription aktiverad',
+        autoscroll_disabled: 'Autoscroll-transkription inaktiverad',
     },
 }

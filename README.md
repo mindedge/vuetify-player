@@ -11,7 +11,9 @@ An accessible, localized, full featured media player with Vuetifyjs
 -   [Define ads / preroll / postroll](#the-ads-array)
 -   [Supported Attributes](#supported-vuetifyplayer-attributes)
 -   [Supported Events](#supported-vuetifyplayer-events)
+-   [Supported Slots](#supported-vuetifyplayer-slots)
 -   [Captions](#captions)
+-   [Supported Keyboard Shortcuts](#supported-keyboard-shortcuts)
 -   [License](#license)
 
 ---
@@ -190,59 +192,80 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 
 ## Supported `<VuetifyPlayer>` Attributes
 
-| Attribute Name            | Datatype  | Allowed Values                                     | Default                       | Description                                                                                                                                                                               |
-| ------------------------- | --------- | -------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `language`                | `String`  | en-US \| See BCP 47 Spec                           | "en-US"                       | Defines which locale the video player controls will load in                                                                                                                               |
-| `src`                     | `Object`  | See [src attribute](#the-src-attribute)            | {}                            | A single media source                                                                                                                                                                     |
-| `playlist`                | `Array `  | See [playlist attribute](#the-playlist-attribute)  | []                            | A collection of media source(s)                                                                                                                                                           |
-| `type`                    | `String`  | video \| audio \| image                            | "video"                       | In audio mode the player has a max-height of 40px                                                                                                                                         |
-| `autoplay`                | `Boolean` | true \| false                                      | false                         | Autoplay on load. It's in the spec but DON'T USE THIS                                                                                                                                     |
-| `autopictureinpicture`    | `Boolean` | true \| false                                      | false                         | Start with picture in picture mode                                                                                                                                                        |
-| `controls`                | `Boolean` | true \| false                                      | true                          | Show video controls. When false only play/pause allowed but clicking on the video itself                                                                                                  |
-| `controlslist`            | `String`  | nodownload nofullscreen noremoteplayback           | "nodownload noremoteplayback" | Space separated string per <video>. Allowed 'nodownload nofullscreen noremoteplayback'                                                                                                    |
-| `crossorigin`             | `String`  | anonymous \| use-credentials                       | "anonymous"                   | Indicates whether to use CORS to fetch the related video                                                                                                                                  |
-| `disablepictureinpicture` | `Boolean` | true \| false                                      | true                          | Shows the picture in picture button                                                                                                                                                       |
-| `disableremoteplayback`   | `Boolean` | true \| false                                      | true                          | Shows the remote playback button but functionality does not exist when clicked                                                                                                            |
-| `height`                  | `String`  | `css pixel value`                                  | "auto"                        | The players height                                                                                                                                                                        |
-| `width`                   | `String`  | `css pixel value`                                  | "100%"                        | The players width                                                                                                                                                                         |
-| `rewind`                  | `Boolean` | true \| false                                      | true                          | Enabled the rewind 10s button                                                                                                                                                             |
-| `loop`                    | `Boolean` | true \| false                                      | false                         | Loop the video on completion                                                                                                                                                              |
-| `muted`                   | `Boolean` | true \| false                                      | false                         | Start the video muted                                                                                                                                                                     |
-| `playsinline`             | `Boolean` | true \| false                                      | false                         | Force inline & disable fullscreen                                                                                                                                                         |
-| `poster`                  | `String`  | `image url`                                        | ""                            | Overridden with the playlist.poster if one is set there                                                                                                                                   |
-| `preload`                 | `String`  | "none" \| "metadata" \| "auto" \| `_empty string_` | ""                            | Empty string = `auto` Provide a hint to the browser about what the author thinks will lead to the best user experience with regards to what content is loaded before the video is played. |
-| `captionsmenu`            | `Boolean` | true \| false                                      | true                          | Show the captions below the video                                                                                                                                                         |
-| `playlistmenu`            | `Boolean` | true \| false                                      | true                          | Show the playlist menu if there's multiple videos                                                                                                                                         |
-| `playlistautoadvance`     | `Boolean` | true \| false                                      | true                          | Play the next source group                                                                                                                                                                |
-| `playbackrates`           | `Array`   | [`array of numbers`]                               | [0.5, 1, 1.5, 2]              | Default playback speeds. Anything below 0.25 and above 4 will make cause audio distortion                                                                                                 |
+| Attribute Name                 | Datatype  | Allowed Values                                     | Default                       | Description                                                                                                                                                                               |
+| ------------------------------ | --------- | -------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `language`                     | `String`  | en-US \| See BCP 47 Spec                           | "en-US"                       | Defines which locale the video player controls will load in                                                                                                                               |
+| `src`                          | `Object`  | See [src attribute](#the-src-attribute)            | {}                            | A single media source                                                                                                                                                                     |
+| `playlist`                     | `Array `  | See [playlist attribute](#the-playlist-attribute)  | []                            | A collection of media source(s)                                                                                                                                                           |
+| `type`                         | `String`  | auto \| video \| audio \| image                    | "auto"                        | In audio mode the player has a max-height of 40px                                                                                                                                         |
+| `autoplay`                     | `Boolean` | true \| false                                      | false                         | Autoplay on load. It's in the spec but DON'T USE THIS                                                                                                                                     |
+| `autopictureinpicture`         | `Boolean` | true \| false                                      | false                         | Start with picture in picture mode                                                                                                                                                        |
+| `controls`                     | `Boolean` | true \| false                                      | true                          | Show video controls. When false only play/pause allowed but clicking on the video itself                                                                                                  |
+| `controlslist`                 | `String`  | nodownload nofullscreen noremoteplayback           | "nodownload noremoteplayback" | Space separated string per <video>. Allowed 'nodownload nofullscreen noremoteplayback'                                                                                                    |
+| `crossorigin`                  | `String`  | anonymous \| use-credentials                       | "anonymous"                   | Indicates whether to use CORS to fetch the related video                                                                                                                                  |
+| `disablepictureinpicture`      | `Boolean` | true \| false                                      | true                          | Shows the picture in picture button                                                                                                                                                       |
+| `disableremoteplayback`        | `Boolean` | true \| false                                      | true                          | Shows the remote playback button but functionality does not exist when clicked                                                                                                            |
+| `height`                       | `String`  | `css pixel value`                                  | "auto"                        | The players height                                                                                                                                                                        |
+| `width`                        | `String`  | `css pixel value`                                  | "100%"                        | The players width                                                                                                                                                                         |
+| `rewind`                       | `Boolean` | true \| false                                      | true                          | Enabled the rewind 10s button                                                                                                                                                             |
+| `loop`                         | `Boolean` | true \| false                                      | false                         | Loop the video on completion                                                                                                                                                              |
+| `muted`                        | `Boolean` | true \| false                                      | false                         | Start the video muted                                                                                                                                                                     |
+| `playsinline`                  | `Boolean` | true \| false                                      | false                         | Force inline & disable fullscreen                                                                                                                                                         |
+| `poster`                       | `String`  | `image url`                                        | ""                            | Overridden with the playlist.poster if one is set there                                                                                                                                   |
+| `preload`                      | `String`  | "none" \| "metadata" \| "auto" \| `_empty string_` | ""                            | Empty string = `auto` Provide a hint to the browser about what the author thinks will lead to the best user experience with regards to what content is loaded before the video is played. |
+| `captionsmenu`                 | `Boolean` | true \| false                                      | true                          | Allow the captions below the video                                                                                                                                                        |
+| `playlistmenu`                 | `Boolean` | true \| false                                      | true                          | Show the playlist menu if there's multiple videos                                                                                                                                         |
+| `playlistautoadvance`          | `Boolean` | true \| false                                      | true                          | Play the next source group                                                                                                                                                                |
+| `playbackrates`                | `Array`   | [`array of numbers`]                               | [0.5, 1, 1.5, 2]              | Default playback speeds. Anything below 0.25 and above 4 will make cause audio distortion                                                                                                 |
+| `captions-expanded`            | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript being expanded.                                                                                                            |
+| `captions-hide-expand`         | `Boolean` | true \| false                                      | true                          | Show / allow the captions transcript expand button for users                                                                                                                              |
+| `captions-paragraph-view`      | `Boolean` | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript paragraph view                                                                                                             |
+| `captions-hide-paragraph-view` | `Boolean` | true \| false                                      | false                         | Allow the captions transcript paragraph view for users                                                                                                                                    |
+| `captions-autoscroll`          | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript autoscroll state                                                                                                          |
+| `captions-hide-autoscroll`     | `Boolean` | true \| false                                      | undefined                     | Allow users to enable / disable captions transcript autoscrolling                                                                                                                         |
+| `captions-hide-close`          | `Boolean` | true \| false                                      | false                         | Allow users to show / hide the captions transcript box                                                                                                                                    |
+| `captions-visible`             | `Boolean` | true \| false                                      | false                         | Supports `.sync`. The initial state for the captions transcript visibility                                                                                                                |
 
 ## Supported `<VuetifyPlayer>` Events
 
-| Event name                 | Returns           | When it's triggered                                                                                                  |
-| -------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `abort`                    | `Event`           | Download interrupted                                                                                                 |
-| `canplay`                  | `Event`           | Playback can start                                                                                                   |
-| `canplaythrough`           | `Event`           | Playback can continue and should not be interrupted. Readstate is 3                                                  |
-| `emptied`                  | `Event`           | The network connection is down                                                                                       |
-| `ended`                    | `Event`           | When playback has stopped because the end of the media was reached                                                   |
-| `error`                    | `Event`           | A network error occurred during the download                                                                         |
-| `loadeddata`               | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame             |
-| `loadedmetadata`           | `Event`           | When the metadata has been loaded                                                                                    |
-| `play`                     | `Event`           | The media has received a request to start playing                                                                    |
-| `pause`                    | `Event`           | Playback has been suspended                                                                                          |
-| `progress`                 | `Event`           | The progress event is fired periodically as the browser loads a resource.                                            |
-| `seeking`                  | `Event`           | Playback has moved to a new location                                                                                 |
-| `timeupdate`               | `Object`          | The current time was changed. Object contains { event: Event, current_percent: Number }                              |
-| `ratechange`               | `Number`          | The playback speed multiplier                                                                                        |
-| `stalled`                  | `Event`           | The browser tried to download but has not received data yet                                                          |
-| `volumechange`             | `Number`          | The volume or muted button changed. Value from 0.0 to 1                                                              |
-| `waiting`                  | `Event`           | Pause playback to download more data                                                                                 |
-| `click:fullscreen`         | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                               |
-| `click:pictureinpicture`   | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                                    |
-| `click:captions-expand`    | `true` \| `false` | When the expand captions button is clicked. true on expanded, false on collapsed                                     |
-| `click:captions-paragraph` | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
-| `mouseover`                | `MouseEvent`      | Mouse over the media                                                                                                 |
-| `mouseout`                 | `MouseEvent`      | Mouse left the media                                                                                                 |
+| Event name                       | Returns           | When it's triggered                                                                                                  |
+| -------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `abort`                          | `Event`           | Download interrupted                                                                                                 |
+| `canplay`                        | `Event`           | Playback can start                                                                                                   |
+| `canplaythrough`                 | `Event`           | Playback can continue and should not be interrupted. Readstate is 3                                                  |
+| `emptied`                        | `Event`           | The network connection is down                                                                                       |
+| `ended`                          | `Event`           | When playback has stopped because the end of the media was reached                                                   |
+| `error`                          | `Event`           | A network error occurred during the download                                                                         |
+| `load`                           | `Event`           | The media is being initialized and loaded                                                                            |
+| `loadeddata`                     | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame             |
+| `loadedmetadata`                 | `Event`           | When the metadata has been loaded                                                                                    |
+| `play`                           | `Event`           | The media has received a request to start playing                                                                    |
+| `pause`                          | `Event`           | Playback has been suspended                                                                                          |
+| `progress`                       | `Event`           | The progress event is fired periodically as the browser loads a resource.                                            |
+| `seeking`                        | `Event`           | Playback has moved to a new location                                                                                 |
+| `timeupdate`                     | `Object`          | The current time was changed. Object contains { event: Event, current_percent: Number }                              |
+| `ratechange`                     | `Number`          | The playback speed multiplier                                                                                        |
+| `stalled`                        | `Event`           | The browser tried to download but has not received data yet                                                          |
+| `volumechange`                   | `Number`          | The volume or muted button changed. Value from 0.0 to 1                                                              |
+| `waiting`                        | `Event`           | Pause playback to download more data                                                                                 |
+| `mouseover`                      | `MouseEvent`      | Mouse over the media                                                                                                 |
+| `mouseout`                       | `MouseEvent`      | Mouse left the media                                                                                                 |
+| `click:fullscreen`               | `true` \| `false` | When the fullscreen button is clicked. true on fullscreen, false on exiting fullscreen                               |
+| `click:pictureinpicture`         | `true` \| `false` | When the picture-in-picture button is clicked. true on enabled, false on disabled                                    |
+| `click:captions-expand`          | `true` \| `false` | When the expand captions button is clicked. true on expanded, false on collapsed                                     |
+| `click:captions-paragraph-view`  | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
+| `click:captions-autoscroll`      | `true` \| `false` | When the autoscroll captions button is clicked. true on autoscrolling otherwise false                                |
+| `click:captions-close`           | `true` \| `false` | When the c;pse captions button is clicked. true on closed, false on visible                                          |
+| `update:captions-expanded`       | `true` \| `false` | When the captions expand state is updated                                                                            |
+| `update:captions-paragraph-view` | `true` \| `false` | When the captions paragraph-view state is updated                                                                    |
+| `update:captions-autoscroll`     | `true` \| `false` | When the captions autoscroll state is updated                                                                        |
+| `update:captions-visible`        | `true` \| `false` | When the captions visible state is updated                                                                           |
+
+## Supported `<VuetifyPlayer>` Slots
+
+| Slot name   | Attributes | Description                                                                 |
+| ----------- | ---------- | --------------------------------------------------------------------------- |
+| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured |
 
 ## Captions
 
@@ -263,6 +286,21 @@ This text will show up on a new line in the player.
 00:00:03.000 --> 00:00:5.999
 sentence here to break it up
 ```
+
+## Supported Keyboard Shortcuts
+
+| Key             | Action                  |
+| --------------- | ----------------------- |
+| `k`             | Toggle play / pause     |
+| `m`             | Toggle mute             |
+| `{Left Arrow}`  | Rewind 5 seconds        |
+| `{Right Arrow}` | Fast forward 5 seconds  |
+| `j`             | Rewind 10 seconds       |
+| `l`             | Fast forward 10 seconds |
+| `{Up Arrow}`    | Increase volume by 10%  |
+| `{Down Arrow}`  | Decrease volume by 10%  |
+| `f`             | Toggle fullscreen       |
+| `c`             | Toggle closed captions  |
 
 ## License
 
