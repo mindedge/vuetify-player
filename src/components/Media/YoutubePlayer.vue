@@ -34,8 +34,12 @@ export default {
     watch: {},
     computed: {
         playerClass() {
-            let classList = 'player-' + this.type
+            let classList = 'player-' + this.resolvedType
             return classList
+        },
+        resolvedType() {
+            // Youtube is always a video
+            return 'video'
         },
     },
     data() {

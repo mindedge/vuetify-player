@@ -6,7 +6,10 @@
                 :cols="!state.expandedCaptions ? 12 : 6"
                 class="pb-0 mb-0"
             >
-                <div v-if="buffering" class="player-overlay">
+                <div
+                    v-if="resolvedType === 'video' && buffering"
+                    class="player-overlay"
+                >
                     <div class="player-overlay--icon">
                         <v-progress-circular
                             :size="50"
@@ -14,7 +17,10 @@
                         ></v-progress-circular>
                     </div>
                 </div>
-                <div v-if="state.replay" class="player-overlay">
+                <div
+                    v-if="resolvedType === 'video' && state.replay"
+                    class="player-overlay"
+                >
                     <div class="player-overlay--icon">
                         <v-icon class="player-overlay--replay-icon">
                             mdi-replay
@@ -24,7 +30,7 @@
                 <video
                     ref="player"
                     tabindex="0"
-                    :class="'player-' + type"
+                    :class="'player-' + resolvedType"
                     :height="attributes.height"
                     :width="attributes.width"
                     :autoplay="attributes.autoplay"
@@ -514,7 +520,7 @@ export default {
         type: {
             type: String,
             required: false,
-            default: 'video',
+            default: 'auto',
         },
         attributes: {
             type: Object,
@@ -613,8 +619,37 @@ export default {
             }
         },
         playerClass() {
-            let classList = 'player-' + this.type
+            let classList = 'player-' + this.resolvedType
             return classList
+        },
+        resolvedType() {
+            // Default to video if the type can't be resolved
+            let type = 'video'
+
+            // Make sure current is set and valid and has sources
+            if (
+                this.current &&
+                this.current.sources &&
+                this.current.sources.length > 0
+            ) {
+                const source = this.current.sources[0]
+
+                // Determine off the type / mime field first, then check the extensions
+                if (source.type && source.type.match(/^video\//i)) {
+                    type = 'video'
+                } else if (source.type && source.type.match(/^audio\//i)) {
+                    type = 'audio'
+                } else if (
+                    source.src &&
+                    source.src.match(/(?:mp4|webm|ogg)$/)
+                ) {
+                    type = 'video'
+                } else if (source.src && source.src.match(/(?:mp3|wav)$/)) {
+                    type = 'audio'
+                }
+            }
+
+            return type
         },
         captionsVisibleState: {
             get() {
