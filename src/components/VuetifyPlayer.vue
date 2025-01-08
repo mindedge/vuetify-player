@@ -25,6 +25,7 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    :elevation="flat ? 0 : elevation"
                     @focusin="onFocusin"
                     @focusout="onFocusout"
                     @click:fullscreen="onFullscreen"
@@ -43,6 +44,7 @@
                     :captions-autoscroll="captionsAutoscroll"
                     :captions-hide-autoscroll="captionsHideAutoscroll"
                     :captions-visible.sync="captionsVisibleState"
+                    :elevation="flat ? 0 : elevation"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
                     @loadeddata="onLoadeddata"
@@ -204,6 +206,8 @@ export default {
                 return [0.5, 1, 1.5, 2]
             },
         }, // Default playback speeds
+        elevation: { type: [Number, String], required: false, default: 2 },
+        flat: { type: Boolean, required: false, default: false },
     },
     emits: [
         'load',

@@ -1,5 +1,5 @@
 <template>
-    <v-card v-if="visibleState">
+    <v-card v-if="visibleState" :elevation="elevation">
         <v-card-actions class="d-flex flex-wrap flex-row-reverse mb-0 pb-0">
             <div class="d-flex ml-auto">
                 <v-tooltip v-if="!hideAutoscroll" top>
@@ -231,6 +231,7 @@ export default {
         hideAutoscroll: { type: Boolean, required: false, default: false },
         visible: { type: Boolean, required: false, default: undefined },
         hideClose: { type: Boolean, required: false, default: false },
+        elevation: { type: [Number, String], required: false, default: 2 },
     },
     emits: [
         'click:cue',
@@ -298,20 +299,23 @@ export default {
                     }
 
                     // Create a new paragraph every 3 sentences
-                    if (puncuationCount > 3) {
-                        // Find the first puncuation and include it in the slice
+                    if (
+                        puncuationCount > 3 &&
+                        typeof cues[i + 1] !== 'undefined'
+                    ) {
+                        // Find the first puncuation and include it in the slice so the NEXT paragraph doesn't start mid sentence
                         const breakIndex = cues[i].text.search(/[.?!]/) + 1
 
                         // Append the first part to the previous paragraph so it ends on a period
                         paragraphs[paragraphs.length - 1].text +=
-                            ' ' + cues[i].text.slice(0, breakIndex)
+                            ' ' + cues[i].text.slice(0, breakIndex).trim()
 
                         // Use `new VTTCue` to break the reference. Otherwise the below appends will duplicate text
                         // Also grab from the breakIndex afterwards to get the potential next sentence
                         paragraphs.push(
                             new VTTCue(
-                                cues[i].startTime,
-                                cues[i].endTime,
+                                cues[i + 1].startTime,
+                                cues[i + 1].endTime,
                                 cues[i].text.slice(breakIndex).trim()
                             )
                         )
