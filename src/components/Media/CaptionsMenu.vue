@@ -299,20 +299,23 @@ export default {
                     }
 
                     // Create a new paragraph every 3 sentences
-                    if (puncuationCount > 3) {
-                        // Find the first puncuation and include it in the slice
+                    if (
+                        puncuationCount > 3 &&
+                        typeof cues[i + 1] !== 'undefined'
+                    ) {
+                        // Find the first puncuation and include it in the slice so the NEXT paragraph doesn't start mid sentence
                         const breakIndex = cues[i].text.search(/[.?!]/) + 1
 
                         // Append the first part to the previous paragraph so it ends on a period
                         paragraphs[paragraphs.length - 1].text +=
-                            ' ' + cues[i].text.slice(0, breakIndex)
+                            ' ' + cues[i].text.slice(0, breakIndex).trim()
 
                         // Use `new VTTCue` to break the reference. Otherwise the below appends will duplicate text
                         // Also grab from the breakIndex afterwards to get the potential next sentence
                         paragraphs.push(
                             new VTTCue(
-                                cues[i].startTime,
-                                cues[i].endTime,
+                                cues[i + 1].startTime,
+                                cues[i + 1].endTime,
                                 cues[i].text.slice(breakIndex).trim()
                             )
                         )
