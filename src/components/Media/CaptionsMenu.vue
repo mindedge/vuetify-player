@@ -1,5 +1,5 @@
 <template>
-    <v-card v-if="visibleState">
+    <v-card v-if="visibleState" flat :elevation="elevation">
         <v-card-actions class="d-flex flex-wrap flex-row-reverse mb-0 pb-0">
             <div class="d-flex ml-auto">
                 <v-tooltip v-if="!hideAutoscroll" top>
@@ -231,6 +231,7 @@ export default {
         hideAutoscroll: { type: Boolean, required: false, default: false },
         visible: { type: Boolean, required: false, default: undefined },
         hideClose: { type: Boolean, required: false, default: false },
+        elevation: { type: [Number, String], required: false, default: 2 },
     },
     emits: [
         'click:cue',

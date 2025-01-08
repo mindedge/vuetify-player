@@ -485,6 +485,7 @@
                     :visible.sync="captionsVisibleState"
                     :hide-autoscroll="captionsHideAutoscroll"
                     :hide-close="captionsHideClose"
+                    :elevation="elevation"
                     @update:paragraph-view="
                         $emit('update:captions-paragraph-view', $event)
                     "
@@ -566,6 +567,7 @@ export default {
             required: false,
             default: false,
         },
+        elevation: { type: [Number, String], required: false, default: 2 },
     },
     emits: [
         'error',
