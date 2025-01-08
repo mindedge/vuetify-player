@@ -1,5 +1,5 @@
 <template>
-    <v-card v-if="visibleState" flat :elevation="elevation">
+    <v-card v-if="visibleState" :elevation="elevation">
         <v-card-actions class="d-flex flex-wrap flex-row-reverse mb-0 pb-0">
             <div class="d-flex ml-auto">
                 <v-tooltip v-if="!hideAutoscroll" top>
