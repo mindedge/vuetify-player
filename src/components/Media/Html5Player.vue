@@ -736,6 +736,7 @@ export default {
                 controlsDebounce: null,
                 volume: 0.5, // default 50%
                 muted: false,
+                unmuteVolume: 0, // The stored volume to return to the initial volume when unmuting
                 paused: true,
                 playbackRateIndex: 0,
                 fullscreen: false,
@@ -1026,10 +1027,17 @@ export default {
         },
         muteToggle() {
             if (this.player.muted) {
+                // Restore the inital volume
+                this.state.volume = this.state.unmuteVolume
+                this.state.unmuteVolume = 0
                 this.state.muted = false
                 this.player.muted = false
                 this.$emit('volumechange', this.state.volume)
             } else {
+                // Store the initial volume
+                this.state.unmuteVolume = this.state.volume
+                this.state.volume = 0
+
                 this.state.muted = true
                 this.player.muted = true
                 this.$emit('volumechange', 0)
@@ -1122,6 +1130,13 @@ export default {
             } else if (value < 0) {
                 value = 0
             }
+
+            // Unmuted if we're adjusting the volume up
+            if (value > 0 && (this.player.muted || this.state.muted)) {
+                this.state.muted = false
+                this.player.muted = false
+            }
+
             this.state.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
