@@ -1029,6 +1029,7 @@ export default {
             if (this.player.muted) {
                 // Restore the inital volume
                 this.state.volume = this.state.unmuteVolume
+                this.player.volume = this.state.unmuteVolume
                 this.state.unmuteVolume = 0
                 this.state.muted = false
                 this.player.muted = false
@@ -1037,6 +1038,7 @@ export default {
                 // Store the initial volume
                 this.state.unmuteVolume = this.state.volume
                 this.state.volume = 0
+                this.player.volume = 0
 
                 this.state.muted = true
                 this.player.muted = true
@@ -1109,6 +1111,13 @@ export default {
                         this.onSelectTrack(track.srclang)
                     }
                 }
+            }
+
+            // We're starting muted so set the appropriate return volume / muted values
+            if (this.state.volume === 0) {
+                this.state.unmuteVolume = 0.5
+                this.state.muted = true
+                this.player.muted = true
             }
 
             this.$emit('loadeddata', e)
