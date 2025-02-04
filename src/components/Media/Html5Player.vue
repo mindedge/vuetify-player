@@ -219,10 +219,10 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="CCToggle"
+                                                @click="onClickCCToggle"
                                             >
                                                 <v-icon>{{
-                                                    state.cc
+                                                    ccState
                                                         ? 'mdi-closed-caption'
                                                         : 'mdi-closed-caption-outline'
                                                 }}</v-icon>
@@ -536,6 +536,11 @@ export default {
             required: false,
             default: undefined,
         },
+        cc: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
         captionsExpanded: {
             type: Boolean,
             required: false,
@@ -605,6 +610,7 @@ export default {
         'click:captions-autoscroll',
         'click:captions-close',
         'click:captions-cue',
+        'update:cc',
         'update:captions-expanded',
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
@@ -657,6 +663,19 @@ export default {
             }
 
             return type
+        },
+        ccState: {
+            get() {
+                if (typeof this.cc !== 'undefined') {
+                    return this.cc
+                } else {
+                    return this.state.cc
+                }
+            },
+            set(v) {
+                this.$emit('update:cc', v)
+                this.state.cc = v
+            },
         },
         captionsVisibleState: {
             get() {
@@ -991,10 +1010,13 @@ export default {
         onMediaProgress(e) {
             this.$emit('progress', e)
         },
-        CCToggle() {
-            this.state.cc = !this.state.cc
+        onClickCCToggle() {
+            // We can't read the opposite of !this.ccState because it's a computed off of props
+            // So this.ccState = !this.ccState takes 1 tick to reflect the actual changes between the getter and setter
+            const state = !this.ccState
+            this.ccState = state
 
-            if (this.state.cc) {
+            if (state) {
                 this.onSelectTrack(this.state.ccLang)
             } else {
                 this.onSelectTrack()
@@ -1111,6 +1133,11 @@ export default {
                         this.onSelectTrack(track.srclang)
                     }
                 }
+            }
+
+            // Toggle the closed captions if the state is disabled
+            if (!this.ccState) {
+                this.onSelectTrack()
             }
 
             // We're starting muted so set the appropriate return volume / muted values
