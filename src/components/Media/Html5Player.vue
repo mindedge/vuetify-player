@@ -531,6 +531,11 @@ export default {
             type: Object,
             required: true,
         },
+        volume: {
+            type: Number,
+            required: false,
+            default: undefined,
+        },
         captionsExpanded: {
             type: Boolean,
             required: false,
@@ -781,6 +786,11 @@ export default {
                 this.ads[ad.play_at_percent] = ad
                 this.ads[ad.play_at_percent].complete = false
             }
+        }
+
+        // Set the initial volume
+        if (typeof this.volume !== 'undefined') {
+            this.state.volume = this.volume
         }
     },
     mounted() {

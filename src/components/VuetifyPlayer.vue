@@ -37,6 +37,7 @@
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    :volume.sync="volumeState"
                     :captions-expanded.sync="captionsExpandedState"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
@@ -54,6 +55,7 @@
                     @seeking="$emit('seeking', $event)"
                     @timeupdate="$emit('timeupdate', $event)"
                     @progress="$emit('progress', $event)"
+                    @volumechange="onVolumeChange"
                     @canplay="$emit('canplay', $event)"
                     @waiting="$emit('waiting', $event)"
                     @canplaythrough="$emit('canplaythrough', $event)"
@@ -157,6 +159,7 @@ export default {
         rewind: { type: Boolean, required: false, default: false }, // Enabled the rewind 10s button
         loop: { type: Boolean, required: false, default: false }, // Loop the video on completion
         muted: { type: Boolean, required: false, default: false }, // Start the video muted
+        volume: { type: Number, required: false, default: undefined }, // The initial volume level. Undefined will use the local value of 0.5
         playsinline: { Boolean: String, required: false, default: false }, // Force inline & disable fullscreen
         poster: { type: String, required: false, default: '' }, // Overridden with the playlist.poster if one is set there
         preload: { type: String, required: false, default: '' },
@@ -218,6 +221,7 @@ export default {
         'seeking',
         'timeupdate',
         'progress',
+        'volumechange',
         'canplay',
         'waiting',
         'canplaythrough',
@@ -240,7 +244,7 @@ export default {
         'update:captions-autoscroll',
         'update:captions-visible',
     ],
-    watch: {},
+
     computed: {
         player() {
             if (this.parseSourceType(this.current.src.sources) === 'youtube') {
@@ -303,6 +307,19 @@ export default {
                 return 8
             }
         },
+        volumeState: {
+            get() {
+                if (typeof this.volume !== 'undefined') {
+                    return this.volume
+                } else {
+                    return this.localVolume
+                }
+            },
+            set(v) {
+                this.player.volumeChange(v)
+                this.localVolume = v
+            },
+        },
         captionsVisibleState: {
             get() {
                 if (typeof this.captionsVisible !== 'undefined') {
@@ -341,6 +358,7 @@ export default {
                 visible: true,
                 expanded: false,
             },
+            localVolume: 0.5, // The initial volume level
             mediaFocus: false,
             keyListener: null,
         }
@@ -358,6 +376,10 @@ export default {
         onLoadeddata(e) {
             // Loaded a new video
             this.$emit('loadeddata', e)
+        },
+        onVolumeChange(e) {
+            this.$emit('update:volume', e)
+            this.$emit('volumechange', e)
         },
         onRemoteplayback(el) {
             // Make sure the browser supports remote playback
