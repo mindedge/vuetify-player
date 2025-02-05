@@ -1166,12 +1166,12 @@ export default {
         setCues(track) {
             // Filter out any cues / active cues that start after the video has already ended
             // This way we don't show captions that we can't skip to
-            const cues = Object.keys(track.cues)
+            const cues = Object.keys(track.cues || {})
                 .map((key) => track.cues[key])
                 .filter((c) => {
                     return c.startTime < this.player.duration
                 })
-            const activeCues = Object.keys(track.activeCues)
+            const activeCues = Object.keys(track.activeCues || {})
                 .map((key) => track.activeCues[key])
                 .filter((c) => {
                     return c.startTime < this.player.duration
