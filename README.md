@@ -266,9 +266,10 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 
 ## Supported `<VuetifyPlayer>` Slots
 
-| Slot name   | Attributes | Description                                                                 |
-| ----------- | ---------- | --------------------------------------------------------------------------- |
-| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured |
+| Slot name   | Attributes | Description                                                                          |
+| ----------- | ---------- | ------------------------------------------------------------------------------------ |
+| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured          |
+| `loading`   | `none`     | Displayed over the media skeleton loader when the playlist has changed via its props |
 
 ## Captions
 
