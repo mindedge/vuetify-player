@@ -1164,10 +1164,23 @@ export default {
             this.player.currentTime = time
         },
         setCues(track) {
+            // Filter out any cues / active cues that start after the video has already ended
+            // This way we don't show captions that we can't skip to
+            const cues = Object.keys(track.cues)
+                .map((key) => track.cues[key])
+                .filter((c) => {
+                    return c.startTime < this.player.duration
+                })
+            const activeCues = Object.keys(track.activeCues)
+                .map((key) => track.activeCues[key])
+                .filter((c) => {
+                    return c.startTime < this.player.duration
+                })
+
             // Create reactive fields
             this.$set(this.captions, 'language', track.language)
-            this.$set(this.captions, 'cues', track.cues)
-            this.$set(this.captions, 'activeCues', track.activeCues)
+            this.$set(this.captions, 'cues', cues)
+            this.$set(this.captions, 'activeCues', activeCues)
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
