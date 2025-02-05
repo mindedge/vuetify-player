@@ -68,6 +68,7 @@
                     :attributes="current.attributes"
                     :src="current.src"
                     :volume.sync="volumeState"
+                    :cc.sync="ccState"
                     :captions-expanded.sync="captionsExpandedState"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
@@ -193,6 +194,7 @@ export default {
         playsinline: { Boolean: String, required: false, default: false }, // Force inline & disable fullscreen
         poster: { type: String, required: false, default: '' }, // Overridden with the playlist.poster if one is set there
         preload: { type: String, required: false, default: '' },
+        cc: { type: Boolean, required: false, default: undefined }, // The initial state of the closed captions (if available). Undefined will use the local value of false
         captionsmenu: { type: Boolean, required: false, default: true }, // Show the captions below the video
         captionsExpanded: {
             type: Boolean,
@@ -269,6 +271,8 @@ export default {
         'click:captions-paragraph-view',
         'click:captions-autoscroll',
         'click:captions-close',
+        'update:volume',
+        'update:cc',
         'update:captions-expanded',
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
@@ -347,6 +351,19 @@ export default {
                 return 8
             }
         },
+        ccState: {
+            get() {
+                if (typeof this.cc !== 'undefined') {
+                    return this.cc
+                } else {
+                    return this.captions.cc
+                }
+            },
+            set(v) {
+                this.$emit('update:cc', v)
+                this.captions.cc = v
+            },
+        },
         volumeState: {
             get() {
                 if (typeof this.volume !== 'undefined') {
@@ -396,6 +413,7 @@ export default {
             loading: false,
             sourceIndex: 0,
             captions: {
+                cc: false,
                 visible: true,
                 expanded: false,
             },
