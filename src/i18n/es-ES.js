@@ -10,6 +10,7 @@ export default {
         next: 'Reproducir el siguiente elemento en la lista de reproducción',
     },
     player: {
+        loading: 'Cargando...',
         not_configured: 'Medios no configurados',
         playback_speed: 'Velocidad de reproducción',
         playback_decrease: 'Disminuir la velocidad de reproducción',

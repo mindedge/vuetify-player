@@ -217,6 +217,8 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `playlistmenu`                 | `Boolean`          | true \| false                                      | true                          | Show the playlist menu if there's multiple videos                                                                                                                                         |
 | `playlistautoadvance`          | `Boolean`          | true \| false                                      | true                          | Play the next source group                                                                                                                                                                |
 | `playbackrates`                | `Array`            | [`array of numbers`]                               | [0.5, 1, 1.5, 2]              | Default playback speeds. Anything below 0.25 and above 4 will make cause audio distortion                                                                                                 |
+| `volume`                       | `Number`           | 0-1                                                | 0.5                           | Supports `.sync`. The initial volume of the player.                                                                                                                                       |
+| `cc`                           | `Boolean`          | true \| false                                      | false                         | Supports `.sync`. The initial state of the player embedded closed captions.                                                                                                               |
 | `captions-expanded`            | `Boolean`          | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript being expanded.                                                                                                            |
 | `captions-hide-expand`         | `Boolean`          | true \| false                                      | true                          | Show / allow the captions transcript expand button for users                                                                                                                              |
 | `captions-paragraph-view`      | `Boolean`          | true \| false                                      | undefined                     | Supports `.sync`. The initial state of the captions transcript paragraph view                                                                                                             |
@@ -258,6 +260,8 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `click:captions-paragraph-view`  | `true` \| `false` | When the view as paragraph button is clicked. true when viewing as a paragraph, false when viewing as timed captions |
 | `click:captions-autoscroll`      | `true` \| `false` | When the autoscroll captions button is clicked. true on autoscrolling otherwise false                                |
 | `click:captions-close`           | `true` \| `false` | When the c;pse captions button is clicked. true on closed, false on visible                                          |
+| `update:volume`                  | `Number`          | When the volume is updated. This is the same as `volumechange`                                                       |
+| `update:cc`                      | `true` \| `false` | When the players closed captions state is updated                                                                    |
 | `update:captions-expanded`       | `true` \| `false` | When the captions expand state is updated                                                                            |
 | `update:captions-paragraph-view` | `true` \| `false` | When the captions paragraph-view state is updated                                                                    |
 | `update:captions-autoscroll`     | `true` \| `false` | When the captions autoscroll state is updated                                                                        |
@@ -265,9 +269,10 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 
 ## Supported `<VuetifyPlayer>` Slots
 
-| Slot name   | Attributes | Description                                                                 |
-| ----------- | ---------- | --------------------------------------------------------------------------- |
-| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured |
+| Slot name   | Attributes | Description                                                                          |
+| ----------- | ---------- | ------------------------------------------------------------------------------------ |
+| `no-source` | `none`     | Displayed over the media skeleton loader when no media source is configured          |
+| `loading`   | `none`     | Displayed over the media skeleton loader when the playlist has changed via its props |
 
 ## Captions
 

@@ -10,6 +10,7 @@ export default {
         next: 'Spela nästa',
     },
     player: {
+        loading: 'Laddar...',
         not_configured: 'Media inte konfigurerad',
         playback_speed: 'Uppspelningshastighet',
         playback_decrease: 'Minska uppspelningshastigheten',
