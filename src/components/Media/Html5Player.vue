@@ -184,7 +184,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="rewind"
+                                                @click="rewind(10)"
                                             >
                                                 <v-icon>mdi-rewind-10</v-icon>
                                                 <span class="sr-only">{{
@@ -219,10 +219,10 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="CCToggle"
+                                                @click="onClickCCToggle"
                                             >
                                                 <v-icon>{{
-                                                    state.cc
+                                                    ccState
                                                         ? 'mdi-closed-caption'
                                                         : 'mdi-closed-caption-outline'
                                                 }}</v-icon>
@@ -531,6 +531,16 @@ export default {
             type: Object,
             required: true,
         },
+        volume: {
+            type: Number,
+            required: false,
+            default: undefined,
+        },
+        cc: {
+            type: Boolean,
+            required: false,
+            default: undefined,
+        },
         captionsExpanded: {
             type: Boolean,
             required: false,
@@ -600,6 +610,7 @@ export default {
         'click:captions-autoscroll',
         'click:captions-close',
         'click:captions-cue',
+        'update:cc',
         'update:captions-expanded',
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
@@ -652,6 +663,19 @@ export default {
             }
 
             return type
+        },
+        ccState: {
+            get() {
+                if (typeof this.cc !== 'undefined') {
+                    return this.cc
+                } else {
+                    return this.state.cc
+                }
+            },
+            set(v) {
+                this.$emit('update:cc', v)
+                this.state.cc = v
+            },
         },
         captionsVisibleState: {
             get() {
@@ -731,6 +755,7 @@ export default {
                 controlsDebounce: null,
                 volume: 0.5, // default 50%
                 muted: false,
+                unmuteVolume: 0, // The stored volume to return to the initial volume when unmuting
                 paused: true,
                 playbackRateIndex: 0,
                 fullscreen: false,
@@ -781,6 +806,11 @@ export default {
                 this.ads[ad.play_at_percent] = ad
                 this.ads[ad.play_at_percent].complete = false
             }
+        }
+
+        // Set the initial volume
+        if (typeof this.volume !== 'undefined') {
+            this.state.volume = this.volume
         }
     },
     mounted() {
@@ -929,7 +959,7 @@ export default {
          *
          * @param String|null lang The lang to load. Eg en-US, sv-SE, etc. Pass nothing / null to turn off captions
          */
-        onSelectTrack(lang = null) {
+        onSelectTrack(lang = null, mode = 'showing') {
             if (this.player.textTracks && this.player.textTracks.length > 0) {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
                     // Disable all tracks by default
@@ -938,7 +968,7 @@ export default {
 
                     if (this.player.textTracks[i].language === lang) {
                         this.state.ccLang = lang
-                        this.player.textTracks[i].mode = 'showing'
+                        this.player.textTracks[i].mode = mode
 
                         this.setCues(this.player.textTracks[i])
 
@@ -980,13 +1010,16 @@ export default {
         onMediaProgress(e) {
             this.$emit('progress', e)
         },
-        CCToggle() {
-            this.state.cc = !this.state.cc
+        onClickCCToggle() {
+            // We can't read the opposite of !this.ccState because it's a computed off of props
+            // So this.ccState = !this.ccState takes 1 tick to reflect the actual changes between the getter and setter
+            const state = !this.ccState
+            this.ccState = state
 
-            if (this.state.cc) {
+            if (state) {
                 this.onSelectTrack(this.state.ccLang)
             } else {
-                this.onSelectTrack()
+                this.onSelectTrack(this.state.ccLang, 'hidden')
             }
         },
         onClickReplay(e) {
@@ -1016,10 +1049,19 @@ export default {
         },
         muteToggle() {
             if (this.player.muted) {
+                // Restore the inital volume
+                this.state.volume = this.state.unmuteVolume
+                this.player.volume = this.state.unmuteVolume
+                this.state.unmuteVolume = 0
                 this.state.muted = false
                 this.player.muted = false
                 this.$emit('volumechange', this.state.volume)
             } else {
+                // Store the initial volume
+                this.state.unmuteVolume = this.state.volume
+                this.state.volume = 0
+                this.player.volume = 0
+
                 this.state.muted = true
                 this.player.muted = true
                 this.$emit('volumechange', 0)
@@ -1084,13 +1126,27 @@ export default {
          * The this.player.textTracks are now loaded
          */
         onLoadeddata(e) {
+            let defaultTrackLang = null
             // Set the default captions since apparently the default attribute means nothing
             if (this.current.tracks && this.current.tracks.length > 0) {
                 for (const track of this.current.tracks) {
                     if (track.default) {
+                        defaultTrackLang = track.srclang
                         this.onSelectTrack(track.srclang)
                     }
                 }
+            }
+
+            // Toggle the closed captions if the state is disabled
+            if (!this.ccState) {
+                this.onSelectTrack(defaultTrackLang, 'hidden')
+            }
+
+            // We're starting muted so set the appropriate return volume / muted values
+            if (this.state.volume === 0) {
+                this.state.unmuteVolume = 0.5
+                this.state.muted = true
+                this.player.muted = true
             }
 
             this.$emit('loadeddata', e)
@@ -1112,6 +1168,13 @@ export default {
             } else if (value < 0) {
                 value = 0
             }
+
+            // Unmuted if we're adjusting the volume up
+            if (value > 0 && (this.player.muted || this.state.muted)) {
+                this.state.muted = false
+                this.player.muted = false
+            }
+
             this.state.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
@@ -1130,10 +1193,23 @@ export default {
             this.player.currentTime = time
         },
         setCues(track) {
+            // Filter out any cues / active cues that start after the video has already ended
+            // This way we don't show captions that we can't skip to
+            const cues = Object.keys(track.cues || {})
+                .map((key) => track.cues[key])
+                .filter((c) => {
+                    return c.startTime < this.player.duration
+                })
+            const activeCues = Object.keys(track.activeCues || {})
+                .map((key) => track.activeCues[key])
+                .filter((c) => {
+                    return c.startTime < this.player.duration
+                })
+
             // Create reactive fields
             this.$set(this.captions, 'language', track.language)
-            this.$set(this.captions, 'cues', track.cues)
-            this.$set(this.captions, 'activeCues', track.activeCues)
+            this.$set(this.captions, 'cues', cues)
+            this.$set(this.captions, 'activeCues', activeCues)
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()

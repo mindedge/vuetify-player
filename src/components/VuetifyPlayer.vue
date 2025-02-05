@@ -2,7 +2,29 @@
     <div>
         <v-row tabindex="0">
             <v-col cols="12">
-                <div v-if="parseSourceType(current.src.sources) === null">
+                <div v-if="loading">
+                    <div class="player-skeleton--no-source">
+                        <slot name="loading">
+                            <div>
+                                <v-progress-circular indeterminate />
+                                <p>
+                                    {{ t(language, 'player.loading') }}
+                                </p>
+                            </div>
+                        </slot>
+                    </div>
+                    <v-skeleton-loader
+                        type="image, image, list-item-avatar"
+                        class="player-skeleton"
+                    ></v-skeleton-loader>
+                </div>
+
+                <div
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === null
+                    "
+                >
                     <div class="player-skeleton--no-source">
                         <slot name="no-source">
                             <div>
@@ -18,9 +40,13 @@
                         class="player-skeleton"
                     ></v-skeleton-loader>
                 </div>
+
                 <YoutubePlayer
                     ref="youtubePlayer"
-                    v-if="parseSourceType(current.src.sources) === 'youtube'"
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === 'youtube'
+                    "
                     :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
@@ -30,13 +56,19 @@
                     @focusout="onFocusout"
                     @click:fullscreen="onFullscreen"
                 ></YoutubePlayer>
+
                 <Html5Player
                     ref="html5Player"
-                    v-if="parseSourceType(current.src.sources) === 'html5'"
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === 'html5'
+                    "
                     :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
+                    :volume.sync="volumeState"
+                    :cc.sync="ccState"
                     :captions-expanded.sync="captionsExpandedState"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
@@ -54,6 +86,7 @@
                     @seeking="$emit('seeking', $event)"
                     @timeupdate="$emit('timeupdate', $event)"
                     @progress="$emit('progress', $event)"
+                    @volumechange="onVolumeChange"
                     @canplay="$emit('canplay', $event)"
                     @waiting="$emit('waiting', $event)"
                     @canplaythrough="$emit('canplaythrough', $event)"
@@ -157,9 +190,11 @@ export default {
         rewind: { type: Boolean, required: false, default: false }, // Enabled the rewind 10s button
         loop: { type: Boolean, required: false, default: false }, // Loop the video on completion
         muted: { type: Boolean, required: false, default: false }, // Start the video muted
+        volume: { type: Number, required: false, default: undefined }, // The initial volume level. Undefined will use the local value of 0.5
         playsinline: { Boolean: String, required: false, default: false }, // Force inline & disable fullscreen
         poster: { type: String, required: false, default: '' }, // Overridden with the playlist.poster if one is set there
         preload: { type: String, required: false, default: '' },
+        cc: { type: Boolean, required: false, default: undefined }, // The initial state of the closed captions (if available). Undefined will use the local value of false
         captionsmenu: { type: Boolean, required: false, default: true }, // Show the captions below the video
         captionsExpanded: {
             type: Boolean,
@@ -218,6 +253,7 @@ export default {
         'seeking',
         'timeupdate',
         'progress',
+        'volumechange',
         'canplay',
         'waiting',
         'canplaythrough',
@@ -235,12 +271,24 @@ export default {
         'click:captions-paragraph-view',
         'click:captions-autoscroll',
         'click:captions-close',
+        'update:volume',
+        'update:cc',
         'update:captions-expanded',
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
         'update:captions-visible',
     ],
-    watch: {},
+    watch: {
+        playlist: {
+            handler(newValue, oldValue) {
+                // Make sure there was actual changes to prevent unnecessary reloads
+                if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+                    // Force-reload the media on playlist changes since we changed the source / tracks
+                    this.reloadMedia()
+                }
+            },
+        },
+    },
     computed: {
         player() {
             if (this.parseSourceType(this.current.src.sources) === 'youtube') {
@@ -303,6 +351,32 @@ export default {
                 return 8
             }
         },
+        ccState: {
+            get() {
+                if (typeof this.cc !== 'undefined') {
+                    return this.cc
+                } else {
+                    return this.captions.cc
+                }
+            },
+            set(v) {
+                this.$emit('update:cc', v)
+                this.captions.cc = v
+            },
+        },
+        volumeState: {
+            get() {
+                if (typeof this.volume !== 'undefined') {
+                    return this.volume
+                } else {
+                    return this.localVolume
+                }
+            },
+            set(v) {
+                this.player.volumeChange(v)
+                this.localVolume = v
+            },
+        },
         captionsVisibleState: {
             get() {
                 if (typeof this.captionsVisible !== 'undefined') {
@@ -336,16 +410,25 @@ export default {
     data() {
         return {
             t,
+            loading: false,
             sourceIndex: 0,
             captions: {
+                cc: false,
                 visible: true,
                 expanded: false,
             },
+            localVolume: 0.5, // The initial volume level
             mediaFocus: false,
             keyListener: null,
         }
     },
     methods: {
+        reloadMedia() {
+            this.loading = true
+            setTimeout(() => {
+                this.loading = false
+            }, 500)
+        },
         onEnded(e) {
             if (
                 this.playlistautoadvance &&
@@ -358,6 +441,10 @@ export default {
         onLoadeddata(e) {
             // Loaded a new video
             this.$emit('loadeddata', e)
+        },
+        onVolumeChange(e) {
+            this.$emit('update:volume', e)
+            this.$emit('volumechange', e)
         },
         onRemoteplayback(el) {
             // Make sure the browser supports remote playback
