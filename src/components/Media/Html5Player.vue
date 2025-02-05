@@ -184,7 +184,7 @@
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
-                                                @click="rewind"
+                                                @click="rewind(10)"
                                             >
                                                 <v-icon>mdi-rewind-10</v-icon>
                                                 <span class="sr-only">{{

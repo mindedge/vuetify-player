@@ -147,15 +147,6 @@
                         @click="onCueClick(cue.startTime)"
                     >
                         <template v-if="!expandedState">
-                            <v-list-item-icon v-if="!paragraphViewState">
-                                <v-icon
-                                    >{{
-                                        index === captionIndex
-                                            ? 'mdi-arrow-right-drop-circle-outline'
-                                            : 'mdi-checkbox-blank-circle-outline'
-                                    }}
-                                </v-icon>
-                            </v-list-item-icon>
                             <v-list-item-content>
                                 <v-list-item-title
                                     v-html="cue.rawText || cue.text"
