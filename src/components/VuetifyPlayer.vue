@@ -2,7 +2,29 @@
     <div>
         <v-row tabindex="0">
             <v-col cols="12">
-                <div v-if="parseSourceType(current.src.sources) === null">
+                <div v-if="loading">
+                    <div class="player-skeleton--no-source">
+                        <slot name="loading">
+                            <div>
+                                <v-progress-circular indeterminate />
+                                <p>
+                                    {{ t(language, 'player.loading') }}
+                                </p>
+                            </div>
+                        </slot>
+                    </div>
+                    <v-skeleton-loader
+                        type="image, image, list-item-avatar"
+                        class="player-skeleton"
+                    ></v-skeleton-loader>
+                </div>
+
+                <div
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === null
+                    "
+                >
                     <div class="player-skeleton--no-source">
                         <slot name="no-source">
                             <div>
@@ -18,9 +40,13 @@
                         class="player-skeleton"
                     ></v-skeleton-loader>
                 </div>
+
                 <YoutubePlayer
                     ref="youtubePlayer"
-                    v-if="parseSourceType(current.src.sources) === 'youtube'"
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === 'youtube'
+                    "
                     :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
@@ -30,9 +56,13 @@
                     @focusout="onFocusout"
                     @click:fullscreen="onFullscreen"
                 ></YoutubePlayer>
+
                 <Html5Player
                     ref="html5Player"
-                    v-if="parseSourceType(current.src.sources) === 'html5'"
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === 'html5'
+                    "
                     :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
@@ -244,7 +274,17 @@ export default {
         'update:captions-autoscroll',
         'update:captions-visible',
     ],
-
+    watch: {
+        playlist: {
+            handler(newValue, oldValue) {
+                // Make sure there was actual changes to prevent unnecessary reloads
+                if (JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+                    // Force-reload the media on playlist changes since we changed the source / tracks
+                    this.reloadMedia()
+                }
+            },
+        },
+    },
     computed: {
         player() {
             if (this.parseSourceType(this.current.src.sources) === 'youtube') {
@@ -353,6 +393,7 @@ export default {
     data() {
         return {
             t,
+            loading: false,
             sourceIndex: 0,
             captions: {
                 visible: true,
@@ -364,6 +405,12 @@ export default {
         }
     },
     methods: {
+        reloadMedia() {
+            this.loading = true
+            setTimeout(() => {
+                this.loading = false
+            }, 500)
+        },
         onEnded(e) {
             if (
                 this.playlistautoadvance &&

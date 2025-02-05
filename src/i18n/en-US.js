@@ -10,6 +10,7 @@ export default {
         next: 'Play next item in playlist',
     },
     player: {
+        loading: 'Loading...',
         not_configured: 'Media not configured',
         playback_speed: 'Playback Speed',
         playback_decrease: 'Decrease playback speed',
