@@ -531,6 +531,11 @@ export default {
             type: Object,
             required: true,
         },
+        volume: {
+            type: Number,
+            required: false,
+            default: undefined,
+        },
         captionsExpanded: {
             type: Boolean,
             required: false,
@@ -731,6 +736,7 @@ export default {
                 controlsDebounce: null,
                 volume: 0.5, // default 50%
                 muted: false,
+                unmuteVolume: 0, // The stored volume to return to the initial volume when unmuting
                 paused: true,
                 playbackRateIndex: 0,
                 fullscreen: false,
@@ -781,6 +787,11 @@ export default {
                 this.ads[ad.play_at_percent] = ad
                 this.ads[ad.play_at_percent].complete = false
             }
+        }
+
+        // Set the initial volume
+        if (typeof this.volume !== 'undefined') {
+            this.state.volume = this.volume
         }
     },
     mounted() {
@@ -1016,10 +1027,19 @@ export default {
         },
         muteToggle() {
             if (this.player.muted) {
+                // Restore the inital volume
+                this.state.volume = this.state.unmuteVolume
+                this.player.volume = this.state.unmuteVolume
+                this.state.unmuteVolume = 0
                 this.state.muted = false
                 this.player.muted = false
                 this.$emit('volumechange', this.state.volume)
             } else {
+                // Store the initial volume
+                this.state.unmuteVolume = this.state.volume
+                this.state.volume = 0
+                this.player.volume = 0
+
                 this.state.muted = true
                 this.player.muted = true
                 this.$emit('volumechange', 0)
@@ -1093,6 +1113,13 @@ export default {
                 }
             }
 
+            // We're starting muted so set the appropriate return volume / muted values
+            if (this.state.volume === 0) {
+                this.state.unmuteVolume = 0.5
+                this.state.muted = true
+                this.player.muted = true
+            }
+
             this.$emit('loadeddata', e)
         },
         onLoadedmetadata(e) {
@@ -1112,6 +1139,13 @@ export default {
             } else if (value < 0) {
                 value = 0
             }
+
+            // Unmuted if we're adjusting the volume up
+            if (value > 0 && (this.player.muted || this.state.muted)) {
+                this.state.muted = false
+                this.player.muted = false
+            }
+
             this.state.volume = value
             this.player.volume = value
             this.$emit('volumechange', value)
