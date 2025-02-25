@@ -118,7 +118,8 @@
                                     <v-tooltip v-if="!state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -155,7 +156,8 @@
                                     <v-tooltip v-if="state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -184,8 +186,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                class="hide-mobile"
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -220,7 +222,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -268,7 +271,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -336,7 +340,8 @@
                                     <v-tooltip v-if="allowFullscreen" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -372,7 +377,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -401,7 +407,8 @@
                                     <v-tooltip v-if="allowRemotePlayback" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -428,7 +435,8 @@
                                     <v-tooltip v-if="allowDownload" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
