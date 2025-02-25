@@ -2,7 +2,7 @@
     <!-- Settings -->
     <v-menu :attach="attach" top left offset-y :close-on-content-click="false">
         <template #activator="{ on, attrs }">
-            <v-btn small text v-bind="attrs" v-on="on">
+            <v-btn x-small text v-bind="attrs" v-on="on">
                 <v-icon>mdi-cog</v-icon>
                 <span class="d-sr-only">{{
                     t(language, 'player.toggle_settings')
