@@ -100,16 +100,26 @@
                                 dark
                                 :min="0"
                                 :max="scrub.max"
-                                :label="
-                                    filters.playerShortDuration(
-                                        percentToTimeSeconds(currentPercent)
-                                    ) +
-                                    ' / ' +
-                                    filters.playerShortDuration(player.duration)
-                                "
                                 inverse-label
                                 @change="onScrubTime"
                             >
+                                <template #label>
+                                    <div class="controls-timestamp--container">
+                                        <div class="controls-timestamp">
+                                            {{
+                                                filters.playerShortDuration(
+                                                    percentToTimeSeconds(
+                                                        currentPercent
+                                                    )
+                                                ) +
+                                                ' / ' +
+                                                filters.playerShortDuration(
+                                                    player.duration
+                                                )
+                                            }}
+                                        </div>
+                                    </div>
+                                </template>
                             </v-slider>
 
                             <div class="controls-buttons">
@@ -1348,6 +1358,15 @@ export default {
 @media (max-width: 600px) {
     .hide-mobile {
         display: none;
+    }
+    .controls-timestamp--container {
+        width: 0px;
+    }
+    .controls-timestamp {
+        width: 150px;
+        text-align: right;
+        margin-left: -150px;
+        margin-top: -25px;
     }
 }
 .controls-container {
