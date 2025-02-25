@@ -94,27 +94,42 @@
                     <v-slide-y-reverse-transition>
                         <div v-if="player && state.controls" class="controls">
                             <v-slider
-                                dark
                                 v-model="currentPercent"
+                                class="controls--slider"
+                                hide-details
+                                dark
                                 :min="0"
                                 :max="scrub.max"
-                                :label="
-                                    filters.playerShortDuration(
-                                        percentToTimeSeconds(currentPercent)
-                                    ) +
-                                    ' / ' +
-                                    filters.playerShortDuration(player.duration)
-                                "
                                 inverse-label
-                                @mousedown="onPause"
                                 @change="onScrubTime"
                             >
-                                <template #prepend>
+                                <template #label>
+                                    <div class="controls-timestamp--container">
+                                        <div class="controls-timestamp">
+                                            {{
+                                                filters.playerShortDuration(
+                                                    percentToTimeSeconds(
+                                                        currentPercent
+                                                    )
+                                                ) +
+                                                ' / ' +
+                                                filters.playerShortDuration(
+                                                    player.duration
+                                                )
+                                            }}
+                                        </div>
+                                    </div>
+                                </template>
+                            </v-slider>
+
+                            <div class="controls-buttons">
+                                <div class="controls-buttons--prepend">
                                     <!-- Play button -->
                                     <v-tooltip v-if="!state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -151,7 +166,8 @@
                                     <v-tooltip v-if="state.replay" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -180,7 +196,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -199,9 +216,9 @@
                                             t(language, 'player.rewind_10')
                                         }}</span>
                                     </v-tooltip>
-                                </template>
+                                </div>
 
-                                <template #append>
+                                <div class="controls-buttons--append">
                                     <!-- Closed Captions -->
                                     <v-menu
                                         v-if="
@@ -215,7 +232,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -263,7 +281,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -331,7 +350,8 @@
                                     <v-tooltip v-if="allowFullscreen" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -367,7 +387,8 @@
                                     >
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -396,7 +417,8 @@
                                     <v-tooltip v-if="allowRemotePlayback" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -423,7 +445,8 @@
                                     <v-tooltip v-if="allowDownload" top>
                                         <template #activator="{ on, attrs }">
                                             <v-btn
-                                                small
+                                                class="controls--button hide-mobile"
+                                                x-small
                                                 text
                                                 v-bind="attrs"
                                                 v-on="on"
@@ -456,8 +479,8 @@
                                             onPlaybackSpeedChange
                                         "
                                     ></SettingsMenu>
-                                </template>
-                            </v-slider>
+                                </div>
+                            </div>
                         </div>
                     </v-slide-y-reverse-transition>
                 </div>
@@ -1079,7 +1102,6 @@ export default {
             // thousands of "targets" for long videos
             const scaleFactor = this.player.duration / this.scrub.max
             this.setTime(value * scaleFactor)
-            this.player.pause()
         },
         onCuechange(e) {
             if (e && e.srcElement && e.srcElement.track) {
@@ -1156,10 +1178,16 @@ export default {
             // this.$refs.player is a type of HTMLMediaElement
             // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
             //this.player.media = this.$refs.player;
-            this.$emit('loadedmetadata', e)
-            this.player = this.$refs.player
-            this.player.volume = this.state.volume
-            this.$emit('volumechange', this.state.volume)
+            if (this.$refs.player) {
+                this.player = this.$refs.player
+                this.player.volume = this.state.volume
+                this.$emit('volumechange', this.state.volume)
+                this.$emit('loadedmetadata', e)
+            } else {
+                console.error(
+                    'Html5Player->onLoadedmetadata() but player not ready'
+                )
+            }
         },
         volumeChange(value) {
             // Value needs to be a decimal value between 0 and 1
@@ -1327,18 +1355,46 @@ export default {
 </script>
 
 <style scoped>
+@media (max-width: 600px) {
+    .hide-mobile {
+        display: none;
+    }
+    .controls-timestamp--container {
+        width: 0px;
+    }
+    .controls-timestamp {
+        width: 150px;
+        text-align: right;
+        margin-left: -150px;
+        margin-top: -25px;
+    }
+}
 .controls-container {
-    height: 40px;
+    height: 80px;
     position: relative;
-    top: -50px;
-    margin-bottom: -40px;
+    top: -90px;
+    margin-bottom: -80px;
 }
 .controls {
-    height: 40px;
+    height: 80px;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
 }
+.controls--slider {
+    width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.controls-buttons {
+    display: flex;
+}
+.controls-buttons--prepend {
+    margin-right: auto;
+}
+.controls-buttons--append {
+    margin-left: auto;
+}
 .player-audio {
-    height: 40px;
+    height: 80px;
 }
 .player-video {
     max-height: 100%;
