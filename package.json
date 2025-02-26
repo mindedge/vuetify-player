@@ -1,6 +1,6 @@
 {
     "name": "@mindedge/vuetify-player",
-    "version": "0.4.4",
+    "version": "0.4.5",
     "private": false,
     "description": "Accessible, localized, full featured media player with Vuetifyjs",
     "author": "Jacob Rogaishio",

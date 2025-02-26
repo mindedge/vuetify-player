@@ -4,7 +4,7 @@
             <v-col
                 ref="playerContainer"
                 :cols="!state.expandedCaptions ? 12 : 6"
-                class="pb-0 mb-0"
+                class="pb-0 mb-0 player-container"
             >
                 <div
                     v-if="resolvedType === 'video' && buffering"
@@ -1378,12 +1378,14 @@ export default {
         margin-top: -25px;
     }
 }
+.player-container {
+    overflow: hidden;
+}
 .controls-container {
     height: 80px;
     position: relative;
     top: -90px;
-    margin-bottom: -80px;
-    overflow: hidden;
+    margin-bottom: -90px;
 }
 .controls {
     height: 80px;
