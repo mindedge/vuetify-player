@@ -129,6 +129,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -167,6 +168,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -197,6 +199,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button hide-mobile"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -233,6 +236,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -282,6 +286,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -351,6 +356,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -388,6 +394,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button hide-mobile"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -418,6 +425,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button hide-mobile"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -446,6 +454,7 @@
                                         <template #activator="{ on, attrs }">
                                             <v-btn
                                                 class="controls--button hide-mobile"
+                                                dark
                                                 x-small
                                                 text
                                                 v-bind="attrs"
@@ -1374,6 +1383,7 @@ export default {
     position: relative;
     top: -90px;
     margin-bottom: -80px;
+    overflow: hidden;
 }
 .controls {
     height: 80px;
