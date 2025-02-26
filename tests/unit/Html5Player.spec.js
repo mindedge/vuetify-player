@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { shallowMount, mount } from '@vue/test-utils'
 import Vuetify from 'vuetify'
 import Vue from 'vue'
 import Html5Player from '../../src/components/Media/Html5Player.vue'
@@ -182,5 +182,92 @@ describe('Html5Player', () => {
             },
         })
         expect(wrapper.vm.src.ads).toBeTruthy()
+    })
+
+    test('Html5Player controls are available', () => {
+        const wrapper = mount(Html5Player, {
+            vuetify: new Vuetify(),
+            mocks: defaultMocks,
+            propsData: {
+                type: 'video',
+                attributes: {
+                    playbackrates: [1],
+                    controls: true,
+                },
+                src: {
+                    sources: [
+                        {
+                            src: 'https://domain.test/example.mp4',
+                            type: 'video/mp4',
+                        },
+                    ],
+                },
+            },
+        })
+
+        const controls = wrapper.vm.$el
+            .querySelector('.controls-container')
+            .querySelectorAll('button')
+
+        expect(controls.length).toEqual(6)
+    })
+
+    test('Html5Player controls have the play button', () => {
+        const wrapper = mount(Html5Player, {
+            vuetify: new Vuetify(),
+            mocks: defaultMocks,
+            propsData: {
+                type: 'video',
+                attributes: {
+                    playbackrates: [1],
+                    controls: true,
+                },
+                src: {
+                    sources: [
+                        {
+                            src: 'https://domain.test/example.mp4',
+                            type: 'video/mp4',
+                        },
+                    ],
+                },
+            },
+        })
+
+        const playButton = wrapper.vm.$el
+            .querySelector('.controls-container')
+            .querySelector('button i.mdi-play')
+
+        expect(playButton).toBeTruthy()
+    })
+
+    test('Html5Player controls are dark mode', () => {
+        const wrapper = mount(Html5Player, {
+            vuetify: new Vuetify(),
+            mocks: defaultMocks,
+            propsData: {
+                type: 'video',
+                attributes: {
+                    playbackrates: [1],
+                    controls: true,
+                },
+                src: {
+                    sources: [
+                        {
+                            src: 'https://domain.test/example.mp4',
+                            type: 'video/mp4',
+                        },
+                    ],
+                },
+            },
+        })
+
+        const controls = wrapper.vm.$el
+            .querySelector('.controls-container')
+            .querySelectorAll('button')
+
+        // Expect all the controls to be in dark mode
+        for (const control of controls) {
+            expect(control.classList.contains('theme--dark')).toBeTruthy()
+        }
     })
 })
