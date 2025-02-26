@@ -1378,9 +1378,6 @@ export default {
         margin-top: -25px;
     }
 }
-.player-container {
-    overflow: hidden;
-}
 .controls-container {
     height: 80px;
     position: relative;
