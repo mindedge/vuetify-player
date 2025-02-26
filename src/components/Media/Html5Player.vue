@@ -1278,7 +1278,7 @@ export default {
                             // If this is left default / set to 100 then the above line
                             // Also set snapToLines to true otherwise if there's a line % in the vtt file the display will be relative and make the lines not aligned properly
                             this.player.textTracks[i].activeCues[0].line =
-                                -3 - numLines
+                                -4 - numLines
                             this.player.textTracks[i].activeCues[0].size = 99
                             this.player.textTracks[
                                 i
