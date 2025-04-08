@@ -543,6 +543,10 @@ export default {
             }
         },
         onKeydown(e) {
+            // prevent tab trap
+            if (e.code.toLowerCase() === 'tab') {
+                return
+            }
             // Only process keyboard events if the media is focused
             // This is just in case the media lost focus but the event listener wasn't removed for some reason
             if (this.mediaFocus) {
