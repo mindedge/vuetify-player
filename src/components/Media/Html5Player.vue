@@ -65,6 +65,7 @@
                     @abort="$emit('abort', $event)"
                     @focusin="$emit('focusin', $event)"
                     @focusout="$emit('focusout', $event)"
+                    @ratechange="onPlayerSpeedChange"
                 >
                     <source
                         v-for="(source, index) of current.sources"
@@ -1008,6 +1009,19 @@ export default {
                         this.$emit('trackchange', this.player.textTracks[i])
                     }
                 }
+            }
+        },
+        onPlayerSpeedChange(e) {
+            // If the player set its own playback rate (like during reloads) then we need to re-set it to the pre-chosen value
+            // The below checks if there's a mismatch between the player and what we set the current rate to be
+            if (
+                e &&
+                e.target &&
+                e.target.playbackRate &&
+                e.target.playbackRate !==
+                    this.attributes.playbackrates[this.state.playbackRateIndex]
+            ) {
+                this.onPlaybackSpeedChange(this.state.playbackRateIndex)
             }
         },
         onPlaybackSpeedChange(index) {
