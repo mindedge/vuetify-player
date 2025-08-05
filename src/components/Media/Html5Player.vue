@@ -22,8 +22,22 @@
                     class="player-overlay"
                 >
                     <div class="player-overlay--icon">
-                        <v-icon class="player-overlay--replay-icon">
+                        <v-icon class="player-overlay--play-icon">
                             mdi-replay
+                        </v-icon>
+                    </div>
+                </div>
+                <div
+                    v-if="
+                        resolvedType === 'video' &&
+                        !state.replay &&
+                        currentPercent === 0
+                    "
+                    class="player-overlay"
+                >
+                    <div class="player-overlay--icon">
+                        <v-icon class="player-overlay--play-icon">
+                            mdi-play
                         </v-icon>
                     </div>
                 </div>
@@ -1437,7 +1451,7 @@ export default {
     height: 0;
     text-align: center;
 }
-.player-overlay--replay-icon {
+.player-overlay--play-icon {
     color: #fff;
     font-size: 5rem;
 }
