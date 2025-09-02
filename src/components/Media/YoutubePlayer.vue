@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-responsive :aspect-ratio="16 / 9">
+        <v-responsive>
             <v-skeleton-loader
                 v-if="!player.ready"
                 class="mx-auto player-skeleton"
@@ -57,6 +57,9 @@ export default {
                 ready: false,
             },
         }
+    },
+    mounted() {
+        this.init()
     },
     methods: {
         parseVideoSource(src) {
@@ -161,9 +164,6 @@ export default {
             }
         },
     },
-    mounted() {
-        this.init()
-    },
 }
 </script>
 
@@ -172,5 +172,9 @@ export default {
     position: relative;
     margin-bottom: -400px;
     height: 400px;
+    aspect-ratio: 16/9;
+}
+.player-video {
+    min-height: 300px;
 }
 </style>
