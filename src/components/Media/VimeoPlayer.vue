@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-responsive>
+        <v-responsive :aspect-ratio="aspectRatio">
             <v-skeleton-loader
                 v-if="!player.ready"
                 class="mx-auto player-skeleton"
@@ -14,7 +14,7 @@
 
 <script>
 export default {
-    name: 'YoutubePlayer',
+    name: 'VimeoPlayer',
     props: {
         language: { type: String, required: false, default: 'en-US' },
         type: {
@@ -38,28 +38,37 @@ export default {
             return classList
         },
         resolvedType() {
-            // Youtube is always a video
+            // vimeo is always a video
             return 'video'
+        },
+        aspectRatio() {
+            if (this.player.height === 0 || this.player.width === 0) {
+                return 16 / 9
+            } else {
+                return this.player.width / this.player.height
+            }
         },
     },
     data() {
         return {
             player: {
                 id:
-                    'yt-player-' +
+                    'vimeo-player-' +
                     Math.floor(Math.random() * 10000000) +
                     1000000,
-                yt: {},
+                vimeo: {},
                 tag: {},
                 scriptTag: {},
                 loaded: false,
                 done: false,
                 ready: false,
+                height: 0,
+                width: 0,
             },
         }
     },
     mounted() {
-        this.init()
+        this.loadAPI()
     },
     methods: {
         parseVideoSource(src) {
@@ -73,12 +82,11 @@ export default {
             } else {
                 let url = src.sources[0].src
                 const regexId =
-                    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-
+                    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
                 const idMatch = url.match(regexId)
 
-                if (idMatch && idMatch[2].length === 11) {
-                    result.videoId = idMatch[2]
+                if (idMatch[4]) {
+                    result.videoId = idMatch[4]
                 }
 
                 const regexPlaylist = /[?&]list=([^#&?]+)/
@@ -90,40 +98,6 @@ export default {
 
                 return result
             }
-        },
-        onPlayerReady() {
-            // Uncomment for auto-play
-            // e.target.playVideo();
-            this.player.ready = true
-
-            const source = this.parseVideoSource(this.src)
-
-            if (source.listId) {
-                this.ytPlayer.loadPlaylist(source.listId)
-            }
-        },
-        onPlayerStateChange(e) {
-            if (e.data == window.YT.PlayerState.PLAYING && !this.player.done) {
-                setTimeout(() => {
-                    this.player.yt.stopVideo()
-                }, 6000)
-                this.player.done = true
-            }
-        },
-        tagReady() {
-            const source = this.parseVideoSource(this.src)
-
-            this.player.yt = new window.YT.Player(this.player.id, {
-                width: '100%',
-                videoId: source.videoId,
-                playerVars: {
-                    playsinline: 1,
-                },
-                events: {
-                    onReady: this.onPlayerReady,
-                    onStateChange: this.onPlayerStateChange,
-                },
-            })
         },
         onreadystatechange() {
             if (
@@ -141,13 +115,21 @@ export default {
                 setTimeout(this.tagReady, 500)
             }
         },
-        init() {
+        async tagReady() {
+            const source = this.parseVideoSource(this.src)
+            this.player.vimeo = new window.Vimeo.Player(this.player.id, {
+                id: source.videoId,
+                responsive: true,
+            })
+            this.player.ready = true
+        },
+        loadAPI() {
             if (this.player.loaded) {
                 this.tagReady()
             } else {
                 this.player.tag = document.createElement('script')
 
-                this.player.tag.src = 'https://www.youtube.com/iframe_api'
+                this.player.tag.src = 'https://player.vimeo.com/api/player.js'
                 this.player.scriptTag =
                     document.getElementsByTagName('script')[0]
 
@@ -174,8 +156,5 @@ export default {
     margin-bottom: -400px;
     height: 400px;
     aspect-ratio: 16/9;
-}
-.player-video {
-    min-height: 300px;
 }
 </style>

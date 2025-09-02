@@ -57,6 +57,22 @@
                     @click:fullscreen="onFullscreen"
                 ></YoutubePlayer>
 
+                <VimeoPlayer
+                    ref="vimeoPlayer"
+                    v-if="
+                        !loading &&
+                        parseSourceType(current.src.sources) === 'vimeo'
+                    "
+                    :language="language"
+                    :type="current.type"
+                    :attributes="current.attributes"
+                    :src="current.src"
+                    :elevation="flat ? 0 : elevation"
+                    @focusin="onFocusin"
+                    @focusout="onFocusout"
+                    @click:fullscreen="onFullscreen"
+                ></VimeoPlayer>
+
                 <Html5Player
                     ref="html5Player"
                     v-if="
@@ -135,6 +151,7 @@
 <script>
 import { t } from '../i18n/i18n'
 import YoutubePlayer from './Media/YoutubePlayer.vue'
+import VimeoPlayer from './Media/VimeoPlayer.vue'
 import Html5Player from './Media/Html5Player.vue'
 import PlaylistMenu from './Media/PlaylistMenu.vue'
 
@@ -142,6 +159,7 @@ export default {
     name: 'VuetifyPlayer',
     components: {
         YoutubePlayer,
+        VimeoPlayer,
         Html5Player,
         PlaylistMenu,
     },
@@ -293,6 +311,10 @@ export default {
         player() {
             if (this.parseSourceType(this.current.src.sources) === 'youtube') {
                 return this.$refs.youtubePlayer
+            } else if (
+                this.parseSourceType(this.current.src.sources) === 'vimeo'
+            ) {
+                return this.$refs.vimeoPlayer
             } else if (
                 this.parseSourceType(this.current.src.sources) === 'html5'
             ) {
@@ -514,6 +536,9 @@ export default {
             const ytRegex =
                 /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
 
+            const vimeoRegex =
+                /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
+
             if (!sources || !sources.length || !sources[0].src) {
                 return null
             }
@@ -526,6 +551,8 @@ export default {
                 return null
             } else if (src.match(ytRegex) || type === 'video/youtube') {
                 return 'youtube'
+            } else if (src.match(vimeoRegex) || type === 'video/vimeo') {
+                return 'vimeo'
             } else {
                 return 'html5'
             }
