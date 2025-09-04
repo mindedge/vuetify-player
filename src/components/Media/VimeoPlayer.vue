@@ -70,6 +70,12 @@ export default {
     mounted() {
         this.loadAPI()
     },
+    beforeDestroy() {
+        if (this.player.loaded) {
+            this.player.vimeo.off('seeked')
+            this.player.vimeo.off('timeupdate')
+        }
+    },
     methods: {
         parseVideoSource(src) {
             const result = {
@@ -121,6 +127,8 @@ export default {
                 id: source.videoId,
                 responsive: true,
             })
+            this.player.vimeo.on('seeked', this.onSeeking)
+            this.player.vimeo.on('timeupdate', this.onTimeupdate)
             this.player.ready = true
         },
         loadAPI() {
@@ -145,6 +153,15 @@ export default {
                     this.player.tag.onreadystatechange = this.onreadystatechange
                 }
             }
+        },
+        onTimeupdate(e) {
+            this.$emit('timeupdate', {
+                event: e,
+                current_percent: e.percent,
+            })
+        },
+        onSeeking(e) {
+            this.$emit('seeking', e)
         },
     },
 }
