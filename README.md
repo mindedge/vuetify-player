@@ -21,11 +21,12 @@ An accessible, localized, full featured media player with Vuetifyjs
 **Supported File Types:**
 
 | Video       | Audio | Poster Image     |
-| ----------- | ----- | ---------------- |
+|-------------| ----- | ---------------- |
 | mp4         | mp3   | png              |
 | webm        | wav   | jpg              |
 | ogg         | ogg   | gif (+ animated) |
 | YouTube URL |       |                  |
+| Vimeo URL   |       |                  |
 
 ## Quick Start
 
