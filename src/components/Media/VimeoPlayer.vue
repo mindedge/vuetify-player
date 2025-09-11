@@ -99,7 +99,7 @@ export default {
             } else {
                 let url = src.sources[0].src
                 const regexId =
-                    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
+                    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
                 const idMatch = url.match(regexId)
 
                 if (idMatch[4]) {
