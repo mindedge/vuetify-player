@@ -20,6 +20,8 @@
                 <div
                     v-if="resolvedType === 'video' && state.replay"
                     class="player-overlay"
+                    role="button"
+                    @click="play"
                 >
                     <div class="player-overlay--icon">
                         <v-icon class="player-overlay--play-icon">
@@ -30,10 +32,13 @@
                 <div
                     v-if="
                         resolvedType === 'video' &&
+                        state.paused &&
                         !state.replay &&
-                        currentPercent === 0
+                        player.currentTime === 0
                     "
                     class="player-overlay"
+                    role="button"
+                    @click="play"
                 >
                     <div class="player-overlay--icon">
                         <v-icon class="player-overlay--play-icon">
