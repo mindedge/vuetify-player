@@ -62,6 +62,7 @@
                     :preload="attributes.preload"
                     @click="playToggle"
                     @seeking="onSeeking"
+                    @seeked="onSeeked"
                     @timeupdate="onTimeupdate"
                     @progress="onMediaProgress"
                     @loadedmetadata="onLoadedmetadata"
@@ -644,6 +645,7 @@ export default {
         'ratechange',
         'timeupdate',
         'seeking',
+        'seeked',
         'progress',
         'volumechange',
         'cuechange',
@@ -1066,6 +1068,9 @@ export default {
         },
         onSeeking(e) {
             this.$emit('seeking', e)
+        },
+        onSeeked(e) {
+            this.$emit('seeked', e)
         },
         onMediaProgress(e) {
             this.$emit('progress', e)

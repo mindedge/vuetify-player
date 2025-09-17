@@ -21,7 +21,7 @@ An accessible, localized, full featured media player with Vuetifyjs
 **Supported File Types:**
 
 | Video       | Audio | Poster Image     |
-|-------------| ----- | ---------------- |
+| ----------- | ----- | ---------------- |
 | mp4         | mp3   | png              |
 | webm        | wav   | jpg              |
 | ogg         | ogg   | gif (+ animated) |
@@ -245,9 +245,11 @@ See [Full media `src` structure for where the ads array is placed](#full-media-s
 | `loadeddata`                     | `Event`           | When the frame at the current playback position of the media has finished loading; often the first frame             |
 | `loadedmetadata`                 | `Event`           | When the metadata has been loaded                                                                                    |
 | `play`                           | `Event`           | The media has received a request to start playing                                                                    |
+| `playing`                        | `Event`           | The media playback is first started, and whenever it is restarted                                                    |
 | `pause`                          | `Event`           | Playback has been suspended                                                                                          |
 | `progress`                       | `Event`           | The progress event is fired periodically as the browser loads a resource.                                            |
-| `seeking`                        | `Event`           | Playback has moved to a new location                                                                                 |
+| `seeking`                        | `Event`           | Playback is currently beeing seeked                                                                                  |
+| `seeked`                         | `Event`           | Playback has moved to a new location                                                                                 |
 | `timeupdate`                     | `Object`          | The current time was changed. Object contains { event: Event, current_percent: Number }                              |
 | `ratechange`                     | `Number`          | The playback speed multiplier                                                                                        |
 | `stalled`                        | `Event`           | The browser tried to download but has not received data yet                                                          |

@@ -31,6 +31,17 @@ export default {
             required: true,
         },
     },
+    emits: [
+        'loadeddata',
+        'play',
+        'pause',
+        'progress',
+        'volumechange',
+        'ended',
+        'seeking',
+        'seeked',
+        'timeupdate',
+    ],
     watch: {},
     computed: {
         playerClass() {
@@ -88,7 +99,7 @@ export default {
             } else {
                 let url = src.sources[0].src
                 const regexId =
-                    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
+                    /(http|https)?:\/\/(www\.|player\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|video\/|)(\d+)(?:|\/\?)/
                 const idMatch = url.match(regexId)
 
                 if (idMatch[4]) {
@@ -127,8 +138,17 @@ export default {
                 id: source.videoId,
                 responsive: true,
             })
-            this.player.vimeo.on('seeked', this.onSeeking)
+            this.player.vimeo.on('seeked', this.onSeek)
             this.player.vimeo.on('timeupdate', this.onTimeupdate)
+
+            this.player.vimeo.on('ended', this.onEnded)
+            this.player.vimeo.on('loaded', this.onLoaded)
+            this.player.vimeo.on('play', this.onPlay)
+            this.player.vimeo.on('pause', this.onPause)
+            this.player.vimeo.on('progress', this.onProgress)
+            this.player.vimeo.on('volumechange', this.onVolumechange)
+            this.player.vimeo.on('error', this.onError)
+
             this.player.ready = true
         },
         loadAPI() {
@@ -160,8 +180,30 @@ export default {
                 current_percent: e.percent,
             })
         },
-        onSeeking(e) {
+        onLoaded(e) {
+            this.$emit('loadeddata', e)
+        },
+        onPlay(e) {
+            this.$emit('play', e)
+        },
+        onPause(e) {
+            this.$emit('pause', e)
+        },
+        onProgress(e) {
+            this.$emit('progress', e)
+        },
+        onVolumechange(e) {
+            this.$emit('volumechange', e)
+        },
+        onError(e) {
+            this.$emit('error', e)
+        },
+        onEnded(e) {
+            this.$emit('ended', e)
+        },
+        onSeek(e) {
             this.$emit('seeking', e)
+            this.$emit('seeked', e)
         },
     },
 }
