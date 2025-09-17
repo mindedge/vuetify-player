@@ -20,6 +20,8 @@
                 <div
                     v-if="resolvedType === 'video' && state.replay"
                     class="player-overlay"
+                    role="button"
+                    @click="play"
                 >
                     <div class="player-overlay--icon">
                         <v-icon class="player-overlay--play-icon">
@@ -30,10 +32,13 @@
                 <div
                     v-if="
                         resolvedType === 'video' &&
+                        state.paused &&
                         !state.replay &&
-                        currentPercent === 0
+                        player.currentTime === 0
                     "
                     class="player-overlay"
+                    role="button"
+                    @click="play"
                 >
                     <div class="player-overlay--icon">
                         <v-icon class="player-overlay--play-icon">
@@ -62,6 +67,7 @@
                     :preload="attributes.preload"
                     @click="playToggle"
                     @seeking="onSeeking"
+                    @seeked="onSeeked"
                     @timeupdate="onTimeupdate"
                     @progress="onMediaProgress"
                     @loadedmetadata="onLoadedmetadata"
@@ -644,6 +650,7 @@ export default {
         'ratechange',
         'timeupdate',
         'seeking',
+        'seeked',
         'progress',
         'volumechange',
         'cuechange',
@@ -1066,6 +1073,9 @@ export default {
         },
         onSeeking(e) {
             this.$emit('seeking', e)
+        },
+        onSeeked(e) {
+            this.$emit('seeked', e)
         },
         onMediaProgress(e) {
             this.$emit('progress', e)
