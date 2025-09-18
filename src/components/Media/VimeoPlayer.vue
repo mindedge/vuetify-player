@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-responsive :aspect-ratio="aspectRatio">
+        <v-responsive>
             <v-skeleton-loader
                 v-if="!player.ready"
                 class="mx-auto player-skeleton"
@@ -215,5 +215,8 @@ export default {
     margin-bottom: -400px;
     height: 400px;
     aspect-ratio: 16/9;
+}
+.player-video {
+    min-height: 200px;
 }
 </style>
