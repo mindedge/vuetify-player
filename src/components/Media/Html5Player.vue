@@ -281,16 +281,16 @@
                                         <v-list>
                                             <v-list-item-group>
                                                 <v-list-item
-                                                    v-for="track in current.tracks"
-                                                    :key="track.srclang"
+                                                    v-for="(track, index) in current.tracks"
+                                                    :key="'track-' + index"
                                                     @click="
-                                                        onSelectTrack(
-                                                            track.srclang
+                                                        onSelectTrackByIndex(
+                                                            index
                                                         )
                                                     "
                                                 >
                                                     <v-list-item-title>{{
-                                                        track.srclang
+                                                        track.label || track.srclang
                                                     }}</v-list-item-title>
                                                 </v-list-item>
                                             </v-list-item-group>
@@ -1009,7 +1009,32 @@ export default {
             }, 50)
         },
         /**
-         * Select a specific track by lang
+         * Select a specific track by index (supports multiple tracks with same language)
+         *
+         * @param Number index The track index to activate
+         * @param String mode The track mode ('showing', 'hidden', 'disabled')
+         */
+        onSelectTrackByIndex(index, mode = 'showing') {
+            if (this.player.textTracks && this.player.textTracks.length > 0) {
+                // Disable all tracks first
+                for (let i = 0; i < this.player.textTracks.length; i++) {
+                    this.player.textTracks[i].mode = 'disabled'
+                }
+                
+                // Enable the selected track
+                if (this.player.textTracks[index]) {
+                    this.player.textTracks[index].mode = mode
+                    this.state.ccLang = this.player.textTracks[index].language
+                    
+                    this.setCues(this.player.textTracks[index])
+                    
+                    // Emit the current track
+                    this.$emit('trackchange', this.player.textTracks[index])
+                }
+            }
+        },
+        /**
+         * Select a specific track by lang (kept for backward compatibility)
          *
          * @param String|null lang The lang to load. Eg en-US, sv-SE, etc. Pass nothing / null to turn off captions
          */
