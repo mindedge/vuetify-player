@@ -281,7 +281,9 @@
                                         <v-list>
                                             <v-list-item-group>
                                                 <v-list-item
-                                                    v-for="(track, index) in current.tracks"
+                                                    v-for="(
+                                                        track, index
+                                                    ) in current.tracks"
                                                     :key="'track-' + index"
                                                     @click="
                                                         onSelectTrackByIndex(
@@ -290,7 +292,8 @@
                                                     "
                                                 >
                                                     <v-list-item-title>{{
-                                                        track.label || track.srclang
+                                                        track.label ||
+                                                        track.srclang
                                                     }}</v-list-item-title>
                                                 </v-list-item>
                                             </v-list-item-group>
@@ -1020,14 +1023,14 @@ export default {
                 for (let i = 0; i < this.player.textTracks.length; i++) {
                     this.player.textTracks[i].mode = 'disabled'
                 }
-                
+
                 // Enable the selected track
                 if (this.player.textTracks[index]) {
                     this.player.textTracks[index].mode = mode
                     this.state.ccLang = this.player.textTracks[index].language
-                    
+
                     this.setCues(this.player.textTracks[index])
-                    
+
                     // Emit the current track
                     this.$emit('trackchange', this.player.textTracks[index])
                 }
