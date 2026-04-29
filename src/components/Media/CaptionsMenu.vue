@@ -144,22 +144,24 @@
                     v-for="(cue, index) in filteredCues"
                     :key="index"
                     :two-line="expandedState"
+                    :active="index === captionIndex"
                     @click="onCueClick(cue.startTime)"
                 >
                     <template v-if="!expandedState">
-                        <v-list-item-title>
-                            <v-list-item-title
-                                v-html="cue.rawText || cue.text"
-                                class="caption-text"
-                            ></v-list-item-title>
-                        </v-list-item-title>
-                        <v-list-item-action v-if="!paragraphViewState">
-                            <span aria-hidden="true">
-                                {{ filters.playerShortDuration(cue.startTime) }}
-                                -
-                                {{ filters.playerShortDuration(cue.endTime) }}
-                            </span>
-                        </v-list-item-action>
+                        <v-list-item-title
+                            v-html="cue.rawText || cue.text"
+                            class="caption-text"
+                        ></v-list-item-title>
+                    </template>
+                    <template
+                        #append
+                        v-if="!expandedState && !paragraphViewState"
+                    >
+                        <span aria-hidden="true">
+                            {{ filters.playerShortDuration(cue.startTime) }}
+                            -
+                            {{ filters.playerShortDuration(cue.endTime) }}
+                        </span>
                     </template>
                     <template v-if="expandedState">
                         <v-list-item-title>
