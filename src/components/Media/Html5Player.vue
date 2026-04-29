@@ -667,6 +667,8 @@ export default {
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
         'update:captions-visible',
+        'focusin',
+        'focusout',
     ],
     watch: {
         'state.controls': function () {
