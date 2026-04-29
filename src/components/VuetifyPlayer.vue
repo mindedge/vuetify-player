@@ -122,19 +122,19 @@
                         !loading &&
                         parseSourceType(current.src.sources) === 'html5'
                     "
+                    v-model:volume="volumeState"
+                    v-model:cc="ccState"
+                    v-model:captions-expanded="captionsExpandedState"
+                    v-model:captions-visible="captionsVisibleState"
                     :language="language"
                     :type="current.type"
                     :attributes="current.attributes"
                     :src="current.src"
-                    :volume.sync="volumeState"
-                    :cc.sync="ccState"
-                    :captions-expanded.sync="captionsExpandedState"
                     :captions-hide-expand="captionsHideExpand"
                     :captions-paragraph-view="captionsParagraphView"
                     :captions-hide-paragraph-view="captionsHideParagraphView"
                     :captions-autoscroll="captionsAutoscroll"
                     :captions-hide-autoscroll="captionsHideAutoscroll"
-                    :captions-visible.sync="captionsVisibleState"
                     :elevation="flat ? 0 : elevation"
                     @load="$emit('load', $event)"
                     @ended="onEnded"
@@ -395,8 +395,7 @@ export default {
             const attrs = {}
 
             // Loop over all available props and get the value / default value
-            for (let i = 0; i < this.$options._propKeys.length; i++) {
-                let key = this.$options._propKeys[i]
+            for (const key of Object.keys(this.$options.props)) {
                 attrs[key] = this[key]
             }
 

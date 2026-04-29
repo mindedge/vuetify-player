@@ -2,58 +2,50 @@
     <v-card>
         <v-card-title>{{ t(language, 'playlist.up_next') }}</v-card-title>
         <v-card-text>
-            <v-list class="playlist-list">
-                <v-list-item-group v-model="sourceIndex">
-                    <v-tooltip
-                        bottom
-                        v-for="(source, index) of playlist"
-                        :key="index + 'playlistSources'"
-                    >
-                        <template #activator="{ on, attrs }">
-                            <v-list-item
-                                class="pl-1"
-                                v-bind="attrs"
-                                v-on="on"
-                                @click="onPlaylistSelect(index)"
-                            >
-                                <v-list-item-icon class="ma-2">
-                                    <v-avatar
-                                        v-if="getPoster(source.poster, poster)"
-                                        tile
-                                    >
-                                        <img
-                                            :src="
-                                                getPoster(source.poster, poster)
-                                            "
-                                        />
-                                    </v-avatar>
-                                    <v-skeleton-loader
-                                        v-if="!getPoster(source.poster, poster)"
-                                        class="ma-3"
-                                        type="avatar"
-                                        tile
-                                    ></v-skeleton-loader>
-                                </v-list-item-icon>
-                                <v-list-item-content>
-                                    <div
-                                        class="text-lg-subtitle-1 text-truncate"
-                                    >
-                                        {{
-                                            source.name ||
-                                            t(language, 'playlist.default_name')
-                                        }}
-                                    </div>
-                                </v-list-item-content>
-                            </v-list-item>
-                        </template>
-                        <span>
-                            {{
-                                source.name ||
-                                t(language, 'playlist.default_name')
-                            }}
-                        </span>
-                    </v-tooltip>
-                </v-list-item-group>
+            <v-list v-model="sourceIndex" class="playlist-list">
+                <v-tooltip
+                    bottom
+                    v-for="(source, index) of playlist"
+                    :key="index + 'playlistSources'"
+                >
+                    <template #activator="{ props }">
+                        <v-list-item
+                            v-bind="props"
+                            class="pl-1"
+                            @click="onPlaylistSelect(index)"
+                        >
+                            <template #prepend>
+                                <v-avatar
+                                    v-if="getPoster(source.poster, poster)"
+                                    tile
+                                >
+                                    <img
+                                        :src="getPoster(source.poster, poster)"
+                                    />
+                                </v-avatar>
+                                <v-skeleton-loader
+                                    v-if="!getPoster(source.poster, poster)"
+                                    class="ma-3"
+                                    type="avatar"
+                                    tile
+                                ></v-skeleton-loader>
+                            </template>
+                            <v-list-item-title>
+                                <div class="text-lg-subtitle-1 text-truncate">
+                                    {{
+                                        source.name ||
+                                        t(language, 'playlist.default_name')
+                                    }}
+                                </div>
+                            </v-list-item-title>
+                        </v-list-item>
+                    </template>
+                    <span>
+                        {{
+                            source.name || t(language, 'playlist.default_name')
+                        }}
+                    </span>
+                </v-tooltip>
             </v-list>
         </v-card-text>
         <v-card-actions>
@@ -93,7 +85,7 @@ import { t } from '../../i18n/i18n'
 
 export default {
     props: {
-        value: { type: Number, required: true },
+        modelValue: { type: Number, required: true },
         playlist: { type: Array, required: true },
         poster: { type: String, required: false, default: '' },
         language: { type: String, required: false, default: 'en-US' },
@@ -101,11 +93,11 @@ export default {
     data() {
         return {
             t,
-            sourceIndex: this.value,
+            sourceIndex: this.modelValue,
         }
     },
     watch: {
-        value(newIndex) {
+        modelValue(newIndex) {
             this.sourceIndex = newIndex
         },
     },

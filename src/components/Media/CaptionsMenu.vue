@@ -2,20 +2,20 @@
     <v-card v-if="visibleState" :elevation="elevation">
         <v-card-actions class="d-flex flex-wrap flex-row-reverse mb-0 pb-0">
             <div class="d-flex ml-auto">
-                <v-tooltip v-if="!hideAutoscroll" top>
-                    <template #activator="{ on, attrs }">
-                        <div v-bind="attrs" v-on="on">
+                <v-tooltip v-if="!hideAutoscroll" location="top">
+                    <template #activator="{ props }">
+                        <div v-bind="props">
                             <v-switch
-                                :input-value="autoscrollState"
+                                :model-value="autoscrollState"
                                 color="primary"
-                                text
+                                variant="text"
                                 class="d-flex align-self-center"
                                 @click="onClickToggleAutoscroll"
                             >
                                 <template #label>
                                     <div v-if="autoscrollState">
                                         <v-icon> mdi-lock-open-variant </v-icon>
-                                        <span class="sr-only">
+                                        <span class="d-sr-only">
                                             {{
                                                 t(
                                                     language,
@@ -26,7 +26,7 @@
                                     </div>
                                     <div v-else>
                                         <v-icon>mdi-arrow-vertical-lock</v-icon>
-                                        <span class="sr-only">
+                                        <span class="d-sr-only">
                                             {{
                                                 t(
                                                     language,
@@ -46,14 +46,13 @@
                     }}</span>
                 </v-tooltip>
 
-                <v-tooltip v-if="!hideParagraphView" top>
-                    <template #activator="{ on, attrs }">
+                <v-tooltip v-if="!hideParagraphView" location="top">
+                    <template #activator="{ props }">
                         <v-btn
+                            v-bind="props"
                             color="primary"
-                            text
+                            variant="text"
                             class="d-flex align-self-center"
-                            v-bind="attrs"
-                            v-on="on"
                             @click="onClickToggleParagraphView"
                         >
                             <v-icon>{{
@@ -61,7 +60,7 @@
                                     ? 'mdi-closed-caption-outline'
                                     : 'mdi-text-box-outline'
                             }}</v-icon>
-                            <span class="sr-only">{{
+                            <span class="d-sr-only">{{
                                 paragraphViewState
                                     ? t(language, 'captions.view_as_captions')
                                     : t(language, 'captions.view_as_paragraph')
@@ -75,14 +74,13 @@
                     }}</span>
                 </v-tooltip>
 
-                <v-tooltip v-if="!hideExpand" top>
-                    <template #activator="{ on, attrs }">
+                <v-tooltip v-if="!hideExpand" location="top">
+                    <template #activator="{ props }">
                         <v-btn
+                            v-bind="props"
                             color="primary"
-                            text
+                            variant="text"
                             class="d-flex align-self-center"
-                            v-bind="attrs"
-                            v-on="on"
                             @click="onClickToggleExpand"
                         >
                             <v-icon>{{
@@ -90,7 +88,7 @@
                                     ? 'mdi-arrow-collapse'
                                     : 'mdi-arrow-expand'
                             }}</v-icon>
-                            <span class="sr-only">{{
+                            <span class="d-sr-only">{{
                                 expandedState
                                     ? t(language, 'captions.collapse')
                                     : t(language, 'captions.expand')
@@ -104,14 +102,13 @@
                     }}</span>
                 </v-tooltip>
 
-                <v-tooltip v-if="!hideClose" top>
-                    <template #activator="{ on, attrs }">
+                <v-tooltip v-if="!hideClose" location="top">
+                    <template #activator="{ props }">
                         <v-btn
+                            v-bind="props"
                             color="primary"
-                            text
+                            variant="text"
                             class="d-flex align-self-center"
-                            v-bind="attrs"
-                            v-on="on"
                             @click="onClickClose"
                         >
                             <v-icon>mdi-close</v-icon>
@@ -137,23 +134,47 @@
             <span v-if="search && !filteredCues.length" class="caption">
                 {{ t(language, 'captions.none_found', [search]) }}
             </span>
-            <v-list ref="captionList" :class="captionsList">
-                <v-list-item-group v-model="captionIndex">
-                    <v-list-item
-                        ref="captionItems"
-                        v-for="(cue, index) in filteredCues"
-                        :key="index"
-                        :two-line="expandedState"
-                        @click="onCueClick(cue.startTime)"
-                    >
-                        <template v-if="!expandedState">
-                            <v-list-item-content>
-                                <v-list-item-title
-                                    v-html="cue.rawText || cue.text"
-                                    class="caption-text"
-                                ></v-list-item-title>
-                            </v-list-item-content>
-                            <v-list-item-action v-if="!paragraphViewState">
+            <v-list
+                ref="captionList"
+                v-model="captionIndex"
+                :class="captionsList"
+            >
+                <v-list-item
+                    ref="captionItems"
+                    v-for="(cue, index) in filteredCues"
+                    :key="index"
+                    :two-line="expandedState"
+                    @click="onCueClick(cue.startTime)"
+                >
+                    <template v-if="!expandedState">
+                        <v-list-item-title>
+                            <v-list-item-title
+                                v-html="cue.rawText || cue.text"
+                                class="caption-text"
+                            ></v-list-item-title>
+                        </v-list-item-title>
+                        <v-list-item-action v-if="!paragraphViewState">
+                            <span aria-hidden="true">
+                                {{ filters.playerShortDuration(cue.startTime) }}
+                                -
+                                {{ filters.playerShortDuration(cue.endTime) }}
+                            </span>
+                        </v-list-item-action>
+                    </template>
+                    <template v-if="expandedState">
+                        <v-list-item-title>
+                            <v-list-item-title
+                                v-html="cue.rawText || cue.text"
+                                class="caption-text"
+                            ></v-list-item-title>
+                            <v-list-item-subtitle v-if="!paragraphViewState">
+                                <v-icon
+                                    >{{
+                                        index === captionIndex
+                                            ? 'mdi-arrow-right-drop-circle-outline'
+                                            : 'mdi-checkbox-blank-circle-outline'
+                                    }}
+                                </v-icon>
                                 <span aria-hidden="true">
                                     {{
                                         filters.playerShortDuration(
@@ -165,42 +186,10 @@
                                         filters.playerShortDuration(cue.endTime)
                                     }}
                                 </span>
-                            </v-list-item-action>
-                        </template>
-                        <template v-if="expandedState">
-                            <v-list-item-content>
-                                <v-list-item-title
-                                    v-html="cue.rawText || cue.text"
-                                    class="caption-text"
-                                ></v-list-item-title>
-                                <v-list-item-subtitle
-                                    v-if="!paragraphViewState"
-                                >
-                                    <v-icon
-                                        >{{
-                                            index === captionIndex
-                                                ? 'mdi-arrow-right-drop-circle-outline'
-                                                : 'mdi-checkbox-blank-circle-outline'
-                                        }}
-                                    </v-icon>
-                                    <span aria-hidden="true">
-                                        {{
-                                            filters.playerShortDuration(
-                                                cue.startTime
-                                            )
-                                        }}
-                                        -
-                                        {{
-                                            filters.playerShortDuration(
-                                                cue.endTime
-                                            )
-                                        }}
-                                    </span>
-                                </v-list-item-subtitle>
-                            </v-list-item-content>
-                        </template>
-                    </v-list-item>
-                </v-list-item-group>
+                            </v-list-item-subtitle>
+                        </v-list-item-title>
+                    </template>
+                </v-list-item>
             </v-list>
         </v-card-text>
     </v-card>
@@ -212,7 +201,7 @@ import { t } from '../../i18n/i18n'
 
 export default {
     props: {
-        value: { type: [Object, Array], required: true },
+        modelValue: { type: [Object, Array], required: true },
         language: { type: String, required: false, default: 'en-US' },
         expanded: { type: Boolean, required: false, default: undefined },
         hideExpand: { type: Boolean, required: false, default: true },
@@ -393,7 +382,7 @@ export default {
         }
     },
     watch: {
-        value: {
+        modelValue: {
             deep: true,
             handler(captions) {
                 this.captions = captions
@@ -403,7 +392,7 @@ export default {
     },
 
     mounted() {
-        this.captions = this.value
+        this.captions = this.modelValue
         this.captionIndex = this.currentCue(this.captions)
     },
     methods: {
