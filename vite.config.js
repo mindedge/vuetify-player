@@ -10,7 +10,5 @@ export default defineConfig({
         },
         environment: 'jsdom',
     },
-    plugins: [
-        vue(), // write this
-    ],
+    plugins: [vue()],
 })

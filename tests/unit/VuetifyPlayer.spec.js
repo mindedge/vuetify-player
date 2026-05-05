@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
+import vuetify from '../plugins/vuetify'
 import VuetifyPlayer from '../../src/components/VuetifyPlayer.vue'
 import { defaultMocks } from '../mocks'
 
@@ -7,7 +8,7 @@ describe('VuetifyPlayer', () => {
     test('VuetifyPlayer is a Vue instance', () => {
         const wrapper = shallowMount(VuetifyPlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 src: {
                     sources: [
                         {
@@ -25,7 +26,7 @@ describe('VuetifyPlayer', () => {
     test('VuetifyPlayer props', () => {
         const wrapper = shallowMount(VuetifyPlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 src: {
                     sources: [
                         {
@@ -49,7 +50,7 @@ describe('VuetifyPlayer', () => {
     test('VuetifyPlayer props type video', () => {
         const wrapper = shallowMount(VuetifyPlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 src: {
                     sources: [
                         {
@@ -74,7 +75,7 @@ describe('VuetifyPlayer', () => {
     test('VuetifyPlayer playlist of 2 items is marked as a playlist', () => {
         const wrapper = shallowMount(VuetifyPlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 playlist: [
                     {
                         sources: [
@@ -101,7 +102,7 @@ describe('VuetifyPlayer', () => {
     test('VuetifyPlayer playlist of 1 item is not marked as a playlist', () => {
         const wrapper = shallowMount(VuetifyPlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 playlist: [
                     {
                         sources: [
