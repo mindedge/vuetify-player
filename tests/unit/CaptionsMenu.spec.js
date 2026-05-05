@@ -1,13 +1,10 @@
+import { vi, describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import Vuetify from 'vuetify'
-import Vue from 'vue'
 import CaptionsMenu from '../../src/components/Media/CaptionsMenu.vue'
 import { defaultMocks } from '../mocks'
 
-Vue.use(Vuetify)
-
 // Mock VTTCue since it doesn't exist for cli unit tests
-const VTTCue = jest.fn().mockImplementation()
+const VTTCue = vi.fn().mockImplementation()
 
 describe('CaptionsMenu', () => {
     test('CaptionsMenu is a Vue instance', () => {
@@ -51,7 +48,7 @@ describe('CaptionsMenu', () => {
     })
 
     test('CaptionsMenu props value as Boolean aka invalid type', () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation()
         shallowMount(CaptionsMenu, {
             mocks: defaultMocks,
             propsData: {
@@ -61,8 +58,8 @@ describe('CaptionsMenu', () => {
 
         expect(consoleSpy).toHaveBeenCalledWith(
             expect.stringContaining(
-                'Invalid prop: type check failed for prop "value". Expected Object, Array, got Boolean with value true'
-            )
+                'Invalid prop: type check failed for prop "value". Expected Object, Array, got Boolean with value true',
+            ),
         )
     })
 })

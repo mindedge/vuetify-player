@@ -5,43 +5,23 @@
     "description": "Accessible, localized, full featured media player with Vuetifyjs",
     "author": "Jacob Rogaishio",
     "scripts": {
-        "test": "vue-cli-service test:unit",
-        "lint": "vue-cli-service lint",
-        "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\"",
-        "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore ."
+        "test": "vitest"
     },
     "main": "./src/components/VuetifyPlayer.vue",
     "dependencies": {
         "vue": "^3.5.32",
-        "vue-i18n": "^11.1.11",
-        "vuetify": "^4.0.5"
+        "vue-i18n": "^11.1.11"
     },
-    "devDependencies": {},
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "node": true
-        },
-        "extends": [
-            "plugin:vue/essential",
-            "eslint:recommended",
-            "plugin:prettier/recommended"
-        ],
-        "parserOptions": {
-            "parser": "@babel/eslint-parser"
-        },
-        "rules": {},
-        "overrides": [
-            {
-                "files": [
-                    "**/__tests__/*.{j,t}s?(x)",
-                    "**/tests/unit/**/*.spec.{j,t}s?(x)"
-                ],
-                "env": {
-                    "jest": true
-                }
-            }
-        ]
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^6.0.6",
+        "@vitejs/plugin-vue-jsx": "^5.1.5",
+        "@vue/test-utils": "^2.4.10",
+        "jsdom": "^29.1.1",
+        "prettier": "^3.8.3",
+        "resize-observer-polyfill": "^1.5.1",
+        "vite-plugin-vuetify": "^2.1.3",
+        "vitest": "^4.1.5",
+        "vuetify": "^4.0.6"
     },
     "browserslist": [
         "> 1%",

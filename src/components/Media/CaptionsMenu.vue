@@ -19,7 +19,7 @@
                                             {{
                                                 t(
                                                     language,
-                                                    'captions.autoscroll_enabled'
+                                                    'captions.autoscroll_enabled',
                                                 )
                                             }}
                                         </span>
@@ -30,7 +30,7 @@
                                             {{
                                                 t(
                                                     language,
-                                                    'captions.autoscroll_disabled'
+                                                    'captions.autoscroll_disabled',
                                                 )
                                             }}
                                         </span>
@@ -180,7 +180,7 @@
                                 <span aria-hidden="true">
                                     {{
                                         filters.playerShortDuration(
-                                            cue.startTime
+                                            cue.startTime,
                                         )
                                     }}
                                     -
@@ -234,7 +234,7 @@ export default {
                 return cues.filter((c) =>
                     c.text
                         .toLowerCase()
-                        .includes((this.search || '').toLowerCase())
+                        .includes((this.search || '').toLowerCase()),
                 )
             } else {
                 return cues
@@ -268,8 +268,8 @@ export default {
                             new VTTCue(
                                 cues[i].startTime,
                                 cues[i].endTime,
-                                cues[i].text
-                            )
+                                cues[i].text,
+                            ),
                         )
                         // Skip first element
                         continue
@@ -298,8 +298,8 @@ export default {
                             new VTTCue(
                                 cues[i + 1].startTime,
                                 cues[i + 1].endTime,
-                                cues[i].text.slice(breakIndex).trim()
-                            )
+                                cues[i].text.slice(breakIndex).trim(),
+                            ),
                         )
                         puncuationCount = 0
                     } else {

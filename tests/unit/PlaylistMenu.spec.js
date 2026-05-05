@@ -1,10 +1,7 @@
+import { describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import Vuetify from 'vuetify'
-import Vue from 'vue'
 import PlaylistMenu from '../../src/components/Media/PlaylistMenu.vue'
 import { defaultMocks } from '../mocks'
-
-Vue.use(Vuetify)
 
 describe('PlaylistMenu', () => {
     test('PlaylistMenu is a Vue instance', () => {

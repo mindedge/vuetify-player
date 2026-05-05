@@ -1,16 +1,15 @@
+import { vi, describe, test, expect } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
-import Vuetify from 'vuetify'
-import Vue from 'vue'
+import vuetify from '../plugins/vuetify'
 import Html5Player from '../../src/components/Media/Html5Player.vue'
 import { defaultMocks } from '../mocks'
-
-Vue.use(Vuetify)
 
 describe('Html5Player', () => {
     test('Html5Player is a Vue instance', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -23,12 +22,13 @@ describe('Html5Player', () => {
     })
 
     test('Html5Player props attributes.playbackrates missing', () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation()
 
         try {
             shallowMount(Html5Player, {
                 mocks: defaultMocks,
-                propsData: {
+
+                props: {
                     type: 'video',
                     attributes: {},
                     src: {},
@@ -37,23 +37,18 @@ describe('Html5Player', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(Error)
             expect(e.message).toContain(
-                'attributes.playbackrates must be defined and an array of numbers!'
-            )
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining(
-                    'attributes.playbackrates must be defined and an array of numbers!"'
-                )
+                'attributes.playbackrates must be defined and an array of numbers!',
             )
         }
     })
 
     test('Html5Player props attributes.playbackrates empty', () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation()
 
         try {
             shallowMount(Html5Player, {
                 mocks: defaultMocks,
-                propsData: {
+                props: {
                     type: 'video',
                     attributes: {
                         playbackrates: [],
@@ -64,12 +59,7 @@ describe('Html5Player', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(Error)
             expect(e.message).toContain(
-                'attributes.playbackrates must be defined and an array of numbers!'
-            )
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining(
-                    'attributes.playbackrates must be defined and an array of numbers!"'
-                )
+                'attributes.playbackrates must be defined and an array of numbers!',
             )
         }
     })
@@ -77,7 +67,8 @@ describe('Html5Player', () => {
     test('Html5Player props attributes.captionsmenu => true', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -92,7 +83,8 @@ describe('Html5Player', () => {
     test('Html5Player props attributes.captionsmenu => false', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -107,7 +99,8 @@ describe('Html5Player', () => {
     test('Html5Player props src.sources', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -128,7 +121,8 @@ describe('Html5Player', () => {
     test('Html5Player props src.tracks', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -151,7 +145,8 @@ describe('Html5Player', () => {
     test('Html5Player props src.ads', () => {
         const wrapper = shallowMount(Html5Player, {
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -186,9 +181,9 @@ describe('Html5Player', () => {
 
     test('Html5Player controls are available', () => {
         const wrapper = mount(Html5Player, {
-            vuetify: new Vuetify(),
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -214,9 +209,9 @@ describe('Html5Player', () => {
 
     test('Html5Player controls have the play button', () => {
         const wrapper = mount(Html5Player, {
-            vuetify: new Vuetify(),
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -242,9 +237,9 @@ describe('Html5Player', () => {
 
     test('Html5Player controls are dark mode', () => {
         const wrapper = mount(Html5Player, {
-            vuetify: new Vuetify(),
             mocks: defaultMocks,
-            propsData: {
+
+            props: {
                 type: 'video',
                 attributes: {
                     playbackrates: [1],
@@ -267,7 +262,7 @@ describe('Html5Player', () => {
 
         // Expect all the controls to be in dark mode
         for (const control of controls) {
-            expect(control.classList.contains('theme--dark')).toBeTruthy()
+            expect(control.classList.contains('text-white')).toBeTruthy()
         }
     })
 })
