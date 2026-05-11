@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import vuetify from '../plugins/vuetify'
+import vuetify from '@/test/plugins/vuetify'
 import SettingsMenu from '../../src/components/Media/SettingsMenu.vue'
 import { defaultMocks } from '../mocks'
 

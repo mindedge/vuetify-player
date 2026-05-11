@@ -1,6 +1,6 @@
 import { vi, describe, test, expect } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
-import vuetify from '../plugins/vuetify'
+import vuetify from '@/test/plugins/vuetify'
 import Html5Player from '../../src/components/Media/Html5Player.vue'
 import { defaultMocks } from '../mocks'
 

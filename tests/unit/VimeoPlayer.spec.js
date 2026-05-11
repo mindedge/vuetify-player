@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import vuetify from '../plugins/vuetify'
+import vuetify from '@/test/plugins/vuetify'
 import VimeoPlayer from '../../src/components/Media/VimeoPlayer.vue'
 import { defaultMocks } from '../mocks'
 

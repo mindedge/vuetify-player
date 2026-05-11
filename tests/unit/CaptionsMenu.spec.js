@@ -1,6 +1,6 @@
 import { vi, describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import vuetify from '../plugins/vuetify'
+import vuetify from '@/test/plugins/vuetify'
 import CaptionsMenu from '../../src/components/Media/CaptionsMenu.vue'
 import { defaultMocks } from '../mocks'
 
