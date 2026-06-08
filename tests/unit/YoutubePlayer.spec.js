@@ -1,16 +1,14 @@
+import { describe, test, expect } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import Vuetify from 'vuetify'
-import Vue from 'vue'
+import vuetify from '@/test/plugins/vuetify'
 import YoutubePlayer from '../../src/components/Media/YoutubePlayer.vue'
 import { defaultMocks } from '../mocks'
-
-Vue.use(Vuetify)
 
 describe('YoutubePlayer', () => {
     test('YoutubePlayer is a Vue instance', () => {
         const wrapper = shallowMount(YoutubePlayer, {
             mocks: defaultMocks,
-            propsData: {
+            props: {
                 type: 'video',
                 attributes: {},
                 src: {},

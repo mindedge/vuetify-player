@@ -118,11 +118,11 @@
                                 v-model="currentPercent"
                                 class="controls--slider"
                                 hide-details
-                                dark
+                                color="white"
                                 :min="0"
                                 :max="scrub.max"
                                 inverse-label
-                                @change="onScrubTime"
+                                @update:modelValue="onScrubTime"
                             >
                                 <template #label>
                                     <div class="controls-timestamp--container">
@@ -130,12 +130,12 @@
                                             {{
                                                 filters.playerShortDuration(
                                                     percentToTimeSeconds(
-                                                        currentPercent
-                                                    )
+                                                        currentPercent,
+                                                    ),
                                                 ) +
                                                 ' / ' +
                                                 filters.playerShortDuration(
-                                                    player.duration
+                                                    player.duration,
                                                 )
                                             }}
                                         </div>
@@ -146,15 +146,16 @@
                             <div class="controls-buttons">
                                 <div class="controls-buttons--prepend">
                                     <!-- Play button -->
-                                    <v-tooltip v-if="!state.replay" top>
-                                        <template #activator="{ on, attrs }">
+                                    <v-tooltip
+                                        v-if="!state.replay"
+                                        location="top"
+                                    >
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="playToggle"
                                             >
                                                 <v-icon>{{
@@ -167,11 +168,11 @@
                                                         state.paused
                                                             ? t(
                                                                   language,
-                                                                  'player.play'
+                                                                  'player.play',
                                                               )
                                                             : t(
                                                                   language,
-                                                                  'player.pause'
+                                                                  'player.pause',
                                                               )
                                                     }}
                                                 </span>
@@ -185,15 +186,16 @@
                                     </v-tooltip>
 
                                     <!-- Replay button -->
-                                    <v-tooltip v-if="state.replay" top>
-                                        <template #activator="{ on, attrs }">
+                                    <v-tooltip
+                                        v-if="state.replay"
+                                        location="top"
+                                    >
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="onClickReplay"
                                             >
                                                 <v-icon>mdi-replay</v-icon>
@@ -201,7 +203,7 @@
                                                     {{
                                                         t(
                                                             language,
-                                                            'player.replay'
+                                                            'player.replay',
                                                         )
                                                     }}
                                                 </span>
@@ -215,23 +217,21 @@
                                     <!-- Rewind Button-->
                                     <v-tooltip
                                         v-if="attributes.rewind && !activeAd"
-                                        top
+                                        location="top"
                                     >
-                                        <template #activator="{ on, attrs }">
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button hide-mobile"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="rewind(10)"
                                             >
                                                 <v-icon>mdi-rewind-10</v-icon>
-                                                <span class="sr-only">{{
+                                                <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.rewind_10'
+                                                        'player.rewind_10',
                                                     )
                                                 }}</span>
                                             </v-btn>
@@ -252,16 +252,14 @@
                                         :attach="$refs.controlsContainer"
                                         open-on-hover
                                         offset-y
-                                        top
+                                        location="top"
                                     >
-                                        <template #activator="{ on, attrs }">
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="onClickCCToggle"
                                             >
                                                 <v-icon>{{
@@ -272,31 +270,26 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_cc'
+                                                        'player.toggle_cc',
                                                     )
                                                 }}</span>
                                             </v-btn>
                                         </template>
 
                                         <v-list>
-                                            <v-list-item-group>
-                                                <v-list-item
-                                                    v-for="(
-                                                        track, index
-                                                    ) in current.tracks"
-                                                    :key="'track-' + index"
-                                                    @click="
-                                                        onSelectTrackByIndex(
-                                                            index
-                                                        )
-                                                    "
-                                                >
-                                                    <v-list-item-title>{{
-                                                        track.label ||
-                                                        track.srclang
-                                                    }}</v-list-item-title>
-                                                </v-list-item>
-                                            </v-list-item-group>
+                                            <v-list-item
+                                                v-for="(
+                                                    track, index
+                                                ) in current.tracks"
+                                                :key="'track-' + index"
+                                                @click="
+                                                    onSelectTrackByIndex(index)
+                                                "
+                                            >
+                                                <v-list-item-title>{{
+                                                    track.label || track.srclang
+                                                }}</v-list-item-title>
+                                            </v-list-item>
                                         </v-list>
                                     </v-menu>
 
@@ -305,16 +298,14 @@
                                         :attach="$refs.controlsContainer"
                                         open-on-hover
                                         offset-y
-                                        top
+                                        location="top"
                                     >
-                                        <template #activator="{ on, attrs }">
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="muteToggle"
                                             >
                                                 <v-icon
@@ -350,7 +341,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.volume_slider'
+                                                        'player.volume_slider',
                                                     )
                                                 }}</span>
                                             </v-btn>
@@ -360,7 +351,7 @@
                                             <span class="d-sr-only">{{
                                                 t(
                                                     language,
-                                                    'player.volume_slider'
+                                                    'player.volume_slider',
                                                 )
                                             }}</span>
                                             <v-slider
@@ -369,22 +360,25 @@
                                                 :min="0"
                                                 :max="1"
                                                 :step="0.1"
-                                                vertical
-                                                @change="volumeChange"
+                                                direction="vertical"
+                                                @update:modelValue="
+                                                    volumeChange
+                                                "
                                             ></v-slider>
                                         </v-sheet>
                                     </v-menu>
 
                                     <!-- Fullscreen -->
-                                    <v-tooltip v-if="allowFullscreen" top>
-                                        <template #activator="{ on, attrs }">
+                                    <v-tooltip
+                                        v-if="allowFullscreen"
+                                        location="top"
+                                    >
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="fullscreenToggle"
                                             >
                                                 <v-icon>{{
@@ -395,7 +389,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_fullscreen'
+                                                        'player.toggle_fullscreen',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -403,7 +397,7 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_fullscreen'
+                                                'player.toggle_fullscreen',
                                             )
                                         }}</span>
                                     </v-tooltip>
@@ -413,16 +407,14 @@
                                         v-if="
                                             !attributes.disablepictureinpicture
                                         "
-                                        top
+                                        location="top"
                                     >
-                                        <template #activator="{ on, attrs }">
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button hide-mobile"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="onPictureInPicture"
                                             >
                                                 <v-icon
@@ -431,7 +423,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_picture_in_picture'
+                                                        'player.toggle_picture_in_picture',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -439,28 +431,29 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_picture_in_picture'
+                                                'player.toggle_picture_in_picture',
                                             )
                                         }}</span>
                                     </v-tooltip>
 
                                     <!-- Remote playback -->
-                                    <v-tooltip v-if="allowRemotePlayback" top>
-                                        <template #activator="{ on, attrs }">
+                                    <v-tooltip
+                                        v-if="allowRemotePlayback"
+                                        location="top"
+                                    >
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button hide-mobile"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="onRemoteplayback"
                                             >
                                                 <v-icon>mdi-cast</v-icon>
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_remote_playback'
+                                                        'player.toggle_remote_playback',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -468,28 +461,29 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_remote_playback'
+                                                'player.toggle_remote_playback',
                                             )
                                         }}</span>
                                     </v-tooltip>
 
                                     <!-- Download -->
-                                    <v-tooltip v-if="allowDownload" top>
-                                        <template #activator="{ on, attrs }">
+                                    <v-tooltip
+                                        v-if="allowDownload"
+                                        location="top"
+                                    >
+                                        <template #activator="{ props }">
                                             <v-btn
+                                                v-bind="props"
                                                 class="controls--button hide-mobile"
-                                                dark
-                                                x-small
-                                                text
-                                                v-bind="attrs"
-                                                v-on="on"
+                                                color="white"
+                                                variant="text"
                                                 @click="onDownload"
                                             >
                                                 <v-icon>mdi-download</v-icon>
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.download'
+                                                        'player.download',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -501,13 +495,13 @@
 
                                     <!-- Settings -->
                                     <SettingsMenu
+                                        v-model:captions-visible="
+                                            captionsVisibleState
+                                        "
                                         :attach="$refs.controlsContainer"
                                         :state="state"
                                         :attributes="attributes"
                                         :language="language"
-                                        :captions-visible.sync="
-                                            captionsVisibleState
-                                        "
                                         @change:playback-rate-index="
                                             onPlaybackSpeedChange
                                         "
@@ -522,23 +516,24 @@
             <v-col
                 v-if="
                     attributes.captionsmenu &&
-                    current.tracks &&
-                    captions &&
-                    captions.cues &&
-                    Object.keys(captions.cues).length
+                    typeof current.tracks !== 'undefined' > 0 &&
+                    current.tracks.length > 0 &&
+                    typeof captions !== 'undefined' &&
+                    typeof captions.cues !== 'undefined' &&
+                    Object.keys(captions.cues).length > 0
                 "
                 :cols="!state.expandedCaptions ? 12 : 6"
                 class="pt-0 mt-0"
             >
                 <CaptionsMenu
                     v-model="captions"
+                    v-model:expanded="captionsExpandedState"
+                    v-model:visible="captionsVisibleState"
                     :language="language"
-                    :expanded.sync="captionsExpandedState"
                     :hide-expand="captionsHideExpand"
                     :paragraph-view="captionsParagraphView"
                     :hide-paragraph-view="captionsHideParagraphView"
                     :autoscroll="captionsAutoscroll"
-                    :visible.sync="captionsVisibleState"
                     :hide-autoscroll="captionsHideAutoscroll"
                     :hide-close="captionsHideClose"
                     :elevation="elevation"
@@ -672,6 +667,8 @@ export default {
         'update:captions-paragraph-view',
         'update:captions-autoscroll',
         'update:captions-visible',
+        'focusin',
+        'focusout',
     ],
     watch: {
         'state.controls': function () {
@@ -840,7 +837,7 @@ export default {
             this.attributes.playbackrates.length === 0
         ) {
             throw new Error(
-                'attributes.playbackrates must be defined and an array of numbers!'
+                'attributes.playbackrates must be defined and an array of numbers!',
             )
         }
 
@@ -852,7 +849,7 @@ export default {
             // 1 aka normal playback not enabled (What monster would do this?!)
             // Set the playback rate to "middle of the road" for whatever is available
             this.state.playbackRateIndex = Math.floor(
-                this.attributes.playbackrates.length / 2
+                this.attributes.playbackrates.length / 2,
             )
         }
 
@@ -939,7 +936,7 @@ export default {
         fullscreenToggle() {
             this.state.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
-            this.$emit('click:fullscreen', this.$refs.playerContainer)
+            this.$emit('click:fullscreen', this.$refs.playerContainer.$el)
         },
         onPictureInPicture() {
             //this.state.pip = !document.fullscreenElement;
@@ -1080,7 +1077,7 @@ export default {
         },
         onTimeupdate(e) {
             this.currentPercent = Math.floor(
-                (this.player.currentTime / this.player.duration) * 100
+                (this.player.currentTime / this.player.duration) * 100,
             )
 
             // Check if there's an ad that needs to be played
@@ -1208,7 +1205,7 @@ export default {
                     track.activeCues[0].text =
                         track.activeCues[0].text.replaceAll(
                             transcriptTagRegex,
-                            ''
+                            '',
                         )
 
                     this.setCuePosition()
@@ -1260,7 +1257,7 @@ export default {
                 this.$emit('loadedmetadata', e)
             } else {
                 console.error(
-                    'Html5Player->onLoadedmetadata() but player not ready'
+                    'Html5Player->onLoadedmetadata() but player not ready',
                 )
             }
         },
@@ -1310,9 +1307,9 @@ export default {
                 })
 
             // Create reactive fields
-            this.$set(this.captions, 'language', track.language)
-            this.$set(this.captions, 'cues', cues)
-            this.$set(this.captions, 'activeCues', activeCues)
+            this.captions.language = track.language
+            this.captions.cues = cues
+            this.captions.activeCues = activeCues
 
             // Required so the v-model will actually update.
             this.captions.nonce = Math.random()
@@ -1455,6 +1452,7 @@ export default {
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
 }
 .controls--slider {
+    color: #fff;
     width: 100%;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
