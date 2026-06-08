@@ -130,12 +130,12 @@
                                             {{
                                                 filters.playerShortDuration(
                                                     percentToTimeSeconds(
-                                                        currentPercent
-                                                    )
+                                                        currentPercent,
+                                                    ),
                                                 ) +
                                                 ' / ' +
                                                 filters.playerShortDuration(
-                                                    player.duration
+                                                    player.duration,
                                                 )
                                             }}
                                         </div>
@@ -168,11 +168,11 @@
                                                         state.paused
                                                             ? t(
                                                                   language,
-                                                                  'player.play'
+                                                                  'player.play',
                                                               )
                                                             : t(
                                                                   language,
-                                                                  'player.pause'
+                                                                  'player.pause',
                                                               )
                                                     }}
                                                 </span>
@@ -203,7 +203,7 @@
                                                     {{
                                                         t(
                                                             language,
-                                                            'player.replay'
+                                                            'player.replay',
                                                         )
                                                     }}
                                                 </span>
@@ -231,7 +231,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.rewind_10'
+                                                        'player.rewind_10',
                                                     )
                                                 }}</span>
                                             </v-btn>
@@ -270,7 +270,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_cc'
+                                                        'player.toggle_cc',
                                                     )
                                                 }}</span>
                                             </v-btn>
@@ -341,7 +341,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.volume_slider'
+                                                        'player.volume_slider',
                                                     )
                                                 }}</span>
                                             </v-btn>
@@ -351,7 +351,7 @@
                                             <span class="d-sr-only">{{
                                                 t(
                                                     language,
-                                                    'player.volume_slider'
+                                                    'player.volume_slider',
                                                 )
                                             }}</span>
                                             <v-slider
@@ -389,7 +389,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_fullscreen'
+                                                        'player.toggle_fullscreen',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -397,7 +397,7 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_fullscreen'
+                                                'player.toggle_fullscreen',
                                             )
                                         }}</span>
                                     </v-tooltip>
@@ -423,7 +423,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_picture_in_picture'
+                                                        'player.toggle_picture_in_picture',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -431,7 +431,7 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_picture_in_picture'
+                                                'player.toggle_picture_in_picture',
                                             )
                                         }}</span>
                                     </v-tooltip>
@@ -453,7 +453,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.toggle_remote_playback'
+                                                        'player.toggle_remote_playback',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -461,7 +461,7 @@
                                         <span>{{
                                             t(
                                                 language,
-                                                'player.toggle_remote_playback'
+                                                'player.toggle_remote_playback',
                                             )
                                         }}</span>
                                     </v-tooltip>
@@ -483,7 +483,7 @@
                                                 <span class="d-sr-only">{{
                                                     t(
                                                         language,
-                                                        'player.download'
+                                                        'player.download',
                                                     )
                                                 }}</span>
                                             </v-btn></template
@@ -837,7 +837,7 @@ export default {
             this.attributes.playbackrates.length === 0
         ) {
             throw new Error(
-                'attributes.playbackrates must be defined and an array of numbers!'
+                'attributes.playbackrates must be defined and an array of numbers!',
             )
         }
 
@@ -849,7 +849,7 @@ export default {
             // 1 aka normal playback not enabled (What monster would do this?!)
             // Set the playback rate to "middle of the road" for whatever is available
             this.state.playbackRateIndex = Math.floor(
-                this.attributes.playbackrates.length / 2
+                this.attributes.playbackrates.length / 2,
             )
         }
 
@@ -936,7 +936,7 @@ export default {
         fullscreenToggle() {
             this.state.fullscreen = !document.fullscreenElement
             // Return the whole element to be fullscreened so the controls come with it
-            this.$emit('click:fullscreen', this.$refs.playerContainer)
+            this.$emit('click:fullscreen', this.$refs.playerContainer.$el)
         },
         onPictureInPicture() {
             //this.state.pip = !document.fullscreenElement;
@@ -1077,7 +1077,7 @@ export default {
         },
         onTimeupdate(e) {
             this.currentPercent = Math.floor(
-                (this.player.currentTime / this.player.duration) * 100
+                (this.player.currentTime / this.player.duration) * 100,
             )
 
             // Check if there's an ad that needs to be played
@@ -1205,7 +1205,7 @@ export default {
                     track.activeCues[0].text =
                         track.activeCues[0].text.replaceAll(
                             transcriptTagRegex,
-                            ''
+                            '',
                         )
 
                     this.setCuePosition()
@@ -1257,7 +1257,7 @@ export default {
                 this.$emit('loadedmetadata', e)
             } else {
                 console.error(
-                    'Html5Player->onLoadedmetadata() but player not ready'
+                    'Html5Player->onLoadedmetadata() but player not ready',
                 )
             }
         },
