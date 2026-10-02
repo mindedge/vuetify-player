@@ -1,8 +1,12 @@
 <template>
     <!-- Settings -->
-    <v-menu :attach="attach" top left offset-y :close-on-content-click="false">
-        <template #activator="{ on, attrs }">
-            <v-btn dark x-small text v-bind="attrs" v-on="on">
+    <v-menu
+        location="top end"
+        min-width="200px"
+        :close-on-content-click="false"
+    >
+        <template #activator="{ props }">
+            <v-btn v-bind="props" color="white" variant="text">
                 <v-icon>mdi-cog</v-icon>
                 <span class="d-sr-only">{{
                     t(language, 'player.toggle_settings')
@@ -14,9 +18,11 @@
             <v-list-item v-if="attributes.captionsmenu">
                 <v-list-item-title>
                     <v-switch
-                        :input-value="captionsVisible"
+                        :model-value="captionsVisible"
                         :label="t(language, 'captions.show_transcript')"
-                        @change="$emit('update:captions-visible', $event)"
+                        @update:model-value="
+                            $emit('update:captions-visible', $event)
+                        "
                     ></v-switch>
                 </v-list-item-title>
             </v-list-item>
